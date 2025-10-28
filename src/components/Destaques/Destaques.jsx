@@ -38,7 +38,7 @@ export default function Destaques() {
       <div className={styles.categorias}>
         <button className={styles.categoriaBtn}>🐶 Cães</button>
         <button className={styles.categoriaBtn}>🐱 Gatos</button>
-        <a href="#" className={styles.verTudo}>
+        <a href="/produtos" className={styles.verTudo}>
           Ver tudo delicioso &nbsp;→
         </a>
       </div>

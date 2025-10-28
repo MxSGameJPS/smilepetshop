@@ -1,0 +1,159 @@
+.footer {
+  background: #f7f8f8;
+  padding: 40px 0 0 0;
+  font-family: inherit;
+  color: #09344a;
+}
+
+.columnsContainer {
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  gap: 60px;
+  flex-wrap: wrap;
+  width: 100%;
+  max-width: 1500px;
+  margin: 0 auto;
+}
+
+.columns {
+  display: flex;
+  gap: 64px;
+  flex: 2;
+  min-width: 0;
+}
+
+.column {
+  min-width: 140px;
+}
+.column h4 {
+  font-size: 1.08rem;
+  font-weight: 700;
+  margin-bottom: 10px;
+}
+.column ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  text-align: left;
+}
+.column li {
+  font-size: 1rem;
+  margin-bottom: 7px;
+  color: #09344a;
+}
+.column a {
+  color: #09344a;
+  text-decoration: none;
+}
+
+.newsletterContainer {
+  flex: 1;
+  min-width: 320px;
+  max-width: 400px;
+  margin-left: 40px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+}
+.newsletterContainer h4 {
+  font-size: 1.08rem;
+  font-weight: 700;
+  margin-bottom: 8px;
+}
+.newsletterContainer p {
+  font-size: 0.98rem;
+  margin-bottom: 16px;
+  color: #09344a;
+}
+
+.newsletterForm {
+  display: flex;
+  width: 100%;
+  max-width: 350px;
+}
+
+.inputEmail {
+  flex: 1;
+  padding: 12px 18px;
+  border-radius: 30px 0 0 30px;
+  border: none;
+  background: #f7f8f8;
+  font-size: 1rem;
+  outline: none;
+  min-width: 0;
+}
+
+.subscribeBtn {
+  background: #09344a;
+  color: #fff;
+  border: none;
+  border-radius: 0 30px 30px 0;
+  padding: 0 28px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: background 0.2s;
+  min-width: 140px;
+  justify-content: center;
+}
+.subscribeBtn:hover {
+  background: #0b4666;
+}
+
+.socialAndLegal {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-top: 40px;
+  gap: 24px;
+}
+
+.socialIcons {
+  display: flex;
+  justify-content: flex-start;
+  gap: 40px;
+  font-size: 2.2rem;
+  margin-bottom: 8px;
+  width: 80%;
+}
+.socialIcons a {
+  color: #09344a;
+  transition: color 0.2s;
+}
+.socialIcons a:hover {
+  color: #0b4666;
+}
+
+.legal {
+  display: flex;
+  gap: 30px;
+  font-size: 0.98rem;
+  color: #09344a;
+  justify-content: flex-start;
+  margin-bottom: 24px;
+  width: 80%;
+}
+@media (max-width: 900px) {
+  .columnsContainer {
+    flex-direction: column;
+    align-items: center;
+    gap: 32px;
+  }
+  .columns {
+    gap: 32px;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+  .newsletterContainer {
+    margin-left: 0;
+    align-items: center;
+    max-width: 100%;
+  }
+  .newsletterForm {
+    max-width: 100%;
+  }
+}

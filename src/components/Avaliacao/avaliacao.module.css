@@ -1,0 +1,92 @@
+/* Sessão de avaliação */
+.avaliacaoSection {
+  display: flex;
+  justify-content: center;
+  padding: 48px 0 32px 0;
+  max-width: 1800px;
+}
+
+.avaliacaoHeader {
+  z-index: 1;
+  margin-bottom: 24px;
+  margin-right: 0;
+  margin-left: 250px;
+}
+.titulo {
+  font-size: 2rem;
+  color: #073b4c;
+  font-family: "Montserrat", Arial, sans-serif;
+  font-weight: 700;
+  margin-bottom: 8px;
+}
+.stars {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  margin-bottom: 4px;
+}
+.starFull {
+  color: #00b67a;
+  font-size: 1.7rem;
+}
+.starHalf {
+  color: #00b67a;
+  font-size: 1.7rem;
+  opacity: 0.5;
+}
+.baseado {
+  color: #222;
+  font-size: 1rem;
+  margin-bottom: 4px;
+}
+.baseado a {
+  color: #073b4c;
+  text-decoration: underline;
+  font-weight: 600;
+}
+.trustpilot {
+  color: #00b67a;
+  font-size: 1.1rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 8px;
+}
+.avaliacoesGrid {
+  display: flex;
+  gap: 24px;
+  margin-left: 40px;
+  margin-top: 16px;
+}
+.avaliacaoCard {
+  border-radius: 16px;
+  padding: 24px 20px 20px 20px;
+  width: 320px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  position: relative;
+}
+.tempo {
+  color: #6c7a89;
+  font-size: 0.95rem;
+  margin-bottom: 4px;
+}
+.cardTitulo {
+  color: #222;
+  font-size: 1.1rem;
+  font-weight: 700;
+  margin-bottom: 4px;
+}
+.cardTexto {
+  color: #222;
+  font-size: 1rem;
+  margin-bottom: 4px;
+}
+.autor {
+  color: #073b4c;
+  font-size: 0.95rem;
+  font-weight: 600;
+  margin-top: 8px;
+}

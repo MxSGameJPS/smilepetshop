@@ -3,50 +3,41 @@ import { FaSearch, FaUser, FaShoppingBag } from "react-icons/fa";
 import { useState } from "react";
 
 export default function Header() {
-  const [dropdownOpen, setDropdownOpen] = useState(false);
   const [cartCount] = useState(0); // Substitua por estado real do carrinho se necessário
 
   return (
     <header className={styles.header}>
       <div className={styles.headerContent}>
         <div className={styles.logoArea}>
-          <img
-            src="/logo/produtos.webp"
-            alt="Logo SmilePet"
-            className={styles.logo}
-          />
+          <a href="/">
+            <img
+              src="/logo/produtos.webp"
+              alt="Logo SmilePet"
+              className={styles.logo}
+            />
+          </a>
           {/* <span className={styles.brand}>SmilePet</span> */}
         </div>
         <nav className={styles.nav}>
           <ul className={styles.navList}>
             <li>
-              <a href="#">Home</a>
-            </li>
-            <li
-              className={styles.shopDropdown}
-              onMouseEnter={() => setDropdownOpen(true)}
-              onMouseLeave={() => setDropdownOpen(false)}
-            >
-              <a href="#">Shop</a>
-              {dropdownOpen && (
-                <div className={styles.dropdownMenu}>
-                  <a href="#" className={styles.dropdownItem}>
-                    Cachorro
-                  </a>
-                  <a href="#" className={styles.dropdownItem}>
-                    Gato
-                  </a>
-                </div>
-              )}
+              <a href="/cachorro">Cachorro</a>
             </li>
             <li>
-              <a href="#">Ofertas</a>
+              <a href="/gato">Gato</a>
             </li>
             <li>
-              <a href="#">Planos</a>
+              <a href="/ofertas" className={styles.ofertas}>
+                OFERTAS IMPERDÍVEIS
+              </a>
             </li>
             <li>
-              <a href="#">Atacado</a>
+              <a href="/atacado">Compre no Atacado</a>
+            </li>
+            <li>
+              <a href="/smileclub" className={styles.smileClub}>
+                SmileClub
+              </a>
             </li>
           </ul>
         </nav>

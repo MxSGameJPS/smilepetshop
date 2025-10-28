@@ -1,3 +1,29 @@
+.ofertas {
+  color: #fc6100 !important;
+  font-weight: 700;
+  background: #fff3e6;
+  border-radius: 8px;
+  padding: 8px 18px;
+  box-shadow: 0 1px 4px rgba(252, 97, 0, 0.08);
+  transition: background 0.2s, color 0.2s;
+}
+.ofertas:hover {
+  background: #fc6100;
+  color: #fff !important;
+}
+.smileClub {
+  background: #fc6100;
+  color: #fff !important;
+  font-weight: 700;
+  border-radius: 8px;
+  padding: 10px 18px;
+  box-shadow: 0 1px 4px rgba(252, 97, 0, 0.12);
+  transition: background 0.2s, color 0.2s;
+}
+.smileClub:hover {
+  background: #ff7f3f;
+  color: #fff !important;
+}
 .header {
   width: 100vw;
   background: #fff;
@@ -5,12 +31,12 @@
   height: 72px;
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content: center;
 }
 
 .headerContent {
   width: 100%;
-  max-width: 1900px;
+  max-width: 1400px;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -43,6 +69,7 @@
 
 .navList {
   display: flex;
+  align-items: center;
   gap: 32px;
   list-style: none;
   padding: 0;
@@ -53,8 +80,8 @@
   text-decoration: none;
   color: #073b4c;
   font-weight: 600;
-  font-size: 1.1rem;
-  padding: 8px 0;
+  font-size: 1rem;
+  padding: 10px ;
   transition: color 0.2s;
 }
 
