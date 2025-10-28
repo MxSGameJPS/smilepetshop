@@ -1,0 +1,45 @@
+/* Container principal da faixa */
+.faixaContainer {
+  width: 100vw;
+  display: flex;
+  justify-content: center;
+  background: transparent;
+  margin-top: 16px;
+}
+
+.faixaContent {
+  background: #dadada;
+  border-radius: 24px;
+  display: flex;
+  gap: 48px;
+  padding: 24px 32px;
+  align-items: center;
+  justify-content: space-between;
+  max-width: 1600px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.item {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  min-width: 220px;
+}
+
+.icon {
+  color: #6c7a89;
+  font-size: 2.2rem;
+  min-width: 36px;
+  min-height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.item span {
+  color: #073b4c;
+  font-size: 1rem;
+  font-weight: 500;
+  font-family: "Montserrat", Arial, sans-serif;
+}

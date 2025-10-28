@@ -15,7 +15,7 @@ export default function Header() {
             alt="Logo SmilePet"
             className={styles.logo}
           />
-          <span className={styles.brand}>SmilePet</span>
+          {/* <span className={styles.brand}>SmilePet</span> */}
         </div>
         <nav className={styles.nav}>
           <ul className={styles.navList}>
