@@ -1,4 +1,5 @@
 import Produtos from "./components/Produtos/produtos";
+import Produto from "./components/Produtos/produto";
 import MarcasTodas from "./components/MarcasTodas/marcastodas";
 import "./App.css";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
@@ -42,6 +43,7 @@ function App() {
         <Route path="/faq" element={<Faq />} />
         <Route path="/marcas" element={<MarcasTodas />} />
         <Route path="/produtos" element={<Produtos />} />
+        <Route path="/produtos/:id" element={<Produto />} />
       </Routes>
       <Footer />
     </Router>

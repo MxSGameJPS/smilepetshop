@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import styles from "./produtos.module.css";
+import { useNavigate } from "react-router-dom";
 
 export default function Produtos() {
   const [openGrupo, setOpenGrupo] = useState({
@@ -50,6 +51,12 @@ export default function Produtos() {
     // Simulação de faixa de preço
     return marcaOk && categoriaOk;
   });
+
+  const navigate = useNavigate();
+
+  function abrirProduto(id) {
+    navigate(`/produtos/${id}`);
+  }
 
   return (
     <section className={styles.produtosContainer}>
@@ -198,8 +205,23 @@ export default function Produtos() {
             <div>Nenhum produto encontrado.</div>
           ) : (
             produtosFiltrados.map((p) => (
-              <div key={p.id} className={styles.produtoCard}>
-                <button className={styles.cardFavorito} title="Favoritar">
+              <div
+                key={p.id}
+                className={styles.produtoCard}
+                onClick={() => abrirProduto(p.id)}
+                style={{ cursor: "pointer", position: "relative" }}
+              >
+                <button
+                  className={styles.cardFavorito}
+                  title="Favoritar"
+                  tabIndex={-1}
+                  style={{
+                    zIndex: 2,
+                    position: "absolute",
+                    top: 16,
+                    right: 16,
+                  }}
+                >
                   <span className={styles.cardHeart}>&#9825;</span>
                 </button>
                 <img
@@ -217,7 +239,14 @@ export default function Produtos() {
                   {p.precoMin ? `$ ${p.precoMin}` : `R$ ${p.preco}`}
                   {p.precoMax ? `–$ ${p.precoMax}` : ""}
                 </div>
-                <button className={styles.cardBtn}>
+                <button
+                  className={styles.cardBtn}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    abrirProduto(p.id);
+                  }}
+                  style={{ zIndex: 1 }}
+                >
                   <span className={styles.cardBtnIcon}>Quero Este</span>
                   <span className={styles.cardBtnHover}>Ver mais</span>
                 </button>

@@ -1,0 +1,311 @@
+/* Estilos básicos para a página de produto */
+.container {
+  padding: 24px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+}
+
+.grid {
+  max-width: 1500px;
+  background: #fff;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  border-radius: 10px;
+}
+
+.galeria {
+  display: flex;
+  gap: 16px;
+  align-items: start;
+}
+
+.thumbsColumn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 88px;
+}
+
+.thumbNav {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  font-size: 14px;
+  padding: 6px 8px;
+}
+
+.thumbsList {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin: 8px 0;
+}
+
+.thumb {
+  width: 64px;
+  height: 64px;
+  padding: 4px;
+  border-radius: 8px;
+  background: #fff;
+  border: 1px solid #eee;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.thumb img {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+}
+
+.thumbSelected {
+  border: 2px solid #000;
+}
+
+.imagemPrincipal {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.imagemPrincipal img {
+  width: 100%;
+  max-width: 460px;
+  height: auto;
+  object-fit: contain;
+  border-radius: 8px;
+}
+
+.info {
+  padding: 8px 16px;
+}
+
+.titulo {
+  font-size: 26px;
+  font-weight: 800;
+  margin: 0 0 8px 0;
+  color: #09344a;
+}
+
+.vendedor a {
+  color: #333;
+  text-decoration: none;
+  font-weight: 500;
+  text-align: left;
+}
+
+.vendedor {
+  font-size: 14px;
+  margin-bottom: 6px;
+  text-align: left;
+}
+
+.sku {
+  color: #777;
+  font-size: 13px;
+  margin-bottom: 12px;
+  text-align: left;
+  margin-left: 25px;
+}
+
+.precoArea {
+  background: #fff;
+  padding: 12px;
+  border-radius: 10px;
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.02);
+  color: #09344a;
+}
+
+.faixaPreco {
+  margin-bottom: 8px;
+}
+.strike {
+  text-decoration: line-through;
+  color: #888;
+  font-size: 14px;
+}
+
+.labelVariacao {
+  font-weight: 700;
+  font-size: 13px;
+  display: block;
+  margin-top: 8px;
+}
+
+.variacoesRow {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 8px;
+  color: #09344a;
+}
+
+.select {
+  padding: 10px 12px;
+  border-radius: 8px;
+  border: 1px solid #ddd;
+  background: #fff;
+  color: #09344a;
+}
+
+.precoAtual {
+  font-weight: 800;
+  font-size: 20px;
+  color: #09344a;
+}
+
+.acoesRow {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 12px;
+}
+
+.qtd {
+  width: 64px;
+  padding: 8px;
+  border-radius: 8px;
+  border: 1px solid rgba(0, 0, 0, 0.12);
+  background: transparent;
+  color: #000;
+  outline: none;
+  -webkit-appearance: none;
+  appearance: none;
+  text-align: center;
+  transition: border-color 120ms ease, box-shadow 120ms ease;
+}
+
+/* Remove spin buttons in WebKit browsers */
+.qtd::-webkit-outer-spin-button,
+.qtd::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+.qtd:focus {
+  border-color: rgba(0, 0, 0, 0.24);
+  box-shadow: 0 0 0 4px rgba(0, 0, 0, 0.03);
+}
+
+.btnComprar {
+  background: #fc6100;
+  color: #000;
+  border: none;
+  padding: 10px 18px;
+  border-radius: 999px;
+  cursor: pointer;
+  font-weight: 700;
+}
+
+.btnFavorito {
+  background: transparent;
+  padding: 8px;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.acordeon {
+  margin-top: 18px;
+  color: #09344a;
+}
+.itemAcordeon {
+  border-top: 1px solid #eee;
+  color: #09344a;
+}
+.itemHeader {
+  width: 100%;
+  background: transparent;
+  border: none;
+  padding: 12px 8px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  cursor: pointer;
+  font-weight: 700;
+  color: #09344a;
+}
+.plus {
+  font-size: 18px;
+}
+.itemBody {
+  padding: 12px 8px;
+  color: #333;
+}
+
+@media (max-width: 900px) {
+  .grid {
+    grid-template-columns: 1fr;
+  }
+  .thumbsColumn {
+    width: 64px;
+  }
+}
+
+/* Produtos relacionados */
+.relacionadosSection {
+  margin-top: 22px;
+}
+.relacionadosTitulo {
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: #09344a;
+  margin-bottom: 12px;
+  text-align: left;
+}
+.relacionadosGrid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+}
+.relacionadoCard {
+  background: #fff;
+  border: 1px solid #f0f0f0;
+  border-radius: 10px;
+  padding: 14px;
+  text-align: left;
+  position: relative;
+  cursor: pointer;
+}
+.cardFavorito {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background: transparent;
+  border: none;
+}
+.cardHeart {
+  font-size: 16px;
+  color: #333;
+}
+.relacionadoImg {
+  width: 100%;
+  max-height: 110px;
+  object-fit: contain;
+  display: block;
+  margin: 6px auto 10px auto;
+}
+.relacionadoNome {
+  font-size: 14px;
+  margin: 0 0 8px 0;
+  color: #09344a;
+  min-height: 40px;
+}
+.relacionadoPreco {
+  font-weight: 700;
+  color: #09344a;
+}
+
+@media (max-width: 900px) {
+  .relacionadosGrid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
