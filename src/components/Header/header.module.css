@@ -81,12 +81,84 @@
   color: #073b4c;
   font-weight: 600;
   font-size: 1rem;
-  padding: 10px ;
+  padding: 10px;
   transition: color 0.2s;
 }
 
 .navList li a:hover {
   color: #ffd600;
+}
+
+.hasSubmenu {
+  position: relative;
+}
+
+.submenu {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  background: #fff;
+  border: 1px solid #e6e6e6;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
+  display: flex;
+  gap: 12px;
+  padding: 12px;
+  min-width: 420px;
+  z-index: 60;
+}
+
+.submenuLeft {
+  flex: 1 1 50%;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.submenuItem {
+  padding: 8px 10px;
+  cursor: pointer;
+  color: #09344a;
+}
+.submenuItem:hover {
+  background: #f5f7f7;
+}
+
+.submenuRight {
+  flex: 1 1 50%;
+  border-left: 1px solid #f0f0f0;
+  padding-left: 12px;
+}
+
+.submenuBrandsTitle {
+  font-weight: 700;
+  margin-bottom: 8px;
+  color: #003b4a;
+}
+
+.submenuLoading,
+.submenuEmpty {
+  color: #666;
+  font-size: 14px;
+}
+
+.brandsList {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.brandsList li {
+  color: #09344a;
+  font-size: 14px;
+  cursor: pointer;
+  padding: 4px 6px;
+  border-radius: 6px;
+}
+.brandsList li:hover {
+  background: #f5f7f7;
 }
 
 .shopDropdown {

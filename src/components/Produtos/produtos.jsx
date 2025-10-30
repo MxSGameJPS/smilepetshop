@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import styles from "./produtos.module.css";
 import { useNavigate } from "react-router-dom";
+import { useLocation } from "react-router-dom";
 
 export default function Produtos() {
   const [openGrupo, setOpenGrupo] = useState({
@@ -15,6 +16,14 @@ export default function Produtos() {
   const [filtroCategoria, setFiltroCategoria] = useState("");
   const [precoMin, setPrecoMin] = useState(0);
   const [precoMax, setPrecoMax] = useState(100);
+  const location = useLocation();
+  // parse categorias from query string (comma separated names)
+  const params = new URLSearchParams(location.search);
+  const categoriasParam = params.get("categorias") || "";
+  const categoriasFiltro = categoriasParam
+    ? categoriasParam.split(",").map((s) => s.trim())
+    : [];
+  const marcaParam = params.get("marca") || "";
 
   useEffect(() => {
     fetch("https://apismilepet.vercel.app/api/produtos")
@@ -41,13 +50,18 @@ export default function Produtos() {
   const marcas = Array.from(
     new Set(produtos.map((p) => p.marca).filter(Boolean))
   );
-  const categorias = Array.from(
-    new Set(produtos.map((p) => p.categoria).filter(Boolean))
-  );
+  // categorias list intentionally omitted (not used directly)
 
   const produtosFiltrados = produtos.filter((p) => {
-    const marcaOk = !filtroMarca || p.marca === filtroMarca;
-    const categoriaOk = !filtroCategoria || p.categoria === filtroCategoria;
+    const effectiveMarca = marcaParam || filtroMarca;
+    const marcaOk = !effectiveMarca || p.marca === effectiveMarca;
+    // if categoriasFiltro is provided in URL, match any of them
+    let categoriaOk = true;
+    if (categoriasFiltro.length) {
+      categoriaOk = categoriasFiltro.includes(p.categoria);
+    } else {
+      categoriaOk = !filtroCategoria || p.categoria === filtroCategoria;
+    }
     // Simulação de faixa de preço
     return marcaOk && categoriaOk;
   });
