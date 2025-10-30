@@ -4,7 +4,8 @@
   gap: 32px;
   justify-content: center;
   align-items: stretch;
-  margin: 32px 0;
+  margin: 32px auto;
+  max-width: 1400px;
 }
 
 .card {

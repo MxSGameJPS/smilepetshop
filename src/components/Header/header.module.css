@@ -21,27 +21,71 @@
   transition: background 0.2s, color 0.2s;
 }
 .smileClub:hover {
-  background: #ff7f3f;
+  background: #fc6100;
   color: #fff !important;
 }
 .header {
-  width: 100vw;
-  background: #fff;
+  width: 100%;
+  background: #ff7f3f;
   border-bottom: 1px solid #f2f2f2;
-  height: 72px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  display: block;
+  /* ensure header is visible and stays on top of content */
+  /* make header fixed to viewport so it always spans full width */
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 1000;
+  /* give a restful elevation so content beneath is visually separated */
+  box-shadow: 0 2px 8px rgba(7, 59, 76, 0.06);
 }
 
 .headerContent {
-  width: 100%;
   max-width: 1400px;
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  padding: 0 48px;
-  height: 72px;
+  justify-content: center;
+  padding: 0 78px;
+  width: 100%;
+  margin: 0 auto;
+  padding-top: 28px;
+  padding-bottom: 28px;
+}
+
+.headerTop {
+  border-bottom: 1px solid #f2f2f2;
+}
+
+/* layout top bar as a 3-column grid: logo | search | actions */
+.headerTop .headerContent {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  column-gap: 24px;
+  max-width: 1400px;
+  padding: 20px 58px;
+}
+
+.headerBottom {
+  background: #fff;
+}
+
+.searchCenter {
+  display: flex;
+  justify-content: center;
+  width: min(720px, 60%);
+  max-width: 720px;
+  justify-self: center;
+}
+
+.searchCenter .searchBox {
+  width: 100%;
+}
+
+.loginLink {
+  color: #ffffff;
+  font-weight: 600;
+  text-decoration: underline;
 }
 
 .logoArea {
@@ -51,7 +95,7 @@
 }
 
 .logo {
-  height: 48px;
+  height: 68px;
   width: auto;
 }
 
@@ -62,9 +106,21 @@
   font-family: "Montserrat", Arial, sans-serif;
 }
 
+.headerNav {
+  margin: 0 auto;
+  padding: 12px;
+  text-align: center;
+  background: #fff;
+}
+
 .nav {
   flex: 1;
-  margin-left: 48px;
+  margin: 0 auto;
+  max-width: 1400px;
+}
+
+.headerBottom .headerContent {
+  justify-content: center;
 }
 
 .navList {
@@ -198,20 +254,25 @@
 .headerRight {
   display: flex;
   align-items: center;
-  gap: 24px;
-  margin-left: 48px;
+  gap: 86px;
+  margin-left: 0;
+}
+
+.iconGroup {
+  display: flex;
+  align-items: center;
+  gap: 14px;
 }
 
 .searchBox {
   display: flex;
   align-items: center;
   background: #fff;
-  border-radius: 16px;
-  border: 1px solid #a7a7a7;
+  border-radius: 22px;
+  border: 1px solid #d6d6d6;
   padding: 0 12px;
-  height: 40px;
-  min-width: 220px;
-  margin-right: 16px;
+  height: 44px;
+  min-width: 320px;
 }
 .searchIcon {
   color: #073b4c;
@@ -226,10 +287,16 @@
   color: #073b4c;
   width: 100%;
 }
+
+.searchInput::placeholder {
+  color: #7a8b91;
+  opacity: 1;
+}
 .iconBtn {
-  background: #fc6100;
+  background: transparent;
   border: none;
-  border-radius: 12px;
+  border-radius: 999px;
+  padding: 12px 12px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -239,7 +306,7 @@
   transition: background 0.2s;
 }
 .iconBtn:hover {
-  background: #ffd600;
+  background: #fc6100;
   color: #073b4c;
 }
 .icon {

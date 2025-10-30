@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import styles from "./produtos.module.css";
-import { useNavigate } from "react-router-dom";
+import ProductCard from "../ProductCard/ProductCard";
+import { addToCart } from "../../lib/cart";
 import { useLocation } from "react-router-dom";
 
 export default function Produtos() {
@@ -66,11 +67,7 @@ export default function Produtos() {
     return marcaOk && categoriaOk;
   });
 
-  const navigate = useNavigate();
-
-  function abrirProduto(id) {
-    navigate(`/produtos/${id}`);
-  }
+  // navigation handled inside ProductCard via useNavigate when opening a product
 
   return (
     <section className={styles.produtosContainer}>
@@ -218,54 +215,33 @@ export default function Produtos() {
           ) : produtosFiltrados.length === 0 ? (
             <div>Nenhum produto encontrado.</div>
           ) : (
-            produtosFiltrados.map((p) => (
-              <div
-                key={p.id}
-                className={styles.produtoCard}
-                onClick={() => abrirProduto(p.id)}
-                style={{ cursor: "pointer", position: "relative" }}
-              >
-                <button
-                  className={styles.cardFavorito}
-                  title="Favoritar"
-                  tabIndex={-1}
-                  style={{
-                    zIndex: 2,
-                    position: "absolute",
-                    top: 16,
-                    right: 16,
-                  }}
-                >
-                  <span className={styles.cardHeart}>&#9825;</span>
-                </button>
-                <img
-                  src={
-                    p.imagem_url && p.imagem_url.trim()
-                      ? p.imagem_url
-                      : "/imgCards/RacaoSeca.png"
+            produtosFiltrados.map((p) => {
+              const image =
+                p.imagem_url && p.imagem_url.trim()
+                  ? p.imagem_url
+                  : "/imgCards/RacaoSeca.png";
+              const price = p.precoMin || p.preco || null;
+              const priceOld = p.precoMax || null;
+              return (
+                <ProductCard
+                  key={p.id}
+                  image={image}
+                  title={p.nome}
+                  priceOld={priceOld}
+                  price={price}
+                  productId={p.id}
+                  onAdd={() =>
+                    addToCart({
+                      id: p.id,
+                      nome: p.nome,
+                      quantidade: 1,
+                      precoUnit: price,
+                      imagem_url: image,
+                    })
                   }
-                  alt={p.nome}
-                  className={styles.produtoImg}
-                  onError={(e) => (e.target.src = "/imgCards/RacaoSeca.png")}
                 />
-                <h3 className={styles.produtoNome}>{p.nome}</h3>
-                <div className={styles.produtoPreco}>
-                  {p.precoMin ? `$ ${p.precoMin}` : `R$ ${p.preco}`}
-                  {p.precoMax ? `–$ ${p.precoMax}` : ""}
-                </div>
-                <button
-                  className={styles.cardBtn}
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    abrirProduto(p.id);
-                  }}
-                  style={{ zIndex: 1 }}
-                >
-                  <span className={styles.cardBtnIcon}>Quero Este</span>
-                  <span className={styles.cardBtnHover}>Ver mais</span>
-                </button>
-              </div>
-            ))
+              );
+            })
           )}
         </div>
       </div>

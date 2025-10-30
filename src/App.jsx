@@ -37,8 +37,8 @@ function Home() {
 function App() {
   return (
     <Router>
+      <Header />
       <div className="appContent">
-        <Header />
         <main className="mainContent">
           <Routes>
             <Route path="/" element={<Home />} />

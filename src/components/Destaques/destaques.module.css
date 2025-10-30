@@ -6,7 +6,7 @@
   margin-top: 24px;
 }
 .carouselBtn {
-  background: #d32f2f;
+  background: #fc6100;
   color: #ffffff;
   border: none;
   border-radius: 50%;
@@ -37,7 +37,7 @@
 }
 
 .destaquesSection {
-  max-width: 1600px;
+  max-width: 1400px;
   margin: 0 auto;
   padding: 32px 0 0 0;
   text-align: center;
@@ -56,7 +56,7 @@
   margin-bottom: 24px;
 }
 .categoriaBtn {
-  background: #d32f2f;
+  background: #fc6100;
   color: #ffffff;
   border: none;
   border-radius: 16px;

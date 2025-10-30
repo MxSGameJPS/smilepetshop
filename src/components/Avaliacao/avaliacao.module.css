@@ -3,14 +3,16 @@
   display: flex;
   justify-content: center;
   padding: 48px 0 32px 0;
-  max-width: 1800px;
+  max-width: 1400px;
+  margin: 0 auto;
+  text-align: center;
 }
 
 .avaliacaoHeader {
   z-index: 1;
   margin-bottom: 24px;
   margin-right: 0;
-  margin-left: 250px;
+  text-align: center;
 }
 .titulo {
   font-size: 2rem;
@@ -18,6 +20,7 @@
   font-family: "Montserrat", Arial, sans-serif;
   font-weight: 700;
   margin-bottom: 8px;
+  text-align: left;
 }
 .stars {
   display: flex;
@@ -67,6 +70,7 @@
   flex-direction: column;
   gap: 8px;
   position: relative;
+  text-align: left;
 }
 .tempo {
   color: #6c7a89;

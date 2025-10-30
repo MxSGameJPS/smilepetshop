@@ -1,5 +1,5 @@
 import styles from "./header.module.css";
-import { FaSearch, FaUser, FaShoppingBag } from "react-icons/fa";
+import { FaSearch, FaHeart, FaShoppingBag } from "react-icons/fa";
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { getCartCount } from "../../lib/cart";
@@ -116,183 +116,188 @@ export default function Header() {
 
   return (
     <header className={styles.header}>
-      <div className={styles.headerContent}>
-        <div className={styles.logoArea}>
-          <a href="/">
-            <img
-              src="/logo/produtos.webp"
-              alt="Logo SmilePet"
-              className={styles.logo}
-            />
-          </a>
-          {/* <span className={styles.brand}>SmilePet</span> */}
-        </div>
-        <nav className={styles.nav}>
-          <ul className={styles.navList}>
-            <li
-              className={styles.hasSubmenu}
-              onMouseEnter={() => setOpenCachorro(true)}
-              onMouseLeave={() => {
-                setOpenCachorro(false);
-              }}
-            >
-              <a href="/cachorro">Cachorro</a>
-              {openCachorro && (
-                <div className={styles.submenu} role="menu">
-                  <div className={styles.submenuLeft}>
-                    {Object.keys(submenuCategoryMapCachorro).map((label) => (
-                      <div
-                        key={label}
-                        className={styles.submenuItem}
-                        onMouseEnter={() =>
-                          handleHoverSubItem(label, "cachorro")
-                        }
-                        onClick={() => {
-                          // navigate to produtos with categorias param(s)
-                          const mapping = {
-                            "Ração Seca": ["Ração para Cachorro"],
-                            "Ração Úmida": ["Ração Úmida para Cães"],
-                            Petiscos: ["Petiscos Dog"],
-                            "Higiene e Cuidados": [
-                              "Higiene e Cuidados para Cães",
-                            ],
-                          };
-                          const cats = mapping[label] || [];
-                          const params = new URLSearchParams();
-                          if (cats.length)
-                            params.set("categorias", cats.join(","));
-                          navigate(`/produtos?${params.toString()}`);
-                        }}
-                      >
-                        {label}
-                      </div>
-                    ))}
-                  </div>
-                  <div className={styles.submenuRight}>
-                    <div className={styles.submenuBrandsTitle}>Marcas</div>
-                    {loadingBrands ? (
-                      <div className={styles.submenuLoading}>Carregando...</div>
-                    ) : brands.length === 0 ? (
-                      <div className={styles.submenuEmpty}>
-                        Passe o mouse sobre uma categoria
-                      </div>
-                    ) : (
-                      <ul className={styles.brandsList}>
-                        {brands.map((b) => (
-                          <li key={b} onClick={() => handleBrandClick(b)}>
-                            {b}
-                          </li>
-                        ))}
-                      </ul>
-                    )}
-                  </div>
-                </div>
-              )}
-            </li>
-            <li
-              className={styles.hasSubmenu}
-              onMouseEnter={() => setOpenGato(true)}
-              onMouseLeave={() => {
-                setOpenGato(false);
-              }}
-            >
-              <a href="/gato">Gato</a>
-              {openGato && (
-                <div className={styles.submenu} role="menu">
-                  <div className={styles.submenuLeft}>
-                    {Object.keys(submenuCategoryMapGato).map((label) => (
-                      <div
-                        key={label}
-                        className={styles.submenuItem}
-                        onMouseEnter={() => handleHoverSubItem(label, "gato")}
-                        onClick={() => {
-                          // navigate to produtos with categorias param(s)
-                          const mapping = {
-                            "Ração Seca": ["Ração para Gatos"],
-                            "Ração Úmida": ["Ração Úmida para Gatos"],
-                            Petiscos: ["Petiscos Cat"],
-                            "Higiene e Cuidados": [
-                              "Higiene e Cuidados para Gatos",
-                            ],
-                          };
-                          const cats = mapping[label] || [];
-                          const params = new URLSearchParams();
-                          if (cats.length)
-                            params.set("categorias", cats.join(","));
-                          navigate(`/produtos?${params.toString()}`);
-                        }}
-                      >
-                        {label}
-                      </div>
-                    ))}
-                  </div>
-                  <div className={styles.submenuRight}>
-                    <div className={styles.submenuBrandsTitle}>Marcas</div>
-                    {loadingBrands ? (
-                      <div className={styles.submenuLoading}>Carregando...</div>
-                    ) : brands.length === 0 ? (
-                      <div className={styles.submenuEmpty}>
-                        Passe o mouse sobre uma categoria
-                      </div>
-                    ) : (
-                      <ul className={styles.brandsList}>
-                        {brands.map((b) => (
-                          <li key={b} onClick={() => handleBrandClick(b)}>
-                            {b}
-                          </li>
-                        ))}
-                      </ul>
-                    )}
-                  </div>
-                </div>
-              )}
-            </li>
-            <li>
-              <a href="/ofertas" className={styles.ofertas}>
-                OFERTAS IMPERDÍVEIS
-              </a>
-            </li>
-            <li>
-              <a href="/atacado">Compre no Atacado</a>
-            </li>
-            <li>
-              <a href="/smileclub" className={styles.smileClub}>
-                SmileClub
-              </a>
-            </li>
-          </ul>
-        </nav>
-        <div className={styles.headerRight}>
-          <div className={styles.searchBox}>
-            <FaSearch className={styles.searchIcon} />
-            <input
-              type="text"
-              placeholder="Pesquisar produtos..."
-              className={styles.searchInput}
-            />
-          </div>
-          <button className={styles.iconBtn} aria-label="Perfil">
-            <FaUser
-              className={styles.icon}
-              focusable="false"
-              aria-hidden="true"
-            />
-          </button>
-          <div className={styles.cartIconArea}>
-            <button
-              className={styles.iconBtn}
-              aria-label="Sacola de compras"
-              type="button"
-              onClick={() => navigate("/carrinho")}
-            >
-              <FaShoppingBag
-                className={styles.icon}
-                focusable="false"
-                aria-hidden="true"
+      {/* Top bar: logo | centered search | right actions */}
+      <div className={styles.headerTop}>
+        <div className={styles.headerContent}>
+          <div className={styles.logoArea}>
+            <a href="/">
+              <img
+                src="/logo/produtos.webp"
+                alt="Logo SmilePet"
+                className={styles.logo}
               />
-            </button>
-            <span className={styles.cartCount}>{cartCount}</span>
+            </a>
+            {/* <span className={styles.brand}>SmilePet</span> */}
           </div>
+
+          <div className={styles.searchCenter}>
+            <div className={styles.searchBox}>
+              <FaSearch className={styles.searchIcon} />
+              <input
+                type="text"
+                placeholder="Pesquisar produtos..."
+                className={styles.searchInput}
+              />
+            </div>
+          </div>
+
+          <div className={styles.headerRight}>
+            <a href="/login" className={styles.loginLink}>
+              Entre ou cadastre-se
+            </a>
+            <div className={styles.iconGroup}>
+              <button className={styles.iconBtn} aria-label="Favoritos">
+                <FaHeart
+                  className={styles.icon}
+                  focusable="false"
+                  aria-hidden="true"
+                />
+              </button>
+              <div className={styles.cartIconArea}>
+                <button
+                  className={styles.iconBtn}
+                  aria-label="Sacola de compras"
+                  type="button"
+                  onClick={() => navigate("/carrinho")}
+                >
+                  <FaShoppingBag
+                    className={styles.icon}
+                    focusable="false"
+                    aria-hidden="true"
+                  />
+                </button>
+                <span className={styles.cartCount}>{cartCount}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Bottom bar: main navigation (keeps existing nav/submenu behavior) */}
+      <div className={styles.headerBottom}>
+        <div className={styles.headerNav}>
+          <nav className={styles.nav}>
+            <ul className={styles.navList}>
+              <li
+                className={styles.hasSubmenu}
+                onMouseEnter={() => setOpenCachorro(true)}
+                onMouseLeave={() => {
+                  setOpenCachorro(false);
+                }}
+              >
+                <a href="/cachorro">Cachorro</a>
+                {openCachorro && (
+                  <div className={styles.submenu} role="menu">
+                    <div className={styles.submenuLeft}>
+                      {Object.keys(submenuCategoryMapCachorro).map((label) => (
+                        <div
+                          key={label}
+                          className={styles.submenuItem}
+                          onMouseEnter={() =>
+                            handleHoverSubItem(label, "cachorro")
+                          }
+                          onClick={() => {
+                            const cats =
+                              submenuCategoryMapCachorro[label] || [];
+                            const params = new URLSearchParams();
+                            if (cats.length)
+                              params.set("categorias", cats.join(","));
+                            navigate(`/produtos?${params.toString()}`);
+                          }}
+                        >
+                          {label}
+                        </div>
+                      ))}
+                    </div>
+                    <div className={styles.submenuRight}>
+                      <div className={styles.submenuBrandsTitle}>Marcas</div>
+                      {loadingBrands ? (
+                        <div className={styles.submenuLoading}>
+                          Carregando...
+                        </div>
+                      ) : brands.length === 0 ? (
+                        <div className={styles.submenuEmpty}>
+                          Passe o mouse sobre uma categoria
+                        </div>
+                      ) : (
+                        <ul className={styles.brandsList}>
+                          {brands.map((b) => (
+                            <li key={b} onClick={() => handleBrandClick(b)}>
+                              {b}
+                            </li>
+                          ))}
+                        </ul>
+                      )}
+                    </div>
+                  </div>
+                )}
+              </li>
+              <li
+                className={styles.hasSubmenu}
+                onMouseEnter={() => setOpenGato(true)}
+                onMouseLeave={() => {
+                  setOpenGato(false);
+                }}
+              >
+                <a href="/gato">Gato</a>
+                {openGato && (
+                  <div className={styles.submenu} role="menu">
+                    <div className={styles.submenuLeft}>
+                      {Object.keys(submenuCategoryMapGato).map((label) => (
+                        <div
+                          key={label}
+                          className={styles.submenuItem}
+                          onMouseEnter={() => handleHoverSubItem(label, "gato")}
+                          onClick={() => {
+                            const cats = submenuCategoryMapGato[label] || [];
+                            const params = new URLSearchParams();
+                            if (cats.length)
+                              params.set("categorias", cats.join(","));
+                            navigate(`/produtos?${params.toString()}`);
+                          }}
+                        >
+                          {label}
+                        </div>
+                      ))}
+                    </div>
+                    <div className={styles.submenuRight}>
+                      <div className={styles.submenuBrandsTitle}>Marcas</div>
+                      {loadingBrands ? (
+                        <div className={styles.submenuLoading}>
+                          Carregando...
+                        </div>
+                      ) : brands.length === 0 ? (
+                        <div className={styles.submenuEmpty}>
+                          Passe o mouse sobre uma categoria
+                        </div>
+                      ) : (
+                        <ul className={styles.brandsList}>
+                          {brands.map((b) => (
+                            <li key={b} onClick={() => handleBrandClick(b)}>
+                              {b}
+                            </li>
+                          ))}
+                        </ul>
+                      )}
+                    </div>
+                  </div>
+                )}
+              </li>
+              <li>
+                <a href="/ofertas" className={styles.ofertas}>
+                  OFERTAS IMPERDÍVEIS
+                </a>
+              </li>
+              <li>
+                <a href="/atacado">Compre no Atacado</a>
+              </li>
+              {/* <li>
+                <a href="/smileclub" className={styles.smileClub}>
+                  SmileClub
+                </a>
+              </li> */}
+            </ul>
+          </nav>
         </div>
       </div>
     </header>
