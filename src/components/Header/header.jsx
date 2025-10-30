@@ -1,9 +1,25 @@
 import styles from "./header.module.css";
 import { FaSearch, FaUser, FaShoppingBag } from "react-icons/fa";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import { getCartCount } from "../../lib/cart";
 
 export default function Header() {
-  const [cartCount] = useState(0); // Substitua por estado real do carrinho se necessário
+  const [cartCount, setCartCount] = useState(() => getCartCount());
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    const handler = (e) => {
+      try {
+        const c = e?.detail?.count ?? getCartCount();
+        setCartCount(Number(c) || 0);
+      } catch {
+        setCartCount(getCartCount());
+      }
+    };
+    window.addEventListener("smilepet_cart_update", handler);
+    return () => window.removeEventListener("smilepet_cart_update", handler);
+  }, []);
 
   return (
     <header className={styles.header}>
@@ -58,7 +74,12 @@ export default function Header() {
             />
           </button>
           <div className={styles.cartIconArea}>
-            <button className={styles.iconBtn} aria-label="Sacola de compras">
+            <button
+              className={styles.iconBtn}
+              aria-label="Sacola de compras"
+              type="button"
+              onClick={() => navigate("/carrinho")}
+            >
               <FaShoppingBag
                 className={styles.icon}
                 focusable="false"

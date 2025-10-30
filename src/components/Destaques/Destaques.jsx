@@ -1,5 +1,6 @@
 import styles from "./destaques.module.css";
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 export default function Destaques() {
   const [produtos, setProdutos] = useState([]);
@@ -7,6 +8,7 @@ export default function Destaques() {
   const [error, setError] = useState(null);
   const [carouselIndex, setCarouselIndex] = useState(0);
   const CARDS_PER_PAGE = 5;
+  const navigate = useNavigate();
 
   useEffect(() => {
     fetch("https://apismilepet.vercel.app/api/produtos")
@@ -47,7 +49,17 @@ export default function Destaques() {
           produtos
             .slice(carouselIndex, carouselIndex + CARDS_PER_PAGE)
             .map((produto) => (
-              <div className={styles.card} key={produto.id}>
+              <div
+                className={styles.card}
+                key={produto.id}
+                role="link"
+                tabIndex={0}
+                onClick={() => navigate(`/produtos/${produto.id}`)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") navigate(`/produtos/${produto.id}`);
+                }}
+                style={{ cursor: "pointer" }}
+              >
                 <img
                   src={
                     produto.imagem_url && produto.imagem_url.trim()
@@ -70,9 +82,31 @@ export default function Destaques() {
                   </p> */}
                   <div className={styles.cardPreco}>R$ {produto.preco}</div>
                 </div>
-                <button className={styles.favBtn} aria-label="Favoritar">
-                  ♡
-                </button>
+                <div
+                  style={{
+                    display: "flex",
+                    gap: 8,
+                    alignItems: "center",
+                    marginTop: 8,
+                  }}
+                >
+                  <button className={styles.favBtn} aria-label="Favoritar">
+                    ♡
+                  </button>
+
+                  <button
+                    className={styles.queroBtn || ""}
+                    aria-label={`Quero este ${produto.nome}`}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      navigate(`/produtos/${produto.id}`, {
+                        state: { queroEste: true },
+                      });
+                    }}
+                  >
+                    Quero este
+                  </button>
+                </div>
               </div>
             ))
         ) : (

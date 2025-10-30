@@ -16,6 +16,8 @@ import Contato from "./components/Contato/contato";
 import Envio from "./components/Envio/envio";
 import Devolucoes from "./components/Devolucoes/devolucoes";
 import Faq from "./components/Faq/faq";
+import Carrinho from "./components/Carrinho/carrinho";
+import Checkout from "./components/Checkout/checkout";
 
 function Home() {
   return (
@@ -44,6 +46,8 @@ function App() {
         <Route path="/marcas" element={<MarcasTodas />} />
         <Route path="/produtos" element={<Produtos />} />
         <Route path="/produtos/:id" element={<Produto />} />
+        <Route path="/carrinho" element={<Carrinho />} />
+        <Route path="/checkout" element={<Checkout />} />
       </Routes>
       <Footer />
     </Router>

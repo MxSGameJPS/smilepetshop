@@ -3,6 +3,7 @@ import { useParams } from "react-router-dom";
 import styles from "./produto.module.css";
 import { AiOutlineHeart, AiFillHeart } from "react-icons/ai";
 import { useNavigate } from "react-router-dom";
+import { addToCart } from "../../lib/cart";
 
 export default function Produto() {
   const { id } = useParams();
@@ -50,6 +51,7 @@ export default function Produto() {
   });
 
   const [favorito, setFavorito] = useState(false);
+  const [addedMsg, setAddedMsg] = useState(false);
 
   // sincroniza localStorage quando o array muda
   useEffect(() => {
@@ -325,6 +327,28 @@ export default function Produto() {
     defaultVariantValue
   );
 
+  const handleAddToCart = () => {
+    try {
+      const itemId = produto?.id ?? produto?.SKU ?? produto?.codigo ?? id;
+      const item = {
+        id: itemId,
+        nome: titulo,
+        variante: variante ?? defaultVariantValue ?? "",
+        quantidade: Number(quantidade) || 1,
+        precoUnit:
+          (mapaPrecos && variante && mapaPrecos[variante] != null
+            ? Number(mapaPrecos[variante])
+            : Number(precoPrincipal)) || 0,
+        imagem_url: imagens[0] || produto?.imagem_url || null,
+      };
+      addToCart(item);
+      setAddedMsg(true);
+      setTimeout(() => setAddedMsg(false), 1800);
+    } catch (err) {
+      console.error("Erro ao adicionar ao carrinho", err);
+    }
+  };
+
   return (
     <div className={styles.container}>
       <div className={styles.grid}>
@@ -486,8 +510,12 @@ export default function Produto() {
                 className={styles.qtd}
                 aria-label="Quantidade"
               />
-              <button className={styles.btnComprar}>
-                Adicionar ao carrinho
+              <button
+                type="button"
+                className={styles.btnComprar}
+                onClick={handleAddToCart}
+              >
+                {addedMsg ? "Adicionado" : "Adicionar ao carrinho"}
               </button>
               <button
                 className={styles.btnFavorito}

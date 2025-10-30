@@ -1,0 +1,297 @@
+.page {
+  padding: 32px;
+  background: #f9f9fb;
+  min-height: calc(100vh - 120px);
+}
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: 1fr 380px;
+  gap: 28px;
+  align-items: start;
+}
+.left {
+  background: transparent;
+}
+.title {
+  font-size: 2rem;
+  font-weight: 900;
+  color: #073b4c;
+  margin-bottom: 18px;
+}
+.itemsList {
+  border: 1px solid rgba(0, 0, 0, 0.12);
+  background: transparent;
+  color: #000;
+  flex-direction: column;
+  gap: 18px;
+}
+.empty {
+  padding: 24px;
+  background: #fc6100;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(7, 59, 76, 0.04);
+  color: #666;
+}
+.itemRow {
+  display: grid;
+  grid-template-columns: 1fr 90px 140px 40px;
+  gap: 12px;
+  align-items: center;
+  background: #fff;
+  padding: 12px 16px;
+  border-radius: 12px;
+  border: 1px solid #eee;
+}
+.itemMain {
+  display: flex;
+  border: 1px solid rgba(0, 0, 0, 0.12);
+  background: transparent;
+  color: #000;
+  align-items: center;
+}
+.thumb {
+  width: 72px;
+  height: 72px;
+  object-fit: contain;
+  border-radius: 8px;
+  background: #fff;
+}
+.itemInfo {
+  display: flex;
+  flex-direction: column;
+}
+.itemLink {
+  font-weight: 700;
+  color: #073b4c;
+  text-decoration: none;
+}
+.itemUnit {
+  color: #073b4c;
+  font-weight: 700;
+  margin-top: 6px;
+}
+.itemControls {
+  display: flex;
+  justify-content: center;
+}
+.qtyInput {
+  width: 68px;
+  padding: 8px 10px;
+  border-radius: 8px;
+  border: 1px solid #fc6100;
+  background: transparent;
+  color: #000;
+}
+.itemTotal {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+}
+.totalPrice {
+  font-weight: 700;
+  color: #073b4c;
+}
+.totalNote {
+  font-size: 0.85rem;
+  color: #999;
+}
+.removeBtn {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  font-size: 1.1rem;
+}
+.couponRow {
+  display: flex;
+  gap: 12px;
+  margin-top: 20px;
+}
+.couponInput {
+  flex: 1;
+  padding: 12px 14px;
+  border-radius: 999px;
+  border: 1px solid #fc6100;
+  background: transparent;
+  color: #000;
+}
+.couponBtn {
+  background: #fc6100;
+  color: #fff;
+  border: none;
+  border: 1px solid rgba(0, 0, 0, 0.12);
+
+  border-radius: 999px;
+  cursor: pointer;
+}
+.couponMsg {
+  margin-top: 8px;
+  color: #0b6;
+}
+.right {
+  position: relative;
+}
+.summaryCard {
+  background: #fff;
+  padding: 20px;
+  border-radius: 10px;
+  border: 1px solid #eee;
+  box-shadow: 0 2px 8px rgba(7, 59, 76, 0.04);
+}
+.summaryTitle {
+  font-size: 1.4rem;
+  margin: 0 0 12px 0;
+  font-weight: 800;
+  color: #073b4c;
+}
+.rowBetween {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin: 12px 0;
+  color: #073b4c;
+}
+.colRight {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+}
+.bold {
+  font-weight: 700;
+}
+.small {
+  font-size: 0.85rem;
+  color: #999;
+}
+.shippingSection {
+  margin-top: 8px;
+}
+.shippingTitle {
+  font-weight: 700;
+  margin-bottom: 6px;
+  color: #073b4c;
+}
+.shippingOption {
+  display: block;
+  margin: 6px 0;
+}
+.shippingInfo {
+  font-size: 0.85rem;
+  color: #888;
+  margin-top: 8px;
+}
+.calcLink {
+  display: inline-block;
+  margin-top: 8px;
+  color: #073b4c;
+  text-decoration: underline;
+}
+.sep {
+  border: none;
+  border-top: 1px solid #eee;
+  margin: 12px 0;
+}
+.rowBetweenTotal {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin: 14px 0;
+}
+.totalLabel {
+  font-weight: 900;
+  font-size: 1.05rem;
+  color: #073b4c;
+}
+.totalValue {
+  font-weight: 900;
+  font-size: 1.05rem;
+  color: #073b4c;
+}
+.checkoutBtn {
+  width: 100%;
+  background: #fc6100;
+  color: #fff;
+  border: none;
+  padding: 12px 16px;
+  border-radius: 10px;
+  cursor: pointer;
+  margin-top: 12px;
+}
+
+@media (max-width: 900px) {
+  .container {
+    grid-template-columns: 1fr;
+  }
+  .right {
+    order: 2;
+  }
+}
+
+/* CEP input row */
+.cepRow {
+  display: flex;
+  gap: 8px;
+  margin-top: 8px;
+}
+.cepInput {
+  flex: 1;
+  padding: 10px 12px;
+  border-radius: 10px;
+  border: 1px solid #fc6100;
+  background: transparent;
+  color: #000;
+}
+.cepBtn {
+  background: #fc6100;
+  color: #fff;
+  border: none;
+  padding: 10px 14px;
+  border-radius: 10px;
+  cursor: pointer;
+}
+.shippingMsg {
+  margin-top: 8px;
+  color: #073b4c;
+  font-weight: 700;
+}
+
+/* High-specificity input overrides to counter global/user-agent styles (e.g. gray autofill) */
+/* Targets inputs inside this page/container to avoid global side-effects */
+.page .container input,
+.page .container textarea,
+.page .container select {
+  color: #000 !important;
+  background: transparent !important;
+  border-color: rgba(0, 0, 0, 0.12) !important;
+  -webkit-text-fill-color: #000 !important; /* Chrome/Safari autofill */
+}
+
+/* Specific classes used in cart for extra safety */
+.page .container .qtyInput,
+.page .container .couponInput,
+.page .container .cepInput {
+  color: #000 !important;
+  background: transparent !important;
+  border: 1px solid rgba(0, 0, 0, 0.12) !important;
+  -webkit-text-fill-color: #000 !important;
+}
+
+/* Autofill pseudo-class handling (WebKit browsers) */
+.page .container input:-webkit-autofill,
+.page .container input:-webkit-autofill:hover,
+.page .container input:-webkit-autofill:focus,
+.page .container textarea:-webkit-autofill,
+.page .container select:-webkit-autofill {
+  -webkit-text-fill-color: #000 !important;
+  background-color: transparent !important;
+  box-shadow: 0 0 0px 1000px transparent inset !important;
+}
+
+/* Firefox autofill (approx) */
+@-moz-document url-prefix() {
+  .page .container input:-moz-autofill {
+    box-shadow: 0 0 0px 1000px transparent inset !important;
+    -moz-text-fill-color: #000 !important;
+  }
+}

@@ -1,0 +1,106 @@
+.page {
+  padding: 32px;
+  min-height: calc(100vh - 120px);
+  background: #f9f9fb;
+}
+.container {
+  max-width: 980px;
+  margin: 0 auto;
+  background: transparent;
+}
+.title {
+  font-size: 1.8rem;
+  font-weight: 900;
+  color: #073b4c;
+  margin-bottom: 18px;
+}
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.row2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+/* Specific row where address + numero sit: make address wider */
+.rowAddress {
+  grid-template-columns: 1fr 120px;
+}
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+/* allow grid children to shrink properly and avoid overflow */
+.row2 > .field {
+  min-width: 0;
+}
+.field input,
+.field select,
+.field textarea {
+  padding: 10px 12px;
+  border-radius: 8px;
+  border: 1px solid rgba(0, 0, 0, 0.12);
+  background: transparent;
+  color: #000;
+  box-sizing: border-box;
+}
+
+.field span {
+  font-size: 0.9rem;
+  color: #666;
+}
+
+.checkbox {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 8px;
+}
+.actions {
+  display: flex;
+  gap: 12px;
+  margin-top: 14px;
+}
+.submitBtn {
+  background: #fc6100;
+  color: #fff;
+  padding: 10px 14px;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+}
+.backBtn {
+  background: transparent;
+  border: 1px solid rgba(0, 0, 0, 0.12);
+  padding: 10px 14px;
+  border-radius: 8px;
+  cursor: pointer;
+  color: #073b4c;
+}
+
+@media (max-width: 800px) {
+  .row2 {
+    grid-template-columns: 1fr;
+  }
+  .rowAddress {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Make the 'numero' input smaller on wide screens while keeping responsive behavior */
+/* Make numero input fill its grid column (which is fixed at 120px) */
+.rowAddress .field:nth-child(2) input[name="numero"] {
+  width: 100%;
+  max-width: 120px;
+  box-sizing: border-box;
+}
+
+@media (min-width: 801px) {
+  .rowAddress {
+    grid-template-columns: 1fr 120px;
+  }
+}
