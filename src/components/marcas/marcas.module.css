@@ -1,7 +1,7 @@
 /* Sessão de marcas */
 .marcasSection {
   max-width: 1400px;
-  margin: 0 auto;
+  margin: 0 auto 30px auto;
   padding: 32px 0 0 0;
 }
 .header {
