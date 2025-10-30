@@ -1,0 +1,162 @@
+.page {
+  padding: 24px;
+}
+.container {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  max-width: 980px;
+  margin: 0 auto;
+  text-align: left;
+}
+.left {
+  flex: 1 1 60%;
+}
+.right {
+  width: 320px;
+}
+.title {
+  font-size: 20px;
+  margin-bottom: 12px;
+  color: #003b4a;
+}
+.itemsList {
+  border: 1px solid #e6e6e6;
+  padding: 12px;
+  background: #fff;
+  color: #003b4a;
+}
+.itemRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 0;
+  border-bottom: 1px solid #f0f0f0;
+  color: #003b4a;
+}
+.itemMain {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+.thumb {
+  width: 48px;
+  height: 48px;
+  object-fit: cover;
+}
+.itemInfo {
+  display: flex;
+  flex-direction: column;
+}
+.itemName {
+  font-size: 14px;
+}
+.itemQty {
+  font-size: 12px;
+  color: #666;
+}
+.itemTotal {
+  min-width: 80px;
+  text-align: right;
+}
+.summaryBox {
+  margin-top: 16px;
+  padding: 12px;
+  border: 1px solid #e6e6e6;
+  background: #fff;
+}
+.rowBetween {
+  display: flex;
+  justify-content: space-between;
+  padding: 6px 0;
+}
+
+.rowBetween span {
+  color: #003b4a;
+}
+
+.bold {
+  font-weight: 700;
+  color: #003b4a;
+}
+.rowBetweenTotal {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 8px;
+}
+.totalLabel {
+  font-weight: 700;
+  color: #003b4a;
+}
+.totalValue {
+  font-weight: 700;
+  color: #003b4a;
+}
+.paymentBox {
+  margin-top: 50px;
+  border: 1px solid #e6e6e6;
+  padding: 8px;
+  background: #fff;
+  color: #003b4a;
+}
+.radioGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin: 8px 0 12px 0;
+}
+.radioOption {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+}
+.actions {
+  margin-top: 12px;
+}
+.paymentBox input[type="radio"] {
+  /* use custom appearance so background can be fully transparent */
+  -webkit-appearance: none;
+  appearance: none;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  border: 2px solid #003b4a;
+  background-color: transparent !important;
+  margin-right: 8px;
+  vertical-align: middle;
+  position: relative;
+}
+
+.paymentBox input[type="radio"]:checked {
+  /* inner dot when checked */
+  background-image: radial-gradient(
+    circle at center,
+    #003b4a 60%,
+    transparent 61%
+  );
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: 8px 8px;
+}
+
+.radioOption {
+  background: transparent;
+}
+
+.paymentBox input[type="radio"]:focus {
+  outline: 2px solid rgba(0, 59, 74, 0.12);
+  outline-offset: 2px;
+}
+.primary {
+  background: #fc6100;
+  color: #fff;
+  border: none;
+  padding: 10px 14px;
+  border-radius: 6px;
+  cursor: pointer;
+}
+.empty {
+  padding: 16px;
+  color: #666;
+}

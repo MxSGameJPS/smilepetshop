@@ -18,6 +18,7 @@ import Devolucoes from "./components/Devolucoes/devolucoes";
 import Faq from "./components/Faq/faq";
 import Carrinho from "./components/Carrinho/carrinho";
 import Checkout from "./components/Checkout/checkout";
+import Pedido from "./components/Pedido/pedido";
 
 function Home() {
   return (
@@ -36,19 +37,24 @@ function Home() {
 function App() {
   return (
     <Router>
-      <Header />
-      <Routes>
-        <Route path="/" element={<Home />} />
-        <Route path="/contato" element={<Contato />} />
-        <Route path="/envio" element={<Envio />} />
-        <Route path="/devolucoes" element={<Devolucoes />} />
-        <Route path="/faq" element={<Faq />} />
-        <Route path="/marcas" element={<MarcasTodas />} />
-        <Route path="/produtos" element={<Produtos />} />
-        <Route path="/produtos/:id" element={<Produto />} />
-        <Route path="/carrinho" element={<Carrinho />} />
-        <Route path="/checkout" element={<Checkout />} />
-      </Routes>
+      <div className="appContent">
+        <Header />
+        <main className="mainContent">
+          <Routes>
+            <Route path="/" element={<Home />} />
+            <Route path="/contato" element={<Contato />} />
+            <Route path="/envio" element={<Envio />} />
+            <Route path="/devolucoes" element={<Devolucoes />} />
+            <Route path="/faq" element={<Faq />} />
+            <Route path="/marcas" element={<MarcasTodas />} />
+            <Route path="/produtos" element={<Produtos />} />
+            <Route path="/produtos/:id" element={<Produto />} />
+            <Route path="/carrinho" element={<Carrinho />} />
+            <Route path="/checkout" element={<Checkout />} />
+            <Route path="/pedido" element={<Pedido />} />
+          </Routes>
+        </main>
+      </div>
       <Footer />
     </Router>
   );

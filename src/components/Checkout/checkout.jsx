@@ -35,13 +35,30 @@ export default function Checkout() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const API_BASE =
-      import.meta.env.VITE_API_BASE_URL || "http://localhost:3001";
+    const ENDPOINT =
+      "https://apismilepet.vercel.app/api/checkout/billing/create";
     try {
-      const resp = await fetch(`${API_BASE}/api/checkout`, {
+      // map local camelCase form fields to API expected snake_case
+      const payload = {
+        first_name: form.firstName,
+        last_name: form.lastName,
+        company: form.company,
+        address1: form.address1,
+        numero: form.numero,
+        address2: form.address2,
+        city: form.city,
+        state: form.state,
+        postal: form.postal,
+        phone: form.phone,
+        email: form.email,
+        ship_different: !!form.shipDifferent,
+        notes: form.notes,
+      };
+
+      const resp = await fetch(ENDPOINT, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(form),
+        body: JSON.stringify(payload),
       });
       const data = await resp.json().catch(() => ({}));
       if (!resp.ok) {
@@ -55,7 +72,8 @@ export default function Checkout() {
       } catch (err) {
         console.warn("localStorage save failed", err);
       }
-      navigate("/", { replace: true });
+      // navegar para a página de confirmação do pedido
+      navigate("/pedido", { replace: true });
     } catch (err) {
       console.error(err);
       alert("Erro de conexão. Verifique se o servidor de API está rodando.");

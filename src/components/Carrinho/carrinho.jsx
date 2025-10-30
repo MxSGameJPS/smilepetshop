@@ -81,6 +81,12 @@ export default function Carrinho() {
     const simulated = 12.5; // R$ 12,50 como exemplo
     setShippingCost(simulated);
     setShippingMsg(`Frete calculado: ${moeda(simulated)}`);
+    try {
+      localStorage.setItem("smilepet_shipping", String(simulated));
+    } catch (err) {
+      // ignore localStorage failures
+      console.warn("Could not persist shipping to localStorage", err);
+    }
     setTimeout(() => setShippingMsg(""), 4000);
   };
 
