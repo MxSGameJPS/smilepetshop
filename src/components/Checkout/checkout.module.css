@@ -1,7 +1,8 @@
 .page {
   padding: 32px;
   min-height: calc(100vh - 120px);
-  background: #f9f9fb;
+  background: #ffffff;
+  margin-top: 170px;
 }
 .container {
   max-width: 980px;

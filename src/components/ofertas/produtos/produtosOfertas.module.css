@@ -14,7 +14,7 @@
   transition: color 0.2s;
 }
 .cardFavorito:hover .cardHeart {
-  color: #FFD600;
+  color: #ffd600;
 }
 
 /* Botão amarelo com + e hover */
@@ -72,13 +72,13 @@
   opacity: 0;
 }
 .cardBtn:hover .cardBtnIcon {
-  background: #FFD600;
+  background: #ffd600;
   color: #09344a;
 }
 
 /* Card layout refinado */
 .produtoCard {
-  background: #fff;
+  background: #000000;
   border-radius: 16px;
   box-shadow: 0 2px 12px rgba(9, 52, 74, 0.07);
   padding: 24px 18px 18px 18px;
@@ -106,7 +106,7 @@
 }
 .produtoPreco {
   font-size: 1.15rem;
-  color: #09344a;
+  color: #ffffff;
   text-align: center;
   font-weight: 700;
   margin-bottom: 8px;
@@ -114,13 +114,14 @@
 .produtosContainer {
   display: flex;
   flex-direction: column;
-  max-width: 1900px;
-  margin-top: 170px;
+  align-items: center;
+  max-width: 1400px;
+  margin: 0 auto;
 }
 
 .filtrosTitulo {
   font-size: 30px;
-  color: #09344a;
+  color: #ffffff;
   text-align: left;
 }
 
@@ -199,7 +200,7 @@
 .filtroLista input[type="checkbox"],
 .filtroSublista input[type="checkbox"] {
   background: transparent !important;
-  border: 2px solid #09344a;
+  border: 2px solid #ffffff;
   width: 18px;
   height: 18px;
   border-radius: 4px;
@@ -241,12 +242,12 @@
   justify-content: space-between;
   font-weight: 700;
   font-size: 1.08rem;
-  color: #09344a;
+  color: #ffffff;
   margin-bottom: 8px;
 }
 .filtroSeta {
   font-size: 1.1rem;
-  color: #09344a;
+  color: #ffffff;
   margin-left: 8px;
 }
 .precoFaixa {
@@ -262,7 +263,7 @@
 }
 .precoLabel {
   font-size: 1rem;
-  color: #09344a;
+  color: #ffffff;
   font-weight: 600;
 }
 .filtroLista {
@@ -270,10 +271,10 @@
   padding: 0;
   margin: 0;
 }
-.filtroLista > li {
+.filtroLista  li {
   margin-bottom: 6px;
   font-size: 1rem;
-  color: #09344a;
+  color: #ffffff;
   font-weight: 500;
 }
 .filtroSublista {
@@ -285,9 +286,9 @@
   display: flex;
   margin: 0 auto;
   min-height: 100vh;
-  background: #fff;
-  padding: 8px 0 0 0;
-  max-width: 1600px;
+  background: #000000;
+  padding: 8px 0 0 78px;
+  max-width: 1400px;
   width: 100%;
 }
 
@@ -301,7 +302,7 @@
 .produtosSection .filtroLista li {
   margin-bottom: 6px;
   font-size: 1rem;
-  color: #09344a;
+  color: #ffffff;
 }
 .produtosSection .limparBtn {
   background: #fc6100;

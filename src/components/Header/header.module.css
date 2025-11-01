@@ -26,7 +26,7 @@
 }
 .header {
   width: 100%;
-  background: #ff7f3f;
+  background: #FC6100;
   border-bottom: 1px solid #f2f2f2;
   display: block;
   /* ensure header is visible and stays on top of content */
@@ -67,7 +67,7 @@
 }
 
 .headerBottom {
-  background: #fff;
+  background: #fff3e6;
 }
 
 .searchCenter {
@@ -110,7 +110,7 @@
   margin: 0 auto;
   padding: 12px;
   text-align: center;
-  background: #fff;
+  background: #f1f1f1;
 }
 
 .nav {

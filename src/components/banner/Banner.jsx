@@ -1,5 +1,6 @@
 import styles from "./banner.module.css";
 import { useEffect, useRef, useState } from "react";
+import { TiChevronLeftOutline, TiChevronRightOutline } from "react-icons/ti";
 
 export default function Banner() {
   const slides = ["/banners/banner3.png", "/banners/banner5.png"];
@@ -62,14 +63,14 @@ export default function Banner() {
           onClick={prev}
           aria-label="Anterior"
         >
-          ‹
+         <TiChevronLeftOutline />
         </button>
         <button
           className={`${styles.arrow} ${styles.right}`}
           onClick={next}
           aria-label="Próximo"
         >
-          ›
+         <TiChevronRightOutline />
         </button>
       </div>
       <div className={styles.dots}>

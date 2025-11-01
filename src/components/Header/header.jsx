@@ -22,14 +22,14 @@ export default function Header() {
   const submenuCategoryMapCachorro = {
     "Ração Seca": ["Ração para Cachorro"],
     "Ração Úmida": ["Ração Úmida para Cães"],
-    Petiscos: ["Petiscos Dog"],
+    "Petiscos": ["Petiscos Dog"],
     "Higiene e Cuidados": ["Higiene e Cuidados para Cães"],
   };
 
   const submenuCategoryMapGato = {
     "Ração Seca": ["Ração para Gatos"],
     "Ração Úmida": ["Ração Úmida para Gatos"],
-    Petiscos: ["Petiscos Cat"],
+    "Petiscos": ["Petiscos Cat"],
     "Higiene e Cuidados": ["Higiene e Cuidados para Gatos"],
   };
 

@@ -2,6 +2,7 @@
   padding: 32px;
   background: #f9f9fb;
   min-height: calc(100vh - 120px);
+  margin-top: 170px;
 }
 .container {
   max-width: 1200px;

@@ -1,0 +1,48 @@
+.header {
+  width: 100%;
+  color: #ffffff;
+  /* keep the ofertas header above the hero */
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 1200;
+}
+
+.inner {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 18px 28px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.logo {
+  height: 56px;
+  width: auto;
+}
+
+.backLink {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  color: #ffffff;
+  text-decoration: none;
+  font-weight: 700;
+}
+
+.backLink:hover {
+  opacity: 0.9;
+}
+
+.homeIcon {
+  color: #ffffff;
+  width: 20px;
+  height: 20px;
+}
+
+.rightArea {
+  display: flex;
+  align-items: center;
+}

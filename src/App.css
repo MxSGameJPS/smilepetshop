@@ -12,9 +12,7 @@
 }
 .mainContent {
   flex: 1 1 auto;
-  /* reserve space for the sticky header so content does not sit under it
-     Adjust this value if your header height changes. */
-  padding-top: 140px;
+
 }
 
 .logo {

@@ -1,0 +1,26 @@
+/* Hero for ofertas page - uses banner image as background */
+.hero {
+  background-image: url("/blackfridy/bannerHero.png");
+  background-size: cover;
+  background-repeat: no-repeat;
+  background-position: center center;
+  min-height: 990px;
+  display: flex;
+  align-items: center;
+  color: #ffffff;
+  margin: 0;
+  padding: 0;
+}
+
+.inner {
+  width: 100%;
+}
+
+@media (max-width: 900px) {
+  .hero {
+    min-height: 360px;
+  }
+  .title {
+    font-size: 1.6rem;
+  }
+}

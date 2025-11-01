@@ -2,7 +2,12 @@ import Produtos from "./components/Produtos/produtos";
 import Produto from "./components/Produtos/produto";
 import MarcasTodas from "./components/MarcasTodas/marcastodas";
 import "./App.css";
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import {
+  BrowserRouter as Router,
+  Routes,
+  Route,
+  useLocation,
+} from "react-router-dom";
 import Avaliacao from "./components/Avaliacao/avaliacao";
 import Banner from "./components/banner/Banner";
 import BannerMeio from "./components/BannerMeio/BannerMeio";
@@ -19,6 +24,7 @@ import Faq from "./components/Faq/faq";
 import Carrinho from "./components/Carrinho/carrinho";
 import Checkout from "./components/Checkout/checkout";
 import Pedido from "./components/Pedido/pedido";
+import Ofertas from "./components/ofertas/ofertas";
 
 function Home() {
   return (
@@ -34,10 +40,17 @@ function Home() {
   );
 }
 
+function HeaderConditional() {
+  const location = useLocation();
+  // hide the global header on the ofertas page
+  if (location && location.pathname === "/ofertas") return null;
+  return <Header />;
+}
+
 function App() {
   return (
     <Router>
-      <Header />
+      <HeaderConditional />
       <div className="appContent">
         <main className="mainContent">
           <Routes>
@@ -47,6 +60,7 @@ function App() {
             <Route path="/devolucoes" element={<Devolucoes />} />
             <Route path="/faq" element={<Faq />} />
             <Route path="/marcas" element={<MarcasTodas />} />
+            <Route path="/ofertas" element={<Ofertas />} />
             <Route path="/produtos" element={<Produtos />} />
             <Route path="/produtos/:id" element={<Produto />} />
             <Route path="/carrinho" element={<Carrinho />} />
