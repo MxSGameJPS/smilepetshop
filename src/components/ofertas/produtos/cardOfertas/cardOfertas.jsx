@@ -4,24 +4,28 @@ import { MdOutlineShoppingCartCheckout } from "react-icons/md";
 import { PiDog } from "react-icons/pi";
 import { useNavigate } from "react-router-dom";
 
+// Promo termina em 28 de novembro de 2025 às 23:59 no fuso de Brasília
+const GLOBAL_PROMO_END = new Date("2025-11-30T23:59:59-03:00").getTime();
+
 export default function CardOfertas({ product }) {
   const { id, nome, imagem_url, preco } = product || {};
   const navigate = useNavigate();
 
-  // default promo end: 29d 12:50:50 from now
-  const promoDurationMs = useMemo(() => {
-    const days = 29;
-    const hours = 12;
-    const mins = 50;
-    const secs = 50;
-    return ((days * 24 + hours) * 60 * 60 + mins * 60 + secs) * 1000;
-  }, []);
+  const promoEnd = useMemo(() => {
+    if (product && product.promoFim) {
+      const parsed = new Date(product.promoFim).getTime();
+      if (!Number.isNaN(parsed)) return parsed;
+    }
+    return GLOBAL_PROMO_END;
+  }, [product]);
 
-  const promoEnd = useMemo(
-    () => Date.now() + promoDurationMs,
-    [promoDurationMs]
+  const [remaining, setRemaining] = useState(() =>
+    Math.max(0, promoEnd - Date.now())
   );
-  const [remaining, setRemaining] = useState(promoEnd - Date.now());
+
+  useEffect(() => {
+    setRemaining(Math.max(0, promoEnd - Date.now()));
+  }, [promoEnd]);
 
   useEffect(() => {
     const t = setInterval(() => {
