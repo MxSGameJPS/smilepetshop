@@ -12,7 +12,9 @@ export default function Ofertas() {
       <main className={styles.content}>
         <HeroOfertas />
         <SobreOfertas />
-        <ProdutosOfertas />
+        <div className={styles.produtosContainer}>
+          <ProdutosOfertas />
+        </div>
 
         {/* restante da página de ofertas pode ser implementado aqui */}
       </main>

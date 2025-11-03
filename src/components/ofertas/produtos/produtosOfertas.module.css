@@ -1,376 +1,60 @@
-/* Card Favorito (coração) */
-.cardFavorito {
-  position: absolute;
-  top: 16px;
-  right: 16px;
-  background: none;
-  border: none;
-  cursor: pointer;
-  z-index: 2;
-}
-.cardHeart {
-  font-size: 1.4rem;
-  color: #09344a;
-  transition: color 0.2s;
-}
-.cardFavorito:hover .cardHeart {
-  color: #ffd600;
-}
-
-/* Botão amarelo com + e hover */
-.cardBtn {
-  width: 90%;
-  margin: 0 auto;
-  margin-top: 18px;
-  background: #fc6100;
-  color: #ffffff;
-  border: none;
-  border-radius: 8px;
-  font-weight: 700;
-  font-size: 1rem;
-  padding: 12px 0;
+.produtosOfertas {
   display: flex;
-  align-items: center;
+  gap: 16px;
   justify-content: center;
-  gap: 8px;
-  cursor: pointer;
-  position: relative;
-  transition: background 0.2s;
-  overflow: hidden;
-}
-.cardBtnIcon {
-  color: #ffffff;
-  font-size: 1.2rem;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-weight: bold;
-  margin-left: 8px;
-}
-
-.cardBtnHover {
-  position: absolute;
-  left: 0;
-  right: 0;
-  top: 0;
-  bottom: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: #fafafa;
-  font-weight: 700;
-  font-size: 1rem;
-  opacity: 0;
-  transition: opacity 0.2s;
-  background: #fc6100;
-  border-radius: 8px;
-}
-.cardBtn:hover .cardBtnHover {
-  opacity: 1;
-}
-.cardBtn:hover .cardBtnText {
-  opacity: 0;
-}
-.cardBtn:hover .cardBtnIcon {
-  background: #ffd600;
-  color: #09344a;
-}
-
-/* Card layout refinado */
-.produtoCard {
-  background: #000000;
-  border-radius: 16px;
-  box-shadow: 0 2px 12px rgba(9, 52, 74, 0.07);
-  padding: 24px 18px 18px 18px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  position: relative;
-  min-height: 340px;
-  max-width: 260px;
-  margin: 0 auto;
-}
-.produtoImg {
-  max-width: 120px;
-  max-height: 120px;
-  margin-bottom: 18px;
-  object-fit: contain;
-  display: block;
-}
-.produtoNome {
-  font-size: 1.08rem;
-  font-weight: 700;
-  color: #09344a;
-  margin-bottom: 10px;
-  text-align: center;
-}
-.produtoPreco {
-  font-size: 1.15rem;
-  color: #ffffff;
-  text-align: center;
-  font-weight: 700;
-  margin-bottom: 8px;
-}
-.produtosContainer {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
+  padding: 20px;
+  flex-wrap: wrap;
   max-width: 1400px;
-  margin: 0 auto;
+  text-align: center;
+  flex-direction: column;
+
+  @media (max-width: 760px) {
+    padding: 10px;
+  }
 }
 
-.filtrosTitulo {
-  font-size: 30px;
+.produtosGrid {
+  display: flex;
+  gap: 16px;
+  justify-content: center;
+  flex-wrap: wrap;
+
+  @media (max-width: 760px) {
+    gap: 10px;
+  }
+}
+
+.produtosHeader {
+  margin-bottom: 24px;
+
+  @media (max-width: 760px) {
+    margin-bottom: 16px;
+  }
+}
+
+h1 {
+  font-size: 4.5rem;
   color: #ffffff;
-  text-align: left;
+  font-family: "Montserrat", Arial, sans-serif;
+  font-weight: 800;
+  margin-bottom: 8px;
+
+  @media (max-width: 760px) {
+    font-size: 2.5rem;
+  }
 }
 
-.filtroPreco input[type="range"] {
-  width: 140px;
-  height: 6px;
-  background: transparent;
-  border-radius: 4px;
-  outline: none;
-  margin-right: 16px;
-  box-shadow: none;
-  appearance: none;
-}
-
-.filtroPreco input[type="range"]::-webkit-slider-runnable-track {
-  height: 6px;
-  background: #393939;
-  border-radius: 4px;
-}
-.filtroPreco input[type="range"]::-webkit-slider-thumb {
-  width: 18px;
-  height: 18px;
-  background: #ffd600;
-  border-radius: 50%;
-  border: none;
-  box-shadow: 0 0 2px #39393933;
-  cursor: pointer;
-  margin-top: -6px;
-  appearance: none;
-}
-.filtroPreco input[type="range"]:focus::-webkit-slider-thumb {
-  outline: 2px solid #ffd600;
-}
-
-/* Firefox */
-.filtroPreco input[type="range"]::-moz-range-thumb {
-  width: 18px;
-  height: 18px;
-  background: #ffd600;
-  border-radius: 50%;
-  border: none;
-  box-shadow: 0 0 2px #39393933;
-  cursor: pointer;
-}
-.filtroPreco input[type="range"]::-moz-range-track {
-  height: 6px;
-  background: #393939;
-  border-radius: 4px;
-}
-.filtroPreco input[type="range"]::-ms-fill-lower {
-  background: #393939;
-  border-radius: 4px;
-}
-
-/* Edge */
-.filtroPreco input[type="range"]::-ms-fill-lower {
-  background: #393939;
-  border-radius: 4px;
-}
-.filtroPreco input[type="range"]::-ms-fill-upper {
-  background: #393939;
-  border-radius: 4px;
-}
-.filtroPreco input[type="range"]::-ms-thumb {
-  width: 18px;
-  height: 18px;
-  background: #ffd600;
-  border-radius: 50%;
-  border: none;
-  box-shadow: 0 0 2px #39393933;
-  cursor: pointer;
-}
-.filtroPreco input[type="range"] {
-  background: transparent;
-}
-.filtroLista input[type="checkbox"],
-.filtroSublista input[type="checkbox"] {
-  background: transparent !important;
-  border: 2px solid #ffffff;
-  width: 18px;
-  height: 18px;
-  border-radius: 4px;
-  margin-right: 8px;
-  box-shadow: none;
-  appearance: none;
-  outline: none;
-  cursor: pointer;
-}
-
-.filtroLista input[type="checkbox"]:checked,
-.filtroSublista input[type="checkbox"]:checked {
-  background: #ffd600 !important;
-  border: 2px solid #09344a;
-}
-.limparTudoBtn {
-  background: none;
+h1 span {
   color: #fc6100;
-  border: none;
-  font-weight: 700;
-  font-size: 1rem;
-  cursor: pointer;
-  margin-bottom: 8px;
-  text-decoration: underline;
-  padding: 0;
 }
-.divisor {
-  width: 100%;
-  height: 1.5px;
-  background: #eee;
-  margin: 16px 0;
-}
-.filtroGrupo {
-  margin-bottom: 0;
-}
-.filtroHeader {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  font-weight: 700;
-  font-size: 1.08rem;
+
+p {
+  font-size: 1.5rem;
   color: #ffffff;
-  margin-bottom: 8px;
-}
-.filtroSeta {
-  font-size: 1.1rem;
-  color: #ffffff;
-  margin-left: 8px;
-}
-.precoFaixa {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  margin-bottom: 8px;
-}
-.precoRange {
-  accent-color: #ffd600;
-  width: 120px;
-  margin-right: 8px;
-}
-.precoLabel {
-  font-size: 1rem;
-  color: #ffffff;
-  font-weight: 600;
-}
-.filtroLista {
-  list-style: none;
-  padding: 0;
-  margin: 0;
-}
-.filtroLista  li {
-  margin-bottom: 6px;
-  font-size: 1rem;
-  color: #ffffff;
+  font-family: "Inter", "Montserrat", Arial, sans-serif;
   font-weight: 500;
-}
-.filtroSublista {
-  list-style: none;
-  padding-left: 18px;
-  margin: 4px 0 0 0;
-}
-.produtosSection {
-  display: flex;
-  margin: 0 auto;
-  min-height: 100vh;
-  background: #000000;
-  padding: 8px 0 0 78px;
-  max-width: 1400px;
-  width: 100%;
-}
 
-/* Flattened selectors for produtosSection children (was nested) */
-.produtosSection .filtroLista {
-  list-style: none;
-  padding: 0;
-  margin: 0;
-  text-align: left;
-}
-.produtosSection .filtroLista li {
-  margin-bottom: 6px;
-  font-size: 1rem;
-  color: #ffffff;
-}
-.produtosSection .limparBtn {
-  background: #fc6100;
-  color: #fff;
-  border: none;
-  border-radius: 8px;
-  padding: 8px 18px;
-  font-weight: 700;
-  cursor: pointer;
-  margin-top: 12px;
-  transition: background 0.2s;
-}
-.produtosSection .limparBtn:hover {
-  background: #ff7f3f;
-}
-.produtosSection .produtosGrid {
-  flex: 1;
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-  gap: 32px;
-  padding: 32px 48px;
-}
-.produtosSection .produtoCard {
-  background: #f7f8f8;
-  border-radius: 16px;
-  box-shadow: 0 2px 12px rgba(9, 52, 74, 0.07);
-  padding: 24px 18px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  transition: box-shadow 0.2s;
-}
-.produtosSection .produtoCard:hover {
-  box-shadow: 0 4px 24px rgba(9, 52, 74, 0.12);
-}
-.produtosSection .produtoImg {
-  max-width: 120px;
-  max-height: 120px;
-  margin-bottom: 18px;
-  object-fit: contain;
-}
-.produtosSection .produtoNome {
-  font-size: 1.08rem;
-  font-weight: 700;
-  color: #09344a;
-  margin-bottom: 10px;
-  text-align: center;
-}
-.produtosSection .produtoPreco {
-  font-size: 1rem;
-  color: #09344a;
-  text-align: center;
-  font-weight: 600;
-}
-
-@media (max-width: 900px) {
-  .produtosSection {
-    flex-direction: column;
-    padding: 24px 0 0 0;
-  }
-  .produtosSection .filtrosAside {
-    width: 100%;
-    border-right: none;
-    border-bottom: 1.5px solid #eee;
-    padding: 18px 12px;
-  }
-  .produtosSection .produtosGrid {
-    padding: 18px 12px;
-    gap: 18px;
+  @media (max-width: 760px) {
+    font-size: 1rem;
   }
 }

@@ -4,24 +4,26 @@
   background: #000000;
   color: #ffffff;
   padding: 0;
+  text-align: center;
+
 }
 
 .content {
   padding: 0;
+  text-align: center;
 }
 
-.hero {
-  padding: 40px 0;
-  text-align: left;
+.produtosContainer {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 20px 0;
+
+  @media (max-width: 760px) {
+    padding: 10px 0;
+  }
 }
 
-.title {
-  font-size: 2.2rem;
-  margin: 0 0 12px 0;
-  color: #ffffff;
-}
 
-.subtitle {
-  color: #d6d6d6;
-  margin: 0;
-}
+
+
+
