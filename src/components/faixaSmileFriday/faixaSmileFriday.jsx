@@ -33,6 +33,36 @@ export default function FaixaSmileFriday() {
           {texto}
           {texto}
           {texto}
+          {texto}
+          {texto}
+          {texto}
+          {texto}
+          {texto}
+          {texto}
+          {texto}
+          {texto}
+          {texto}
+          {texto}
+          {texto}
+          {texto}
+          {texto}
+          {texto}
+          {texto}
+          {texto}
+          {texto}
+          {texto}
+          {texto}
+          {texto}
+          {texto}
+          {texto}
+          {texto}
+          {texto}
+          {texto}
+          {texto}
+          {texto}
+          {texto}
+          {texto}
+          {texto}
         </div>
       </div>
     </div>
