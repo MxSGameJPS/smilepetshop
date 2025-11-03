@@ -257,6 +257,90 @@
   font-weight: 700;
 }
 
+.compreTambemSection {
+  max-width: 1200px;
+  margin: 48px auto 0 auto;
+  padding: 32px 0 16px 0;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.compreTambemTitle {
+  font-size: 1.8rem;
+  font-weight: 900;
+  color: #073b4c;
+}
+
+.compreTambemMensagem {
+  color: #073b4c;
+  font-weight: 600;
+}
+
+.compreTambemGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 20px;
+}
+
+.compreTambemCard {
+  background: #fff;
+  border: 1px solid #eee;
+  border-radius: 14px;
+  padding: 18px;
+  box-shadow: 0 4px 12px rgba(7, 59, 76, 0.08);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+}
+
+.compreTambemLink {
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  text-decoration: none;
+  color: #073b4c;
+  text-align: center;
+}
+
+.compreTambemImg {
+  width: 140px;
+  height: 140px;
+  object-fit: contain;
+}
+
+.compreTambemNome {
+  font-weight: 700;
+  font-size: 1rem;
+}
+
+.compreTambemPreco {
+  font-weight: 900;
+  color: #fc6100;
+  font-size: 1.1rem;
+}
+
+.compreTambemBtn {
+  background: #fc6100;
+  color: #fff;
+  border: none;
+  border-radius: 999px;
+  padding: 10px 24px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.compreTambemBtn:hover {
+  background: #e25500;
+}
+
 /* High-specificity input overrides to counter global/user-agent styles (e.g. gray autofill) */
 /* Targets inputs inside this page/container to avoid global side-effects */
 .page .container input,

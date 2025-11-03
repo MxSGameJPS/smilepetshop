@@ -25,12 +25,62 @@ export default function Carrinho() {
   const [cep, setCep] = useState("");
   const [shippingCost, setShippingCost] = useState(0);
   const [shippingMsg, setShippingMsg] = useState("");
+  const [sugestoes, setSugestoes] = useState([]);
+  const [carregandoSugestoes, setCarregandoSugestoes] = useState(true);
+  const [erroSugestoes, setErroSugestoes] = useState("");
   const navigate = useNavigate();
 
   useEffect(() => {
     const handler = () => setCart(getCart());
     window.addEventListener("smilepet_cart_update", handler);
     return () => window.removeEventListener("smilepet_cart_update", handler);
+  }, []);
+
+  useEffect(() => {
+    let ativo = true;
+
+    const extrairLista = (payload) => {
+      if (Array.isArray(payload)) return payload;
+      if (payload && typeof payload === "object") {
+        const chaves = ["data", "produtos", "items", "lista", "results"];
+        for (const chave of chaves) {
+          const valor = payload[chave];
+          if (Array.isArray(valor)) return valor;
+        }
+      }
+      return [];
+    };
+
+    async function buscarSugestoes() {
+      try {
+        setCarregandoSugestoes(true);
+        setErroSugestoes("");
+        const resposta = await fetch(
+          "https://apismilepet.vercel.app/api/produtos"
+        );
+        if (!resposta.ok) throw new Error(`HTTP ${resposta.status}`);
+        const dados = await resposta.json();
+        const lista = extrairLista(dados);
+        const normalizados = lista.map((p) => ({
+          ...p,
+          id: p.id || p._id || p.uid || p.slug,
+        }));
+        if (ativo) setSugestoes(normalizados.slice(0, 4));
+      } catch (err) {
+        if (ativo) {
+          console.warn("Falha ao buscar produtos para 'Compre também'", err);
+          setSugestoes([]);
+          setErroSugestoes("Não foi possível carregar sugestões agora.");
+        }
+      } finally {
+        if (ativo) setCarregandoSugestoes(false);
+      }
+    }
+
+    buscarSugestoes();
+    return () => {
+      ativo = false;
+    };
   }, []);
 
   const handleQtyChange = (item, value) => {
@@ -215,6 +265,59 @@ export default function Carrinho() {
           </div>
         </aside>
       </div>
+
+      <section className={styles.compreTambemSection}>
+        <h2 className={styles.compreTambemTitle}>Compre também...</h2>
+        {carregandoSugestoes ? (
+          <div className={styles.compreTambemMensagem}>
+            Carregando sugestões...
+          </div>
+        ) : erroSugestoes ? (
+          <div className={styles.compreTambemMensagem}>{erroSugestoes}</div>
+        ) : sugestoes.length === 0 ? (
+          <div className={styles.compreTambemMensagem}>
+            Não encontramos sugestões no momento.
+          </div>
+        ) : (
+          <div className={styles.compreTambemGrid}>
+            {sugestoes.map((produto) => {
+              const idProduto =
+                produto.id || produto._id || produto.uid || produto.slug;
+              return (
+                <article
+                  key={idProduto || produto.nome}
+                  className={styles.compreTambemCard}
+                >
+                  <button
+                    type="button"
+                    className={styles.compreTambemLink}
+                    onClick={() => navigate(`/produtos/${idProduto}`)}
+                  >
+                    <img
+                      src={produto.imagem_url || "/imgCards/RacaoSeca.png"}
+                      alt={produto.nome}
+                      className={styles.compreTambemImg}
+                    />
+                    <span className={styles.compreTambemNome}>
+                      {produto.nome}
+                    </span>
+                  </button>
+                  <div className={styles.compreTambemPreco}>
+                    {moeda(produto.preco_promocional || produto.preco)}
+                  </div>
+                  <button
+                    type="button"
+                    className={styles.compreTambemBtn}
+                    onClick={() => navigate(`/produtos/${idProduto}`)}
+                  >
+                    Ver produto
+                  </button>
+                </article>
+              );
+            })}
+          </div>
+        )}
+      </section>
     </div>
   );
 }

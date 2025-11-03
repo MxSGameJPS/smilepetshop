@@ -1,17 +1,17 @@
 import styles from "./banner.module.css";
 import { useEffect, useRef, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { TiChevronLeftOutline, TiChevronRightOutline } from "react-icons/ti";
 
 export default function Banner() {
   const slides = ["/banners/banner3.png", "/banners/banner5.png"];
-
-  const DELAY = 7000; // 7 seconds
+  const DELAY = 5000; // 5 seconds
   const [index, setIndex] = useState(0);
   const [paused, setPaused] = useState(false);
   const timerRef = useRef(null);
+  const navigate = useNavigate();
 
   useEffect(() => {
-    // clear any existing
     if (timerRef.current) clearInterval(timerRef.current);
     if (!paused) {
       timerRef.current = setInterval(() => {
@@ -35,6 +35,12 @@ export default function Banner() {
     goTo(index - 1);
   }
 
+  function handleBannerClick(i) {
+    if (slides[i] === "/banners/banner5.png") {
+      navigate("/ofertas");
+    }
+  }
+
   return (
     <div className={styles.bannerWrapper}>
       <div
@@ -48,6 +54,10 @@ export default function Banner() {
               key={src}
               className={`${styles.slide} ${i === index ? styles.active : ""}`}
               aria-hidden={i !== index}
+              onClick={() => handleBannerClick(i)}
+              style={
+                src === "/banners/banner5.png" ? { cursor: "pointer" } : {}
+              }
             >
               <img
                 src={src}
@@ -63,14 +73,14 @@ export default function Banner() {
           onClick={prev}
           aria-label="Anterior"
         >
-         <TiChevronLeftOutline />
+          <TiChevronLeftOutline />
         </button>
         <button
           className={`${styles.arrow} ${styles.right}`}
           onClick={next}
           aria-label="Próximo"
         >
-         <TiChevronRightOutline />
+          <TiChevronRightOutline />
         </button>
       </div>
       <div className={styles.dots}>
