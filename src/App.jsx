@@ -28,10 +28,12 @@ import Ofertas from "./components/ofertas/ofertas";
 import Atacado from "./components/Atacado/atacado";
 import LoginAtacado from "./components/Atacado/loginAtacado/loginAtacado";
 import CadastroAtacado from "./components/Atacado/cadastroAtacado/cadastroAtacado";
+import FaixaSmileFriday from "./components/faixaSmileFriday/faixaSmileFriday";
 
 function Home() {
   return (
     <>
+      <FaixaSmileFriday />
       <Banner />
       <Faixa />
       <Cards />
