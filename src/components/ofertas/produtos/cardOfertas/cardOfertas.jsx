@@ -1,11 +1,12 @@
 import React, { useEffect, useMemo, useState } from "react";
 import styles from "./cardOfertas.module.css";
 import { MdOutlineShoppingCartCheckout } from "react-icons/md";
-import { addToCart } from "../../../../lib/cart";
 import { PiDog } from "react-icons/pi";
+import { useNavigate } from "react-router-dom";
 
 export default function CardOfertas({ product }) {
   const { id, nome, imagem_url, preco } = product || {};
+  const navigate = useNavigate();
 
   // default promo end: 29d 12:50:50 from now
   const promoDurationMs = useMemo(() => {
@@ -41,19 +42,32 @@ export default function CardOfertas({ product }) {
     )} : ${String(mins).padStart(2, "0")} : ${String(secs).padStart(2, "0")}`;
   }
 
-  function handleAdd(e) {
+  function goToProduct() {
+    if (!id) return;
+    navigate(`/produtos/${id}`);
+  }
+
+  function handleButtonClick(e) {
     e.stopPropagation();
-    addToCart({
-      id,
-      nome,
-      quantidade: 1,
-      precoUnit: preco != null ? Number(preco) : null,
-      imagem_url,
-    });
+    goToProduct();
+  }
+
+  function handleKeyDown(e) {
+    if (e.key === "Enter" || e.key === " ") {
+      e.preventDefault();
+      goToProduct();
+    }
   }
 
   return (
-    <div className={styles.card}>
+    <div
+      className={styles.card}
+      onClick={goToProduct}
+      onKeyDown={handleKeyDown}
+      role="button"
+      tabIndex={0}
+      aria-label={`Ver detalhes de ${nome}`}
+    >
       <div className={styles.topTag}>SMILEFRIDAY</div>
 
       <div className={styles.hero}>
@@ -82,7 +96,7 @@ export default function CardOfertas({ product }) {
         <button
           type="button"
           className={styles.promoButton}
-          onClick={handleAdd}
+          onClick={handleButtonClick}
           aria-label={`Comprar ${nome}`}
         >
           <div className={styles.defaultState}>

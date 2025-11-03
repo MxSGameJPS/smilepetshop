@@ -8,6 +8,12 @@
   flex-direction: column;
   align-items: stretch;
   width: 250px;
+  cursor: pointer;
+
+  &:focus-visible {
+    outline: 2px solid #ff6600;
+    outline-offset: 4px;
+  }
 
   @media (max-width: 760px) {
     width: 150px;
