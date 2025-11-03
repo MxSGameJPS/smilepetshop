@@ -1,0 +1,95 @@
+/* Fundo da tela de cadastro atacado */
+.bgCadastroAtacado {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #fff 60%, #ffe5d1 100%);
+  margin-top: 180px;
+}
+
+.cardCadastroAtacado {
+  background: rgba(255, 255, 255, 0.92);
+  border: 2px solid #fc6100;
+  border-radius: 18px;
+  box-shadow: 0 4px 24px rgba(252, 97, 0, 0.08);
+  padding: 36px 32px 28px 32px;
+  max-width: 1400px;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.titulo {
+  font-size: 1.7rem;
+  font-weight: 900;
+  color: #fc6100;
+  margin-bottom: 18px;
+  text-align: center;
+}
+
+.gridForm {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 18px 24px;
+  width: 100%;
+  margin-bottom: 18px;
+}
+.inputGroup {
+  display: flex;
+  flex-direction: column;
+}
+.inputGroup label {
+  font-weight: 700;
+  color: #222;
+  margin-bottom: 6px;
+}
+.inputGroup input {
+  padding: 10px 12px;
+  border-radius: 7px;
+  border: 1.5px solid #ccc;
+  font-size: 1rem;
+  outline: none;
+  transition: border 0.2s;
+  background: transparent !important;
+  color: #222;
+}
+.inputGroup input:focus {
+  border-color: #fc6100;
+}
+.erro {
+  color: #e25500;
+  font-size: 0.95rem;
+  margin-top: 4px;
+}
+.btnCadastrar {
+  background: #fc6100;
+  color: #fff;
+  font-weight: 800;
+  font-size: 1rem;
+  border: none;
+  border-radius: 8px;
+  padding: 12px 24px;
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(252, 97, 0, 0.08);
+  margin-top: 8px;
+  width: 100%;
+  transition: background 0.2s;
+}
+.btnCadastrar:hover {
+  background: #e25500;
+}
+.sucesso {
+  color: #0074d9;
+  font-weight: 700;
+  margin-top: 16px;
+  text-align: center;
+}
+
+.info {
+  font-size: 1rem;
+  color: #444;
+  margin-top: 12px;
+  text-align: center;
+}

@@ -25,6 +25,9 @@ import Carrinho from "./components/Carrinho/carrinho";
 import Checkout from "./components/Checkout/checkout";
 import Pedido from "./components/Pedido/pedido";
 import Ofertas from "./components/ofertas/ofertas";
+import Atacado from "./components/Atacado/atacado";
+import LoginAtacado from "./components/Atacado/loginAtacado/loginAtacado";
+import CadastroAtacado from "./components/Atacado/cadastroAtacado/cadastroAtacado";
 
 function Home() {
   return (
@@ -66,6 +69,9 @@ function App() {
             <Route path="/carrinho" element={<Carrinho />} />
             <Route path="/checkout" element={<Checkout />} />
             <Route path="/pedido" element={<Pedido />} />
+            <Route path="/atacado" element={<Atacado />} />
+            <Route path="/loginatacado" element={<LoginAtacado />} />
+            <Route path="/cadastroatacado" element={<CadastroAtacado />} />
           </Routes>
         </main>
       </div>

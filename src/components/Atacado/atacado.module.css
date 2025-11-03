@@ -1,0 +1,83 @@
+/* Fundo da tela atacado */
+.atacadoBg {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #fff 60%, #ffe5d1 100%);
+}
+
+/* Card centralizado transparente com borda laranja */
+.cardAtacado {
+  background: rgba(255, 255, 255, 0.85);
+  border: 2px solid #fc6100;
+  border-radius: 18px;
+  box-shadow: 0 4px 24px rgba(252, 97, 0, 0.08);
+  padding: 40px 32px 32px 32px;
+  max-width: 420px;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.titulo {
+  font-size: 2rem;
+  font-weight: 900;
+  color: #fc6100;
+  margin-bottom: 12px;
+  text-align: center;
+}
+
+.subtitulo {
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: #222;
+  margin-bottom: 18px;
+  text-align: center;
+}
+
+.info {
+  font-size: 1rem;
+  color: #444;
+  margin-bottom: 28px;
+  text-align: center;
+}
+
+.botoes {
+  display: flex;
+  gap: 18px;
+  justify-content: center;
+}
+
+.btnLaranja {
+  background: #fc6100;
+  color: #fff;
+  font-weight: 800;
+  font-size: 1rem;
+  border: none;
+  border-radius: 8px;
+  padding: 12px 24px;
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(252, 97, 0, 0.08);
+  transition: background 0.2s;
+}
+.btnLaranja:hover {
+  background: #e25500;
+}
+
+.btnAzul {
+  background: #0074d9;
+  color: #fff;
+  font-weight: 800;
+  font-size: 1rem;
+  border: none;
+  border-radius: 8px;
+  padding: 12px 24px;
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(0, 116, 217, 0.08);
+  transition: background 0.2s;
+}
+.btnAzul:hover {
+  background: #005fa3;
+}
