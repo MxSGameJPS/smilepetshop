@@ -22,7 +22,7 @@
 
 .topTag {
   align-self: flex-start;
-  background: #fc6100;
+  background: linear-gradient(90deg, #fc6100 0%, #111 100%);
   color: #fff;
   padding: 6px 8px;
   border-radius: 6px;
@@ -141,7 +141,7 @@
 
 .iconWrapper {
   flex: 0 0 24%;
-  background: #ff6600;
+  background: linear-gradient(90deg, #fc6100 0%, #111 100%);
   color: #fff;
   display: flex;
   align-items: center;
@@ -198,7 +198,7 @@
   justify-content: center;
   gap: 10px;
   color: #fff;
-  background: #ff6600;
+  background: linear-gradient(90deg, #fc6100 0%, #111 100%);
   opacity: 0;
   visibility: hidden;
   transition: opacity 0.2s ease, visibility 0.2s ease;

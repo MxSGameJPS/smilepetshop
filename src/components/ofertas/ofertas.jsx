@@ -11,7 +11,7 @@ export default function Ofertas() {
       <HeaderOfertas />
       <main className={styles.content}>
         <HeroOfertas />
-        <SobreOfertas />
+        {/* <SobreOfertas /> */}
         <div className={styles.produtosContainer}>
           <ProdutosOfertas />
         </div>
