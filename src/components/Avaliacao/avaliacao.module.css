@@ -29,11 +29,11 @@
   margin-bottom: 4px;
 }
 .starFull {
-  color: #0026fc;
+  color: #009ac3;
   font-size: 1.7rem;
 }
 .starHalf {
-  color: #0026fc;
+  color: #009ac3;
   font-size: 1.7rem;
   opacity: 0.5;
 }
@@ -48,7 +48,7 @@
   font-weight: 600;
 }
 .trustpilot {
-  color: #011cb6;
+  color: #009ac3;
   font-size: 1.1rem;
   font-weight: 700;
   display: flex;

@@ -15,7 +15,6 @@ import Cards from "./components/Cards/cards";
 import Destaques from "./components/Destaques/Destaques";
 import Faixa from "./components/faixa/Faixa";
 import Footer from "./components/Footer/footer";
-import Header from "./components/Header/header";
 import Marcas from "./components/marcas/marcas";
 import Contato from "./components/Contato/contato";
 import Envio from "./components/Envio/envio";
@@ -32,6 +31,7 @@ import FaixaSmileFriday from "./components/faixaSmileFriday/faixaSmileFriday";
 import Usuario from "./components/Usuario/usuario";
 import LoginUsuario from "./components/Usuario/login/loginUsuario";
 import CadastroUsuario from "./components/Usuario/cadastro/cadastroUsuario";
+import Header from "./components/Header/header";
 
 function Home() {
   return (
