@@ -17,6 +17,8 @@ export default function CadastroUsuario() {
     senha: "",
   });
   const [errors, setErrors] = useState({});
+  const [submitting, setSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState("");
 
   const isEmailValid = (v) => /^\S+@\S+\.\S+$/.test(String(v).toLowerCase());
   const isSenhaValid = (v) => typeof v === "string" && v.length >= 8;
@@ -47,11 +49,54 @@ export default function CadastroUsuario() {
     e.preventDefault();
     if (!validate()) return;
 
-    // Aqui você faria a chamada à API para criar o usuário.
-    // Exemplo: fetch('/api/cadastro', { method: 'POST', body: JSON.stringify(form) })
+    // Enviar para o endpoint de cadastro
+    (async () => {
+      try {
+        setErrors({});
+        setSubmitError("");
+        setSubmitting(true);
+        // mapear o campo de senha para o nome esperado pela API: `password`
+        const payload = {
+          nome: form.nome,
+          sobrenome: form.sobrenome,
+          rua: form.rua || null,
+          numero: form.numero || null,
+          bairro: form.bairro || null,
+          cidade: form.cidade || null,
+          estado: form.estado || null,
+          whatsapp: form.whatsapp || null,
+          email: form.email,
+          password: form.senha,
+        };
 
-    // Simular sucesso e redirecionar para login
-    navigate("/login");
+        const res = await fetch("https://apismilepet.vercel.app/api/client", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(payload),
+        });
+        if (res.ok) {
+          // sucesso: redirecionar para login
+          navigate("/login");
+        } else {
+          // tentar ler mensagem de erro
+          let msg = `Erro ${res.status}`;
+          try {
+            const data = await res.json();
+            if (data && data.message) msg = String(data.message);
+            else if (data && data.error) msg = String(data.error);
+          } catch {
+            // ignore
+          }
+          setSubmitError(msg);
+        }
+      } catch {
+        setSubmitError("Erro ao conectar com o servidor. Tente novamente.");
+      } finally {
+        setSubmitting(false);
+      }
+    })();
   }
 
   return (
@@ -188,8 +233,13 @@ export default function CadastroUsuario() {
           </div>
         </div>
 
-        <button className={styles.submitBtn} type="submit">
-          Cadastrar
+        {submitError && <div className={styles.error}>{submitError}</div>}
+        <button
+          className={styles.submitBtn}
+          type="submit"
+          disabled={submitting}
+        >
+          {submitting ? "Cadastrando..." : "Cadastrar"}
         </button>
       </form>
     </section>

@@ -1,0 +1,78 @@
+.pedidosWrap {
+  max-width: 980px;
+  margin: 170px auto;
+  padding: 18px;
+  
+}
+.center {
+  padding: 24px;
+  text-align: center;
+}
+.emptyBox {
+  text-align: center;
+  padding: 40px;
+  border: 1px dashed #e6e6e6;
+  border-radius: 8px;
+  margin-top: 170px;
+}
+
+.emptyBox h2 {
+  font-size: 1.4rem;
+  margin-bottom: 12px;
+  color: #073b4c;
+}
+
+.emptyBox p {
+  font-size: 1rem;
+  margin-bottom: 16px;
+  color: #6c7a89;
+}
+
+.buyNow {
+  display: inline-block;
+  margin-top: 12px;
+  background: #fc6100;
+  color: #fff;
+  padding: 10px 14px;
+  border-radius: 8px;
+  text-decoration: none;
+}
+.list {
+  display: grid;
+  gap: 12px;
+}
+.orderCard {
+  background: #fff;
+  padding: 12px;
+  border-radius: 8px;
+  box-shadow: 0 6px 18px rgba(7, 59, 76, 0.04);
+}
+.orderHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.status {
+  background: #ffd600;
+  padding: 6px 10px;
+  border-radius: 6px;
+  font-weight: 700;
+  color: #073b4c;
+}
+.orderBody {
+  display: flex;
+  gap: 18px;
+  margin-top: 8px;
+}
+.details {
+  margin-top: 8px;
+}
+.pre {
+  background: #f7f7f7;
+  padding: 8px;
+  border-radius: 6px;
+  overflow: auto;
+}
+.error {
+  color: #b00020;
+}

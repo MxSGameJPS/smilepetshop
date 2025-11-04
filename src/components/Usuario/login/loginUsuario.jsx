@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import styles from "./loginUsuario.module.css";
+import { setUser, broadcastUserUpdate } from "../../../lib/auth";
 
 export default function LoginUsuario() {
   const navigate = useNavigate();
@@ -8,6 +9,7 @@ export default function LoginUsuario() {
   const [password, setPassword] = useState("");
   const [touched, setTouched] = useState({ email: false, password: false });
   const [submitError, setSubmitError] = useState("");
+  const [loading, setLoading] = useState(false);
 
   const isEmailValid = (value) => {
     // simples validação de email
@@ -29,9 +31,52 @@ export default function LoginUsuario() {
       return;
     }
 
-    // Aqui você chamaria a API de autenticação.
-    // Para demo, apenas navega para a área do usuário.
-    navigate("/usuario");
+    // chamar API de autenticação
+    (async () => {
+      setLoading(true);
+      try {
+        const res = await fetch(
+          "https://apismilepet.vercel.app/api/client/login",
+          {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ email, password }),
+          }
+        );
+        const data = await res.json().catch(() => null);
+        if (!res.ok) {
+          if (data && data.error) setSubmitError(data.error);
+          else if (res.status === 401) setSubmitError("Credenciais inválidas.");
+          else setSubmitError("Erro ao autenticar. Tente novamente.");
+          return;
+        }
+
+        // sucesso: API pode retornar user ou { user, token }
+        const user = data?.user ?? data;
+        if (!user) {
+          setSubmitError("Resposta inesperada do servidor.");
+          return;
+        }
+
+        // salva usuário localmente e notifica header
+        try {
+          setUser(user);
+          // broadcast the user object directly for simplicity
+          broadcastUserUpdate(user);
+        } catch (err) {
+          // continue mesmo se falhar
+          console.warn("Falha ao armazenar usuário localmente", err);
+        }
+
+        // após login bem sucedido, redireciona para a home
+        navigate("/");
+      } catch (err) {
+        console.error(err);
+        setSubmitError("Erro de conexão. Tente novamente.");
+      } finally {
+        setLoading(false);
+      }
+    })();
   }
 
   return (
@@ -90,8 +135,8 @@ export default function LoginUsuario() {
           </Link>
         </div>
 
-        <button className={styles.submitBtn} type="submit">
-          ENTRAR
+        <button className={styles.submitBtn} type="submit" disabled={loading}>
+          {loading ? "Entrando..." : "ENTRAR"}
         </button>
       </form>
     </section>

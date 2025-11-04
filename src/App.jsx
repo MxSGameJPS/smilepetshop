@@ -31,6 +31,8 @@ import FaixaSmileFriday from "./components/faixaSmileFriday/faixaSmileFriday";
 import Usuario from "./components/Usuario/usuario";
 import LoginUsuario from "./components/Usuario/login/loginUsuario";
 import CadastroUsuario from "./components/Usuario/cadastro/cadastroUsuario";
+import Perfil from "./components/Usuario/perfil/perfil";
+import MeusPedidos from "./components/Usuario/pedidos/pedidos";
 import Header from "./components/Header/header";
 
 function Home() {
@@ -80,6 +82,8 @@ function App() {
             <Route path="/usuario" element={<Usuario />} />
             <Route path="/login" element={<LoginUsuario />} />
             <Route path="/cadastro" element={<CadastroUsuario />} />
+            <Route path="/perfil" element={<Perfil />} />
+            <Route path="/meus-pedidos" element={<MeusPedidos />} />
           </Routes>
         </main>
       </div>

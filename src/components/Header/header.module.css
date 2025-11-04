@@ -20,13 +20,27 @@
   box-shadow: 0 1px 4px rgba(252, 97, 0, 0.12);
   transition: background 0.2s, color 0.2s;
 }
-.smileClub:hover {
+/* clickable name button inside userArea */
+.userArea .userNameBtn {
+  background: transparent;
+  color: #fff;
+  border: none;
+  font-weight: 700;
+  cursor: pointer;
+  padding: 8px 10px;
+  text-decoration: underline;
+}
+.userArea .userNameBtn:focus {
+  outline: 2px solid rgba(255, 255, 255, 0.18);
+  border-radius: 6px;
+}
+.userNameBtn:hover {
   background: #fc6100;
   color: #fff !important;
 }
 .header {
   width: 100%;
-  background: #FC6100;
+  background: #fc6100;
   border-bottom: 1px solid #f2f2f2;
   display: block;
   /* ensure header is visible and stays on top of content */
@@ -333,4 +347,27 @@
   align-items: center;
   justify-content: center;
   box-shadow: 0 1px 4px rgba(7, 59, 76, 0.08);
+}
+
+/* when user is logged in show name and logout button */
+.userArea {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.userName {
+  color: #ffffff;
+  font-weight: 700;
+}
+.logoutBtn {
+  background: transparent;
+  color: #fff;
+  border: 2px solid rgba(255, 255, 255, 0.18);
+  padding: 6px 10px;
+  border-radius: 8px;
+  cursor: pointer;
+}
+.logoutBtn:hover {
+  background: rgba(0, 0, 0, 0.05);
+  border: 1px solid #fff;
 }

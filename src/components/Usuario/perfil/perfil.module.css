@@ -1,0 +1,79 @@
+.perfilSection {
+  max-width: 1400px;
+  margin: 170px auto;
+  padding: 18px;
+  background: #fff;
+  border-radius: 10px;
+  box-shadow: 0 6px 24px rgba(7, 59, 76, 0.05);
+}
+
+.perfilSection h1 {
+  font-size: 3.4rem;
+  margin-bottom: 16px;
+  color: #fc6100;
+}
+
+.perfilSection p {
+  font-size: 1rem;
+  margin-bottom: 25px;
+  color: #073b4c;
+}
+
+.form {
+  display: grid;
+  gap: 12px;
+}
+.row {
+  display: flex;
+  flex-direction: column;
+}
+.row label {
+  font-weight: 700;
+  margin-bottom: 6px;
+  color: #073b4c;
+}
+.row input {
+  padding: 10px 12px;
+  border-radius: 8px;
+  border: 1px solid #e6e6e6;
+  background: transparent;
+  color: #000000;
+}
+.actions {
+  display: flex;
+  gap: 12px;
+  margin-top: 12px;
+  align-items: center;
+}
+.saveBtn {
+  background: #fc6100;
+  color: #fff;
+  border: none;
+  padding: 10px 16px;
+  border-radius: 8px;
+  cursor: pointer;
+}
+.deleteBtn {
+  background: transparent;
+  color: #c62828;
+  border: 1px solid rgba(198, 40, 40, 0.14);
+  padding: 8px 12px;
+  border-radius: 8px;
+  cursor: pointer;
+}
+.ordersBtn {
+  background: transparent;
+  color: #073b4c;
+  border: 1px solid rgba(7, 59, 76, 0.06);
+  padding: 8px 12px;
+  border-radius: 8px;
+  text-decoration: none;
+}
+.message {
+  color: #0a8a00;
+  font-weight: 700;
+}
+.error {
+  color: #b00020;
+  font-weight: 700;
+}

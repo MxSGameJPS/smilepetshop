@@ -3,10 +3,34 @@ import { FaSearch, FaHeart, FaShoppingBag } from "react-icons/fa";
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { getCartCount } from "../../lib/cart";
+import { getUser, clearUser, broadcastUserUpdate } from "../../lib/auth";
 
 export default function Header() {
   const [cartCount, setCartCount] = useState(() => getCartCount());
   const navigate = useNavigate();
+
+  // helper: try to extract the actual user object from many possible shapes
+  function normalizeUser(payload) {
+    if (!payload) return null;
+    // unwrap common wrappers
+    const tryKeys = ["user", "data", "cliente", "client", "customer"];
+    let p = payload;
+    // if payload has token and user inside, prefer inner
+    for (const k of tryKeys) {
+      if (p && typeof p === "object" && k in p && p[k]) {
+        p = p[k];
+      }
+    }
+    // if still wrapped (e.g. { user: { user: {...} } }), unwrap repeatedly up to depth
+    let depth = 0;
+    while (p && typeof p === "object" && (p.user || p.data) && depth < 4) {
+      p = p.user ?? p.data ?? p;
+      depth += 1;
+    }
+    return p;
+  }
+
+  const [user, setUser] = useState(() => normalizeUser(getUser()));
 
   // submenu state
   const [openCachorro, setOpenCachorro] = useState(false);
@@ -20,17 +44,17 @@ export default function Header() {
   // mapping for submenu item -> target category name(s) for products filter
   // separate maps for cachorro and gato (arrays so we can join multiple categories)
   const submenuCategoryMapCachorro = {
-    "Ração": ["Ração para Cachorro"],
+    Ração: ["Ração para Cachorro"],
     "Ração Úmida": ["Ração Úmida para Cães"],
-    "Petiscos": ["Petiscos Dog"],
+    Petiscos: ["Petiscos Dog"],
     "Tapetes Higienicos": ["Higiene e Cuidados para Cães"],
   };
 
   const submenuCategoryMapGato = {
-    "Ração": ["Ração para Gatos"],
+    Ração: ["Ração para Gatos"],
     "Ração Úmida": ["Ração Úmida para Gatos"],
-    "Petiscos": ["Petiscos Cat"],
-    "Areia": ["Higiene e Cuidados para Gatos"],
+    Petiscos: ["Petiscos Cat"],
+    Areia: ["Higiene e Cuidados para Gatos"],
   };
 
   const [activeSubSpecies, setActiveSubSpecies] = useState("");
@@ -111,8 +135,30 @@ export default function Header() {
       }
     };
     window.addEventListener("smilepet_cart_update", handler);
-    return () => window.removeEventListener("smilepet_cart_update", handler);
+    // listen for user updates (login/logout)
+    const userHandler = (ev) => {
+      try {
+        const d = ev?.detail ?? getUser();
+        const u = normalizeUser(d) ?? normalizeUser(getUser());
+        setUser(u || null);
+      } catch {
+        setUser(normalizeUser(getUser()));
+      }
+    };
+    window.addEventListener("smilepet_user_update", userHandler);
+    return () => {
+      window.removeEventListener("smilepet_cart_update", handler);
+      window.removeEventListener("smilepet_user_update", userHandler);
+    };
   }, []);
+
+  // small logout helper
+  function handleLogout() {
+    clearUser();
+    broadcastUserUpdate({ user: null });
+    setUser(null);
+    navigate("/");
+  }
 
   return (
     <header className={styles.header}>
@@ -142,9 +188,37 @@ export default function Header() {
           </div>
 
           <div className={styles.headerRight}>
-            <a href="/usuario" className={styles.loginLink}>
-              Entre ou cadastre-se
-            </a>
+            {(() => {
+              // tolerate different shapes returned by API
+              const displayName =
+                user?.nome || user?.name || user?.firstName || user?.email;
+              if (displayName) {
+                return (
+                  <div className={styles.userArea}>
+                    <button
+                      className={styles.userNameBtn}
+                      onClick={() => navigate("/perfil")}
+                      type="button"
+                      title={`Ver perfil de ${displayName}`}
+                    >
+                      Olá, {displayName}
+                    </button>
+                    <button
+                      className={styles.logoutBtn}
+                      onClick={handleLogout}
+                      type="button"
+                    >
+                      Sair
+                    </button>
+                  </div>
+                );
+              }
+              return (
+                <a href="/usuario" className={styles.loginLink}>
+                  Entre ou cadastre-se
+                </a>
+              );
+            })()}
             <div className={styles.iconGroup}>
               <button className={styles.iconBtn} aria-label="Favoritos">
                 <FaHeart
