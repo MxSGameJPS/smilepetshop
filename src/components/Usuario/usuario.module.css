@@ -38,6 +38,7 @@
 .loginBtn:hover {
   opacity: 0.95;
   outline: none;
+    color: #fff;
 }
 
 .cadastroBtn {
@@ -55,4 +56,5 @@
 .cadastroBtn:hover {
   opacity: 0.95;
   outline: none;
+  color: #fff;
 }
