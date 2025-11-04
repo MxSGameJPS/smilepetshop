@@ -29,6 +29,9 @@ import Atacado from "./components/Atacado/atacado";
 import LoginAtacado from "./components/Atacado/loginAtacado/loginAtacado";
 import CadastroAtacado from "./components/Atacado/cadastroAtacado/cadastroAtacado";
 import FaixaSmileFriday from "./components/faixaSmileFriday/faixaSmileFriday";
+import Usuario from "./components/Usuario/usuario";
+import LoginUsuario from "./components/Usuario/login/loginUsuario";
+import CadastroUsuario from "./components/Usuario/cadastro/cadastroUsuario";
 
 function Home() {
   return (
@@ -74,6 +77,9 @@ function App() {
             <Route path="/atacado" element={<Atacado />} />
             <Route path="/loginatacado" element={<LoginAtacado />} />
             <Route path="/cadastroatacado" element={<CadastroAtacado />} />
+            <Route path="/usuario" element={<Usuario />} />
+            <Route path="/login" element={<LoginUsuario />} />
+            <Route path="/cadastro" element={<CadastroUsuario />} />
           </Routes>
         </main>
       </div>

@@ -1,0 +1,58 @@
+.usuarioSection {
+  padding: 40px 20px;
+  max-width: 900px;
+  margin: 170px auto;
+  color: #073b4c;
+}
+
+.usuarioSection h1 {
+  font-size: 1.6rem;
+  margin-bottom: 12px;
+  color: #073b4c;
+}
+
+.usuarioSection p {
+  color: #6c7a89;
+}
+
+.actions {
+  margin-top: 20px;
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  justify-content: center;
+}
+
+.loginBtn {
+  display: inline-block;
+  background: #fc6100;
+  color: #fff;
+  padding: 10px 18px;
+  border-radius: 8px;
+  text-decoration: none;
+  font-weight: 700;
+  box-shadow: 0 4px 10px rgba(252, 97, 0, 0.18);
+}
+
+.loginBtn:focus,
+.loginBtn:hover {
+  opacity: 0.95;
+  outline: none;
+}
+
+.cadastroBtn {
+  display: inline-block;
+  background: #007bff;
+  color: #fff;
+  padding: 10px 18px;
+  border-radius: 8px;
+  text-decoration: none;
+  font-weight: 700;
+  box-shadow: 0 4px 10px rgba(0, 123, 255, 0.12);
+}
+
+.cadastroBtn:focus,
+.cadastroBtn:hover {
+  opacity: 0.95;
+  outline: none;
+}
