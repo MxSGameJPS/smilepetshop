@@ -220,6 +220,16 @@ export default function Produto() {
     }
   }, [produto]);
 
+  // Garantir que a página abra no topo ao navegar para um produto
+  useEffect(() => {
+    try {
+      window.scrollTo({ top: 0, left: 0, behavior: "auto" });
+    } catch {
+      // fallback
+      window.scrollTo(0, 0);
+    }
+  }, [id]);
+
   // quando as variações vindas do endpoint mudam, definir variante padrão
   useEffect(() => {
     if (variacoesList && variacoesList.length > 0) {

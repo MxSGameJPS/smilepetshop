@@ -5,22 +5,22 @@ import { useNavigate } from "react-router-dom";
 const cardsData = [
   {
     title: "Ração Seca",
-    img: "/imgCards/RacaoSeca.png",
+    img: "/ImagensRacoes/1.png",
     description: "Ver Ração Seca",
   },
   {
     title: "Ração Úmida",
-    img: "/imgCards/RacaoUmida.png",
+    img: "/ImagensRacoes/2.png",
     description: "Ver Ração Úmida",
   },
   {
     title: "Petiscos",
-    img: "/imgCards/Petisco.png",
+    img: "/ImagensRacoes/4.png",
     description: "Ver Petiscos",
   },
   {
     title: "Higiene",
-    img: "/imgCards/higiene.png",
+    img: "/ImagensRacoes/5.png",
     description: "Ver produtos de Higiene e Cuidados",
   },
 ];
