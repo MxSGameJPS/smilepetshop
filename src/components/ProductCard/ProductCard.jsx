@@ -1,6 +1,6 @@
-import React from "react";
+import React, { useState, useRef, useEffect } from "react";
 import styles from "./productCard.module.css";
-import { FaPlus } from "react-icons/fa";
+import { FaPlus, FaCheck } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 
 export default function ProductCard({
@@ -11,8 +11,17 @@ export default function ProductCard({
   priceSubscriber,
   onAdd,
   productId,
+  promocao,
 }) {
   const navigate = useNavigate();
+  const [added, setAdded] = useState(false);
+  const addedTimer = useRef(null);
+
+  useEffect(() => {
+    return () => {
+      if (addedTimer.current) clearTimeout(addedTimer.current);
+    };
+  }, []);
 
   function handleOpen() {
     if (productId) navigate(`/produtos/${productId}`);
@@ -21,17 +30,32 @@ export default function ProductCard({
   return (
     <div className={styles.card} onClick={handleOpen} role="button">
       <div className={styles.imageWrap}>
+        {promocao && <span className={styles.smileFridayTag}>SmileFriday</span>}
         <img src={image} alt={title} className={styles.productImage} />
         <button
-          className={styles.addBtn}
-          aria-label="Adicionar ao carrinho"
+          className={added ? `${styles.addBtn} ${styles.added}` : styles.addBtn}
+          aria-label={
+            added ? "Adicionado ao carrinho" : "Adicionar ao carrinho"
+          }
           onClick={(e) => {
             e.stopPropagation();
             if (onAdd) onAdd();
+            // feedback visual
+            setAdded(true);
+            if (addedTimer.current) clearTimeout(addedTimer.current);
+            addedTimer.current = setTimeout(() => setAdded(false), 1800);
           }}
         >
-          <FaPlus className={styles.addIcon} />
+          {added ? (
+            <FaCheck className={styles.addIcon} />
+          ) : (
+            <FaPlus className={styles.addIcon} />
+          )}
         </button>
+        {/* accessibility live region */}
+        <span className={styles.srOnly} aria-live="polite">
+          {added ? "Produto adicionado ao carrinho" : ""}
+        </span>
       </div>
 
       <div className={styles.info}>
@@ -56,3 +80,5 @@ export default function ProductCard({
     </div>
   );
 }
+
+// (cleanup handled with useEffect above)

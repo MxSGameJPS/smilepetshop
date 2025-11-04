@@ -229,6 +229,7 @@ export default function Produtos() {
                   title={p.nome}
                   priceOld={priceOld}
                   price={price}
+                  promocao={p.promocao}
                   productId={p.id}
                   onAdd={() =>
                     addToCart({

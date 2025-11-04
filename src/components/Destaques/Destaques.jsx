@@ -59,6 +59,7 @@ export default function Destaques() {
                 title={produto.nome}
                 price={produto.preco}
                 priceOld={produto.precoOld}
+                promocao={produto.promocao}
                 priceSubscriber={produto.precoAssinante}
                 productId={produto.id}
                 onAdd={() =>

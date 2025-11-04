@@ -170,14 +170,23 @@ export default function Carrinho() {
                   </div>
                 </div>
                 <div className={styles.itemControls}>
-                  <input
-                    type="number"
-                    min={0}
-                    value={it.quantidade}
+                  <select
+                    value={Math.max(
+                      1,
+                      Math.min(10, Number(it.quantidade) || 1)
+                    )}
                     onChange={(e) => handleQtyChange(it, e.target.value)}
-                    className={styles.qtyInput}
+                    className={styles.qtySelect}
                     aria-label="Quantidade"
-                  />
+                  >
+                    {Array.from({ length: 10 }, (_, i) => i + 1).map(
+                      (opcao) => (
+                        <option key={opcao} value={opcao}>
+                          {opcao}
+                        </option>
+                      )
+                    )}
+                  </select>
                 </div>
                 <div className={styles.itemTotal}>
                   <div className={styles.totalPrice}>

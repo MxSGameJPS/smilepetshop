@@ -15,7 +15,7 @@
   align-items: center;
   justify-content: center;
   background: #fff;
-  border-radius: 16px;  
+  border-radius: 16px;
   border: 1px solid #073b4c;
 }
 
@@ -109,4 +109,40 @@
   font-weight: 600;
   font-size: 0.8rem;
   margin-left: 6px;
+}
+
+/* Tag SmileFriday */
+.smileFridayTag {
+  position: absolute;
+  top: 4px;
+  left: 8px;
+  background: linear-gradient(90deg, #fc6100 0%, #111 100%);
+  color: #ffffff;
+  font-size: 0.85rem;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 8px;
+  z-index: 5;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
+  font-family: "Inter", "Montserrat", Arial, sans-serif;
+  letter-spacing: 0.4px;
+  text-transform: none;
+}
+
+/* Button added state */
+.added {
+  background: #28a745 !important; /* green to indicate success */
+}
+
+/* visually hidden, but accessible */
+.srOnly {
+  position: absolute !important;
+  width: 1px !important;
+  height: 1px !important;
+  padding: 0 !important;
+  margin: -1px !important;
+  overflow: hidden !important;
+  clip: rect(0, 0, 0, 0) !important;
+  white-space: nowrap !important;
+  border: 0 !important;
 }
