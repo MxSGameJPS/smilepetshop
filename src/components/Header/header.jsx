@@ -20,17 +20,17 @@ export default function Header() {
   // mapping for submenu item -> target category name(s) for products filter
   // separate maps for cachorro and gato (arrays so we can join multiple categories)
   const submenuCategoryMapCachorro = {
-    "Ração Seca": ["Ração para Cachorro"],
+    "Ração": ["Ração para Cachorro"],
     "Ração Úmida": ["Ração Úmida para Cães"],
-    Petiscos: ["Petiscos Dog"],
-    "Higiene e Cuidados": ["Higiene e Cuidados para Cães"],
+    "Petiscos": ["Petiscos Dog"],
+    "Tapetes Higienicos": ["Higiene e Cuidados para Cães"],
   };
 
   const submenuCategoryMapGato = {
-    "Ração Seca": ["Ração para Gatos"],
+    "Ração": ["Ração para Gatos"],
     "Ração Úmida": ["Ração Úmida para Gatos"],
-    Petiscos: ["Petiscos Cat"],
-    "Higiene e Cuidados": ["Higiene e Cuidados para Gatos"],
+    "Petiscos": ["Petiscos Cat"],
+    "Areia": ["Higiene e Cuidados para Gatos"],
   };
 
   const [activeSubSpecies, setActiveSubSpecies] = useState("");
