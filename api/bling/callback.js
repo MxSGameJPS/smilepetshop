@@ -30,7 +30,9 @@ export default function handler(req, res) {
             // If the auth flow opened a popup, notify the opener and close
             try {
               if (window.opener && window.opener.postMessage) {
-                window.opener.postMessage({ source: 'bling-callback', data }, '*');
+                try { window.opener.postMessage({ source: 'bling-callback', data }, '*'); } catch(e) { /* ignore */ }
+                // also save a copy to localStorage as a fallback if opener misses the message
+                try { localStorage.setItem('bling_callback', JSON.stringify(data)); } catch(e) { /* ignore */ }
                 payload.innerHTML = '<p>Dados enviados para a aplicação. Você pode fechar esta janela.</p>';
                 // try to close after a short delay so user sees message
                 setTimeout(() => window.close(), 900);
@@ -39,8 +41,24 @@ export default function handler(req, res) {
             } catch (e) {
               // ignore
             }
-            // Otherwise render the returned params so user can copy them
-            payload.innerHTML = '<h3>Parâmetros recebidos</h3><pre>' + JSON.stringify(data, null, 2) + '</pre>';
+
+            // If there is no opener (redirected in the same tab), store params and redirect
+            try {
+              localStorage.setItem('bling_callback', JSON.stringify(data));
+            } catch (e) {
+              // ignore
+            }
+            // build query string and redirect to SPA route so the frontend can finish auth
+            try {
+              const qs = Object.keys(data).map(k => encodeURIComponent(k) + '=' + encodeURIComponent(data[k] == null ? '' : String(data[k]))).join('&');
+              const target = 'https://smilepetshop.vercel.app/bling/callback' + (qs ? ('?' + qs) : '');
+              // replace location so back button doesn't keep callback URL
+              window.location.replace(target);
+              return;
+            } catch (e) {
+              // if redirect fails, render the returned params so user can copy them
+              payload.innerHTML = '<h3>Parâmetros recebidos</h3><pre>' + JSON.stringify(data, null, 2) + '</pre>';
+            }
           })();
         </script>
       </body>
