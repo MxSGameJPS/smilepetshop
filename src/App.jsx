@@ -34,6 +34,7 @@ import CadastroUsuario from "./components/Usuario/cadastro/cadastroUsuario";
 import Perfil from "./components/Usuario/perfil/perfil";
 import MeusPedidos from "./components/Usuario/pedidos/pedidos";
 import Header from "./components/Header/header";
+import BlingCallback from "./components/Bling/callback";
 
 function Home() {
   return (
@@ -84,6 +85,7 @@ function App() {
             <Route path="/cadastro" element={<CadastroUsuario />} />
             <Route path="/perfil" element={<Perfil />} />
             <Route path="/meus-pedidos" element={<MeusPedidos />} />
+            <Route path="/bling/callback" element={<BlingCallback />} />
           </Routes>
         </main>
       </div>
