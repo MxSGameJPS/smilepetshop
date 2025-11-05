@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import styles from "./cadastroUsuario.module.css";
+import { RxFontRoman } from "react-icons/rx";
 
 export default function CadastroUsuario() {
   const navigate = useNavigate();
@@ -13,6 +14,9 @@ export default function CadastroUsuario() {
     cidade: "",
     estado: "",
     whatsapp: "",
+    company: "",
+    address2: "",
+    postal: "",
     email: "",
     senha: "",
   });
@@ -26,6 +30,12 @@ export default function CadastroUsuario() {
   function handleChange(e) {
     const { name, value } = e.target;
     setForm((f) => ({ ...f, [name]: value }));
+  }
+
+  function handlePostalChange(e) {
+    const digits = (e.target.value || "").replace(/\D/g, "");
+    const limited = digits.slice(0, 8);
+    setForm((f) => ({ ...f, postal: limited }));
   }
 
   function validate() {
@@ -55,16 +65,20 @@ export default function CadastroUsuario() {
         setErrors({});
         setSubmitError("");
         setSubmitting(true);
-        // mapear o campo de senha para o nome esperado pela API: `password`
+        // mapear o formulário para a mesma estrutura usada no checkout
+        // (campos em snake_case e nomes compatíveis)
         const payload = {
-          nome: form.nome,
-          sobrenome: form.sobrenome,
-          rua: form.rua || null,
+          first_name: form.nome || form.first_name,
+          last_name: form.sobrenome || form.last_name,
+          company: null,
+          address1: form.rua || null,
           numero: form.numero || null,
+          address2: form.complemento || form.address2 || null,
+          city: form.cidade || null,
+          state: form.estado || null,
           bairro: form.bairro || null,
-          cidade: form.cidade || null,
-          estado: form.estado || null,
-          whatsapp: form.whatsapp || null,
+          postal: form.cep || form.postal || null,
+          phone: form.whatsapp || form.phone || null,
           email: form.email,
           password: form.senha,
         };
@@ -152,6 +166,31 @@ export default function CadastroUsuario() {
             {errors.numero && (
               <div className={styles.error}>{errors.numero}</div>
             )}
+          </div>
+        </div>
+
+        <div className={styles.row}>
+          <div className={styles.col}>
+            <label>Complemento</label>
+            <input
+              name="address2"
+              value={form.address2}
+              onChange={handleChange}
+              className={styles.input}
+              placeholder="Apartamento, bloco, complemento (opcional)"
+            />
+          </div>
+          <div className={styles.colSmall}>
+            <label>CEP</label>
+            <input
+              name="postal"
+              value={form.postal}
+              onChange={handlePostalChange}
+              className={styles.input}
+              inputMode="numeric"
+              maxLength={8}
+              placeholder="Somente números"
+            />
           </div>
         </div>
 

@@ -1,9 +1,9 @@
 .page {
   padding: 24px;
+  margin-top: 170px;
 }
 .container {
   display: flex;
-  align-items: center;
   gap: 24px;
   max-width: 980px;
   margin: 0 auto;
