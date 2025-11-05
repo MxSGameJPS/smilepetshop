@@ -3,8 +3,6 @@
 // perform the token exchange server-side and embed the token response in the page
 // so the opener (or SPA route) receives tokens instead of the one-minute code.
 
-import fetch from "node-fetch";
-
 export default async function handler(req, res) {
   try {
     const params = req.method === "GET" ? req.query : req.body || {};

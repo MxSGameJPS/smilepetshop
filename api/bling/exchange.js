@@ -4,8 +4,6 @@
 // - BLING_CLIENT_ID
 // - BLING_CLIENT_SECRET
 
-import fetch from "node-fetch";
-
 export default async function handler(req, res) {
   if (req.method !== "POST") {
     res.setHeader("Allow", "POST");
@@ -22,12 +20,10 @@ export default async function handler(req, res) {
   const clientSecret = procEnv.BLING_CLIENT_SECRET;
 
   if (!clientId || !clientSecret) {
-    return res
-      .status(500)
-      .json({
-        error:
-          "Server misconfigured: BLING_CLIENT_ID or BLING_CLIENT_SECRET missing in env",
-      });
+    return res.status(500).json({
+      error:
+        "Server misconfigured: BLING_CLIENT_ID or BLING_CLIENT_SECRET missing in env",
+    });
   }
 
   let body = {};
