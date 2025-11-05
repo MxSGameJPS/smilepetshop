@@ -1,0 +1,33 @@
+.headerWrap {
+  border-bottom: 1px solid #eee;
+}
+.banner {
+  background: #ff7a00; /* laranja */
+  color: #fff;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 20px;
+}
+.welcome {
+  font-weight: 600;
+}
+.logout {
+  background: rgba(255, 255, 255, 0.15);
+  color: #fff;
+  border: none;
+  padding: 6px 10px;
+  border-radius: 6px;
+  cursor: pointer;
+}
+.nav {
+  display: flex;
+  gap: 16px;
+  padding: 10px 20px;
+  background: #fff;
+}
+.nav a {
+  color: #333;
+  text-decoration: none;
+  font-weight: 600;
+}

@@ -1,0 +1,36 @@
+.wrap {
+  padding: 20px;
+}
+
+.wrap h2 {
+  margin-bottom: 36px;
+  color: #333;
+  font-size: 2.50rem;
+}
+
+.error {
+  color: #b00020;
+  font-weight: 600;
+}
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 16px;
+  margin-top: 16px;
+}
+.card {
+  background: #fff;
+  border: 1px solid #eee;
+  padding: 16px;
+  border-radius: 8px;
+  text-align: center;
+}
+.value {
+  font-size: 28px;
+  font-weight: 700;
+  color: #ff7a00;
+}
+.label {
+  margin-top: 8px;
+  color: #333;
+}

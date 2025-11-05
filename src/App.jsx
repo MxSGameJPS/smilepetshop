@@ -35,6 +35,7 @@ import Perfil from "./components/Usuario/perfil/perfil";
 import MeusPedidos from "./components/Usuario/pedidos/pedidos";
 import Header from "./components/Header/header";
 import BlingCallback from "./components/Bling/callback";
+import AdmPage from "./components/Administracao/admPage";
 
 function Home() {
   return (
@@ -54,7 +55,12 @@ function Home() {
 function HeaderConditional() {
   const location = useLocation();
   // hide the global header on the ofertas page
-  if (location && location.pathname === "/ofertas") return null;
+  // hide the global header on the ofertas page and on adm area
+  if (
+    location &&
+    (location.pathname === "/ofertas" || location.pathname.startsWith("/adm"))
+  )
+    return null;
   return <Header />;
 }
 
@@ -86,6 +92,7 @@ function App() {
             <Route path="/perfil" element={<Perfil />} />
             <Route path="/meus-pedidos" element={<MeusPedidos />} />
             <Route path="/bling/callback" element={<BlingCallback />} />
+            <Route path="/adm/*" element={<AdmPage />} />
           </Routes>
         </main>
       </div>
