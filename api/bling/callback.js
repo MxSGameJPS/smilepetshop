@@ -3,61 +3,131 @@
 // perform the token exchange server-side and embed the token response in the page
 // so the opener (or SPA route) receives tokens instead of the one-minute code.
 
+function readEnv() {
+  if (
+    typeof globalThis !== "undefined" &&
+    globalThis.process &&
+    globalThis.process.env
+  ) {
+    return globalThis.process.env;
+  }
+  return {};
+}
+
+function inferOrigin(req, env) {
+  const headers = req?.headers || {};
+  const envUrl =
+    env.BLING_PUBLIC_URL ||
+    env.BLING_APP_BASE_URL ||
+    env.NEXT_PUBLIC_SITE_URL ||
+    env.SITE_URL ||
+    env.VERCEL_URL ||
+    "";
+
+  if (envUrl) {
+    if (/^https?:\/\//i.test(envUrl)) {
+      return envUrl.replace(/\/$/, "");
+    }
+    return `https://${envUrl.replace(/\/$/, "")}`;
+  }
+
+  const hostHeader =
+    headers["x-forwarded-host"]?.split(",")[0]?.trim() ||
+    headers.host ||
+    "localhost:3000";
+  const protoHeader =
+    headers["x-forwarded-proto"]?.split(",")[0]?.trim() ||
+    (hostHeader.startsWith("localhost") ? "http" : "https");
+
+  return `${protoHeader}://${hostHeader.replace(/\/$/, "")}`;
+}
+
+function buildRedirectTargets(req, env) {
+  const origin = inferOrigin(req, env);
+  const apiBase = env.BLING_API_BASE_URL
+    ? env.BLING_API_BASE_URL.replace(/\/$/, "")
+    : origin;
+  const appBase = env.BLING_APP_BASE_URL
+    ? env.BLING_APP_BASE_URL.replace(/\/$/, "")
+    : origin;
+
+  const redirectUri = env.BLING_REDIRECT_URI
+    ? env.BLING_REDIRECT_URI.replace(/\/$/, "")
+    : `${apiBase}/api/bling/callback`;
+
+  const spaCallback = env.BLING_APP_CALLBACK_URL
+    ? env.BLING_APP_CALLBACK_URL.replace(/\/$/, "")
+    : `${appBase}/bling/callback`;
+
+  return { origin, apiBase, appBase, redirectUri, spaCallback };
+}
+
 export default async function handler(req, res) {
   try {
     const params = req.method === "GET" ? req.query : req.body || {};
+    const env = readEnv();
+    const { redirectUri, spaCallback } = buildRedirectTargets(req, env);
 
-    // Read env safely (avoid lint warnings about 'process')
-    const procEnv =
-      typeof globalThis !== "undefined" &&
-      globalThis["process"] &&
-      globalThis["process"].env
-        ? globalThis["process"].env
-        : {};
     let tokenData = null;
+    let tokenError = null;
 
-    if (
-      params &&
-      params.code &&
-      procEnv.BLING_CLIENT_ID &&
-      procEnv.BLING_CLIENT_SECRET
-    ) {
+    if (params?.code && env.BLING_CLIENT_ID && env.BLING_CLIENT_SECRET) {
       try {
         const NodeBuffer = globalThis["Buffer"];
         const auth = NodeBuffer
           ? NodeBuffer.from(
-              procEnv.BLING_CLIENT_ID + ":" + procEnv.BLING_CLIENT_SECRET
+              env.BLING_CLIENT_ID + ":" + env.BLING_CLIENT_SECRET
             ).toString("base64")
-          : btoa(procEnv.BLING_CLIENT_ID + ":" + procEnv.BLING_CLIENT_SECRET);
+          : btoa(env.BLING_CLIENT_ID + ":" + env.BLING_CLIENT_SECRET);
 
         const tokenResp = await fetch(
-          "https://api.bling.com.br/Api/v3/oauth/token",
+          env.BLING_TOKEN_URL || "https://api.bling.com.br/Api/v3/oauth/token",
           {
             method: "POST",
             headers: {
               "Content-Type": "application/x-www-form-urlencoded",
-              Accept: "1.0",
+              Accept: "application/json",
               Authorization: "Basic " + auth,
             },
             body: new URLSearchParams({
               grant_type: "authorization_code",
               code: params.code,
+              redirect_uri: redirectUri,
+              client_id: env.BLING_CLIENT_ID,
             }).toString(),
           }
         );
 
         const txt = await tokenResp.text();
+        let parsed;
         try {
-          tokenData = JSON.parse(txt);
+          parsed = JSON.parse(txt);
         } catch {
-          tokenData = { raw: txt };
+          parsed = { raw: txt };
         }
-      } catch {
-        tokenData = null;
+
+        if (!tokenResp.ok || parsed?.error) {
+          tokenError = {
+            status: tokenResp.status,
+            data: parsed,
+            redirect_uri: redirectUri,
+          };
+        } else {
+          tokenData = parsed;
+        }
+      } catch (err) {
+        tokenError = { error: String(err), redirect_uri: redirectUri };
       }
     }
 
-    const safe = JSON.stringify(tokenData || params || {});
+    const payload = tokenError
+      ? { ...(params || {}), token_error: tokenError }
+      : tokenData
+      ? { ...(params || {}), ...tokenData, redirect_uri: redirectUri }
+      : { ...(params || {}), redirect_uri: redirectUri };
+
+    const safeData = JSON.stringify(payload);
+    const safeSpaCallback = JSON.stringify(spaCallback);
 
     res.setHeader("Content-Type", "text/html; charset=utf-8");
     res
@@ -78,7 +148,10 @@ export default async function handler(req, res) {
           "<script>" +
           "(function(){" +
           "const data = " +
-          safe +
+          safeData +
+          ";" +
+          "const spaCallback = " +
+          safeSpaCallback +
           ";" +
           'const payload = document.getElementById("payload");' +
           "try {" +
@@ -92,8 +165,17 @@ export default async function handler(req, res) {
           "} catch (e) { /* ignore */ }" +
           'try { localStorage.setItem("bling_callback", JSON.stringify(data)); } catch (e) { /* ignore */ }' +
           "try {" +
-          'var qs = Object.keys(data).map(function(k){ return encodeURIComponent(k) + "=" + encodeURIComponent(data[k] == null ? "" : String(data[k])); }).join("&");' +
-          'var target = "https://smilepetshop.vercel.app/bling/callback" + (qs ? ("?" + qs) : "");' +
+          "var qs = Object.keys(data).map(function(k){" +
+          "  var value = data[k];" +
+          "  if (value === null || value === undefined) {" +
+          '    return encodeURIComponent(k) + "=";' +
+          "  }" +
+          '  if (typeof value === "object") {' +
+          "    try { value = JSON.stringify(value); } catch(e) { value = String(value); }" +
+          "  }" +
+          '  return encodeURIComponent(k) + "=" + encodeURIComponent(String(value));' +
+          '}).join("&");' +
+          'var target = spaCallback + (qs ? ("?" + qs) : "");' +
           "window.location.replace(target);" +
           "return;" +
           "} catch (e) {" +

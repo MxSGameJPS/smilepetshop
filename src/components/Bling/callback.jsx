@@ -1,6 +1,56 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
+function parseMaybeJSON(value) {
+  if (typeof value !== "string") return value;
+  const trimmed = value.trim();
+  if (!trimmed) return "";
+  if (/^-?\d+$/.test(trimmed) && trimmed.length < 16) {
+    return Number(trimmed);
+  }
+  if (
+    (trimmed.startsWith("{") && trimmed.endsWith("}")) ||
+    (trimmed.startsWith("[") && trimmed.endsWith("]"))
+  ) {
+    try {
+      return JSON.parse(trimmed);
+    } catch {
+      return trimmed;
+    }
+  }
+  return trimmed;
+}
+
+function normalizeParams(raw) {
+  if (!raw) return {};
+  const normalized = {};
+  Object.entries(raw).forEach(([key, value]) => {
+    normalized[key] = parseMaybeJSON(value);
+  });
+  return normalized;
+}
+
+function persistPayload(payload) {
+  try {
+    localStorage.setItem("bling_callback", JSON.stringify(payload));
+  } catch {
+    /* ignore */
+  }
+}
+
+function notifyOpener(payload) {
+  try {
+    if (window.opener && window.opener.postMessage) {
+      window.opener.postMessage(
+        { source: "bling-callback", data: payload },
+        "*"
+      );
+    }
+  } catch {
+    /* ignore */
+  }
+}
+
 export default function BlingCallback() {
   const navigate = useNavigate();
   const [info, setInfo] = useState(null);
@@ -8,82 +58,113 @@ export default function BlingCallback() {
 
   useEffect(() => {
     const qs = new URLSearchParams(window.location.search);
-    const params = Object.fromEntries(qs.entries());
+    const rawParams = Object.fromEntries(qs.entries());
+    let params = normalizeParams(rawParams);
 
-    // save to localStorage as a canonical source
-    try {
-      localStorage.setItem("bling_callback", JSON.stringify(params));
-    } catch {
-      /* ignore */
+    if (!params || !Object.keys(params).length) {
+      try {
+        const cached = localStorage.getItem("bling_callback");
+        if (cached) params = normalizeParams(JSON.parse(cached));
+      } catch {
+        /* ignore */
+      }
     }
 
-    async function finalize() {
-      setInfo(params);
+    setInfo(params);
+    if (params && Object.keys(params).length) {
+      persistPayload(params);
+    }
 
-      // If we received an authorization code but not tokens, try server-side exchange
-      if (params && params.code && !params.access_token) {
+    let timerId = null;
+
+    async function finalize(currentParams) {
+      if (!currentParams || !Object.keys(currentParams).length) {
+        setStatus(
+          "Nenhum parâmetro recebido. Se você veio de um popup, confirme se a janela foi fechada automaticamente."
+        );
+        return;
+      }
+
+      if (currentParams.error) {
+        setStatus(
+          `Fluxo interrompido pelo Bling: ${
+            currentParams.error_description || currentParams.error
+          }`
+        );
+        return;
+      }
+
+      if (currentParams.token_error) {
+        const message =
+          currentParams.token_error?.data?.error_description ||
+          currentParams.token_error?.data?.error ||
+          currentParams.token_error?.error ||
+          "Falha na troca de token";
+        setStatus(`Erro ao autenticar no Bling: ${message}`);
+        persistPayload(currentParams);
+        notifyOpener(currentParams);
+        return;
+      }
+
+      if (currentParams.access_token) {
+        persistPayload(currentParams);
+        notifyOpener(currentParams);
+        setStatus("Autenticação concluída com sucesso. Redirecionando...");
+        timerId = window.setTimeout(() => navigate("/perfil"), 1200);
+        return;
+      }
+
+      if (currentParams.code) {
         setStatus("Trocando code por token...");
         try {
           const resp = await fetch("/api/bling/exchange", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ code: params.code }),
+            body: JSON.stringify({
+              code: currentParams.code,
+              redirect_uri: currentParams.redirect_uri,
+            }),
           });
-          const data = await resp.json();
-          if (resp.ok) {
-            // store tokens and notify opener if present
-            try {
-              localStorage.setItem("bling_callback", JSON.stringify(data));
-            } catch {
-              /* ignore */
-            }
-            try {
-              if (window.opener && window.opener.postMessage)
-                window.opener.postMessage(
-                  { source: "bling-callback", data },
-                  "*"
-                );
-            } catch {
-              /* ignore */
-            }
-            setStatus("Autenticação concluída com sucesso. Redirecionando...");
-            setTimeout(() => navigate("/perfil"), 900);
+          const data = await resp.json().catch(() => ({}));
+          if (!resp.ok) {
+            const errMsg =
+              data?.error_description || data?.error || resp.statusText;
+            const payload = { ...currentParams, token_error: data };
+            setInfo(payload);
+            setStatus(`Falha na troca de token: ${errMsg}`);
+            persistPayload(payload);
+            notifyOpener(payload);
             return;
-          } else {
-            setStatus(
-              "Falha na troca de token: " +
-                (data && data.error ? data.error : resp.status)
-            );
           }
+
+          const merged = { ...currentParams, ...data };
+          setInfo(merged);
+          persistPayload(merged);
+          notifyOpener(merged);
+          if (merged.access_token) {
+            setStatus("Autenticação concluída com sucesso. Redirecionando...");
+            timerId = window.setTimeout(() => navigate("/perfil"), 1200);
+            return;
+          }
+          setStatus(
+            "Token trocado, mas resposta inesperada recebida. Verifique a aba de detalhes abaixo."
+          );
+          return;
         } catch (err) {
           setStatus("Erro ao trocar token: " + String(err));
+          return;
         }
       }
 
-      // notify opener if present even when tokens are already in params
-      try {
-        if (window.opener && window.opener.postMessage) {
-          try {
-            window.opener.postMessage(
-              { source: "bling-callback", data: params },
-              "*"
-            );
-          } catch {
-            /* ignore */
-          }
-        }
-      } catch {
-        /* ignore */
-      }
-
-      // navigate to profile after a short delay
-      const t = setTimeout(() => navigate("/perfil"), 900);
-      return () => clearTimeout(t);
+      setStatus(
+        "Parâmetros recebidos, mas nenhum token disponível. Caso necessário, tente autenticar novamente."
+      );
     }
 
-    const cancel = finalize();
+    finalize(params);
+
     return () => {
-      if (typeof cancel === "function") cancel();
+      if (timerId) window.clearTimeout(timerId);
     };
   }, [navigate]);
 

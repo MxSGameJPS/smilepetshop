@@ -4,18 +4,52 @@
 // - BLING_CLIENT_ID
 // - BLING_CLIENT_SECRET
 
+function readEnv() {
+  if (
+    typeof globalThis !== "undefined" &&
+    globalThis.process &&
+    globalThis.process.env
+  ) {
+    return globalThis.process.env;
+  }
+  return {};
+}
+
+function inferOrigin(req, env) {
+  const headers = req?.headers || {};
+  const envUrl =
+    env.BLING_PUBLIC_URL ||
+    env.BLING_APP_BASE_URL ||
+    env.NEXT_PUBLIC_SITE_URL ||
+    env.SITE_URL ||
+    env.VERCEL_URL ||
+    "";
+
+  if (envUrl) {
+    if (/^https?:\/\//i.test(envUrl)) {
+      return envUrl.replace(/\/$/, "");
+    }
+    return `https://${envUrl.replace(/\/$/, "")}`;
+  }
+
+  const hostHeader =
+    headers["x-forwarded-host"]?.split(",")[0]?.trim() ||
+    headers.host ||
+    "localhost:3000";
+  const protoHeader =
+    headers["x-forwarded-proto"]?.split(",")[0]?.trim() ||
+    (hostHeader.startsWith("localhost") ? "http" : "https");
+
+  return `${protoHeader}://${hostHeader.replace(/\/$/, "")}`;
+}
+
 export default async function handler(req, res) {
   if (req.method !== "POST") {
     res.setHeader("Allow", "POST");
     return res.status(405).json({ error: "Method not allowed" });
   }
 
-  const procEnv =
-    typeof globalThis !== "undefined" &&
-    globalThis["process"] &&
-    globalThis["process"].env
-      ? globalThis["process"].env
-      : {};
+  const procEnv = readEnv();
   const clientId = procEnv.BLING_CLIENT_ID;
   const clientSecret = procEnv.BLING_CLIENT_SECRET;
 
@@ -26,12 +60,23 @@ export default async function handler(req, res) {
     });
   }
 
+  const origin = inferOrigin(req, procEnv);
+  let redirectUri =
+    procEnv.BLING_REDIRECT_URI || `${origin}/api/bling/callback`;
+
   let body = {};
   try {
     body =
       req.body && Object.keys(req.body).length ? req.body : req.query || {};
   } catch {
     body = req.query || {};
+  }
+
+  if (body.redirect_uri || body.redirectUri) {
+    const provided = String(body.redirect_uri || body.redirectUri).trim();
+    if (provided) {
+      redirectUri = provided.replace(/\s+/g, "");
+    }
   }
 
   const grantType =
@@ -51,7 +96,8 @@ export default async function handler(req, res) {
       .json({ error: "refresh_token grant requires refresh_token" });
   }
 
-  const tokenUrl = "https://api.bling.com.br/Api/v3/oauth/token";
+  const tokenUrl =
+    procEnv.BLING_TOKEN_URL || "https://api.bling.com.br/Api/v3/oauth/token";
 
   const NodeBuffer = globalThis["Buffer"];
   const auth = NodeBuffer
@@ -60,23 +106,27 @@ export default async function handler(req, res) {
 
   const params = new URLSearchParams();
   params.append("grant_type", grantType);
-  if (grantType === "authorization_code") params.append("code", code);
-  if (grantType === "refresh_token")
+  params.append("client_id", clientId);
+  if (grantType === "authorization_code") {
+    params.append("code", code);
+    params.append("redirect_uri", redirectUri);
+  }
+  if (grantType === "refresh_token") {
     params.append("refresh_token", refreshToken);
+  }
 
   try {
     const resp = await fetch(tokenUrl, {
       method: "POST",
       headers: {
         "Content-Type": "application/x-www-form-urlencoded",
-        Accept: "1.0",
+        Accept: "application/json",
         Authorization: `Basic ${auth}`,
       },
       body: params.toString(),
     });
 
     const text = await resp.text();
-    // Try parse JSON, fallback to text
     let data;
     try {
       data = JSON.parse(text);
@@ -84,14 +134,19 @@ export default async function handler(req, res) {
       data = { raw: text };
     }
 
-    if (!resp.ok) {
-      return res
-        .status(502)
-        .json({ error: "Failed to exchange token", status: resp.status, data });
+    if (!resp.ok || data?.error) {
+      return res.status(resp.status || 502).json({
+        error: data?.error || "Failed to exchange token",
+        status: resp.status,
+        data,
+        redirect_uri: redirectUri,
+      });
     }
 
-    // Return the token response to the client (do NOT expose client_secret here)
-    return res.status(200).json(data);
+    return res.status(200).json({
+      ...data,
+      redirect_uri: redirectUri,
+    });
   } catch (err) {
     return res
       .status(500)
