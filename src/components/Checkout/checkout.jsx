@@ -50,7 +50,72 @@ export default function Checkout() {
 
     try {
       const user = getUser();
+
+      // helper to fetch remote client (tries cookies and Bearer token if available)
+      const fetchAndApplyRemoteUser = async () => {
+        try {
+          const headers = {};
+          // try to include a token if present in localStorage under common keys
+          const possibleToken =
+            localStorage.getItem("smilepet_token") ||
+            localStorage.getItem("token") ||
+            (getUser() && (getUser().token || getUser().accessToken)) ||
+            null;
+          if (possibleToken)
+            headers["Authorization"] = `Bearer ${possibleToken}`;
+
+          const res = await fetch("https://apismilepet.vercel.app/api/client", {
+            credentials: headers.Authorization ? "omit" : "include",
+            headers,
+          });
+          const data = await res.json().catch(() => null);
+          if (!res.ok) return null;
+          const client =
+            data?.data ?? data?.client ?? data?.user ?? data ?? null;
+          if (!client) return null;
+
+          const mapped = {
+            firstName: client.nome || client.firstName || client.name || "",
+            lastName: client.sobrenome || client.lastName || "",
+            email: client.email || client.emailAddress || "",
+            cpf: client.cpf || client.cpf_cliente || "",
+            phone: client.whatsapp || client.phone || client.telefone || "",
+            address1: client.rua || client.street || client.address1 || "",
+            numero: client.numero || client.number || "",
+            bairro: client.bairro || client.neighborhood || "",
+            city: client.cidade || client.city || "",
+            state: client.estado || client.state || "",
+            postal: client.cep || client.postal || "",
+          };
+          setForm((current) => ({ ...mapped, ...current }));
+          try {
+            setStoredUser(client);
+            broadcastUserUpdate(client);
+          } catch {
+            // ignore
+          }
+          return client;
+        } catch (err) {
+          console.debug("Não foi possível buscar usuário remoto:", err);
+          return null;
+        }
+      };
+
       if (user) {
+        // if the stored user is missing identifying fields, still try remote fetch
+        const hasIdent =
+          Boolean(user?.email) ||
+          Boolean(user?.nome) ||
+          Boolean(user?.id) ||
+          Boolean(user?._id) ||
+          Boolean(user?.clienteId) ||
+          Boolean(user?.clientId);
+
+        if (!hasIdent) {
+          // attempt remote lookup and apply if found
+          void fetchAndApplyRemoteUser();
+        }
+
         const mapped = {
           firstName: user.nome || user.firstName || user.name || "",
           lastName: user.sobrenome || user.lastName || "",
@@ -64,49 +129,10 @@ export default function Checkout() {
           state: user.estado || user.state || "",
           postal: user.cep || user.postal || "",
         };
-        // keep any existing draft values (draft should override saved user)
         setForm((current) => ({ ...mapped, ...current }));
       } else {
         // no local user saved — try to fetch current authenticated user from API
-        (async () => {
-          try {
-            const res = await fetch(
-              "https://apismilepet.vercel.app/api/client",
-              { credentials: "include" }
-            );
-            const data = await res.json().catch(() => null);
-            if (!res.ok) return;
-            const client =
-              data?.data ?? data?.client ?? data?.user ?? data ?? null;
-            if (!client) return;
-            const mapped = {
-              firstName: client.nome || client.firstName || client.name || "",
-              lastName: client.sobrenome || client.lastName || "",
-              email: client.email || client.emailAddress || "",
-              cpf: client.cpf || client.cpf_cliente || "",
-              phone: client.whatsapp || client.phone || client.telefone || "",
-              address1: client.rua || client.street || client.address1 || "",
-              numero: client.numero || client.number || "",
-              bairro: client.bairro || client.neighborhood || "",
-              city: client.cidade || client.city || "",
-              state: client.estado || client.state || "",
-              postal: client.cep || client.postal || "",
-            };
-            // merge mapped into form but keep any existing draft values
-            setForm((current) => ({ ...mapped, ...current }));
-            // persist canonical client locally for future renders
-            try {
-              setStoredUser(client);
-              // notify other components
-              broadcastUserUpdate(client);
-            } catch {
-              // ignore storage failures
-            }
-          } catch (err) {
-            // ignore fetch errors here — checkout can work with manual input
-            console.debug("Não foi possível buscar usuário remoto:", err);
-          }
-        })();
+        void fetchAndApplyRemoteUser();
       }
     } catch (e) {
       void e;
