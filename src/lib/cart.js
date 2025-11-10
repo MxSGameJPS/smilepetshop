@@ -60,7 +60,12 @@ export function addToCart(item) {
   return count;
 }
 
-export function updateCartItemQuantity(itemId, variante, quantidade) {
+export function updateCartItemQuantity(
+  itemId,
+  variante,
+  quantidade,
+  silent = false
+) {
   const cart = getCart();
   const keyId = String(itemId);
   const varianteKey = variante != null ? String(variante) : "";
@@ -75,17 +80,19 @@ export function updateCartItemQuantity(itemId, variante, quantidade) {
   }
   saveCart(cart);
   const count = getCartCount();
-  try {
-    window.dispatchEvent(
-      new CustomEvent("smilepet_cart_update", { detail: { count } })
-    );
-  } catch {
-    /* ignore */
+  if (!silent) {
+    try {
+      window.dispatchEvent(
+        new CustomEvent("smilepet_cart_update", { detail: { count } })
+      );
+    } catch {
+      /* ignore */
+    }
   }
   return count;
 }
 
-export function removeCartItem(itemId, variante) {
+export function removeCartItem(itemId, variante, silent = false) {
   const cart = getCart();
   const keyId = String(itemId);
   const varianteKey = variante != null ? String(variante) : "";
@@ -96,12 +103,14 @@ export function removeCartItem(itemId, variante) {
   cart.splice(idx, 1);
   saveCart(cart);
   const count = getCartCount();
-  try {
-    window.dispatchEvent(
-      new CustomEvent("smilepet_cart_update", { detail: { count } })
-    );
-  } catch {
-    /* ignore */
+  if (!silent) {
+    try {
+      window.dispatchEvent(
+        new CustomEvent("smilepet_cart_update", { detail: { count } })
+      );
+    } catch {
+      /* ignore */
+    }
   }
   return count;
 }
@@ -112,7 +121,9 @@ export function clearCart() {
     window.dispatchEvent(
       new CustomEvent("smilepet_cart_update", { detail: { count: 0 } })
     );
-  } catch {}
+  } catch {
+    /* ignore */
+  }
 }
 
 export default {

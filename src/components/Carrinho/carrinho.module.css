@@ -77,6 +77,41 @@
   display: flex;
   justify-content: center;
 }
+/* custom quantity control (minus / qty / plus) matching design */
+.qtyControl {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 10px;
+  border-radius: 12px;
+  border: 1px solid #eee;
+  background: #fff;
+}
+.qtyBtn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  border: none;
+  background: transparent;
+  color: #073b4c;
+  font-size: 18px;
+  font-weight: 700;
+  cursor: pointer;
+  border-radius: 6px;
+}
+.qtyBtn:focus {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(7, 59, 76, 0.06);
+}
+.qtyDisplay {
+  min-width: 28px;
+  text-align: center;
+  font-weight: 700;
+  color: #073b4c;
+}
 .qtySelect {
   width: 80px;
   padding: 8px 10px;
@@ -350,6 +385,57 @@
 
 .compreTambemBtn:hover {
   background: #e25500;
+}
+
+/* remove confirmation dialog */
+.removeOverlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+}
+.removeDialog {
+  width: 92%;
+  max-width: 420px;
+  background: #fff;
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 8px 28px rgba(7, 59, 76, 0.18);
+  color: #073b4c;
+}
+.removeTitle {
+  font-weight: 800;
+  font-size: 1.05rem;
+  margin-bottom: 8px;
+}
+.removeMessage {
+  color: #334;
+  margin-bottom: 18px;
+  line-height: 1.4;
+}
+.removeActions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+}
+.removeCancelBtn {
+  background: #f0f0f0;
+  color: #333;
+  border: none;
+  padding: 8px 14px;
+  border-radius: 8px;
+  cursor: pointer;
+}
+.removeConfirmBtn {
+  background: #fc6100;
+  color: #fff;
+  border: none;
+  padding: 8px 14px;
+  border-radius: 8px;
+  cursor: pointer;
 }
 
 /* High-specificity input overrides to counter global/user-agent styles (e.g. gray autofill) */

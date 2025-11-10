@@ -85,13 +85,18 @@ export default function Carrinho() {
 
   const handleQtyChange = (item, value) => {
     const q = Number(value) || 0;
-    updateCartItemQuantity(item.id, item.variante, q);
+    // update silently on cart page to avoid triggering the global modal open
+    updateCartItemQuantity(item.id, item.variante, q, true);
     setCart(getCart());
   };
 
-  const handleRemove = (item) => {
-    removeCartItem(item.id, item.variante);
+  const [pendingRemove, setPendingRemove] = useState(null);
+
+  const confirmRemove = () => {
+    if (!pendingRemove) return;
+    removeCartItem(pendingRemove.id, pendingRemove.variante, true);
     setCart(getCart());
+    setPendingRemove(null);
   };
 
   const subtotal = cart.reduce(
@@ -170,23 +175,45 @@ export default function Carrinho() {
                   </div>
                 </div>
                 <div className={styles.itemControls}>
-                  <select
-                    value={Math.max(
-                      1,
-                      Math.min(10, Number(it.quantidade) || 1)
-                    )}
-                    onChange={(e) => handleQtyChange(it, e.target.value)}
-                    className={styles.qtySelect}
-                    aria-label="Quantidade"
+                  <div
+                    className={styles.qtyControl}
+                    role="group"
+                    aria-label={`Quantidade de ${it.nome}`}
                   >
-                    {Array.from({ length: 10 }, (_, i) => i + 1).map(
-                      (opcao) => (
-                        <option key={opcao} value={opcao}>
-                          {opcao}
-                        </option>
-                      )
-                    )}
-                  </select>
+                    <button
+                      type="button"
+                      className={styles.qtyBtn}
+                      aria-label="Diminuir quantidade"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        const atual = Number(it.quantidade) || 1;
+                        const novo = Math.max(1, atual - 1);
+                        handleQtyChange(it, novo);
+                      }}
+                    >
+                      −
+                    </button>
+                    <div
+                      className={styles.qtyDisplay}
+                      aria-live="polite"
+                      onClick={(e) => e.stopPropagation()}
+                    >
+                      {Math.max(1, Number(it.quantidade) || 1)}
+                    </div>
+                    <button
+                      type="button"
+                      className={styles.qtyBtn}
+                      aria-label="Aumentar quantidade"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        const atual = Number(it.quantidade) || 1;
+                        const novo = Math.min(10, atual + 1);
+                        handleQtyChange(it, novo);
+                      }}
+                    >
+                      +
+                    </button>
+                  </div>
                 </div>
                 <div className={styles.itemTotal}>
                   <div className={styles.totalPrice}>
@@ -198,7 +225,10 @@ export default function Carrinho() {
                 <button
                   className={styles.removeBtn}
                   aria-label="Remover item"
-                  onClick={() => handleRemove(it)}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setPendingRemove(it);
+                  }}
                 >
                   🗑️
                 </button>
@@ -327,6 +357,51 @@ export default function Carrinho() {
           </div>
         )}
       </section>
+
+      {pendingRemove && (
+        <div
+          className={styles.removeOverlay}
+          role="dialog"
+          aria-modal="true"
+          onClick={() => setPendingRemove(null)}
+        >
+          <div
+            className={styles.removeDialog}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className={styles.removeTitle}>Confirmar exclusão</div>
+            <div className={styles.removeMessage}>
+              Ao excluir o produto, ele será removido do carrinho. Tem certeza
+              que deseja continuar?
+            </div>
+            <div className={styles.removeActions}>
+              <button
+                type="button"
+                className={styles.removeCancelBtn}
+                onClick={() => setPendingRemove(null)}
+              >
+                Voltar
+              </button>
+              <button
+                type="button"
+                className={styles.removeConfirmBtn}
+                onClick={() => {
+                  // perform removal and close
+                  removeCartItem(
+                    pendingRemove.id,
+                    pendingRemove.variante,
+                    true
+                  );
+                  setCart(getCart());
+                  setPendingRemove(null);
+                }}
+              >
+                Continuar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
