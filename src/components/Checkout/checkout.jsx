@@ -81,13 +81,16 @@ export default function Checkout() {
             headers["Authorization"] = `Bearer ${possibleToken}`;
 
           const res = await fetch("https://apismilepet.vercel.app/api/client", {
+            // avoid cached 304 responses in prod by forcing a fresh network request
+            cache: "no-store",
             credentials: headers.Authorization ? "omit" : "include",
             headers,
           });
           const data = await res.json().catch(() => null);
           if (!res.ok) return null;
-          const client =
-            data?.data ?? data?.client ?? data?.user ?? data ?? null;
+          let client = data?.data ?? data?.client ?? data?.user ?? data ?? null;
+          // some APIs return an array under data (e.g. data: [ { ... } ])
+          if (Array.isArray(client) && client.length > 0) client = client[0];
           return client;
         } catch (err) {
           console.debug("Não foi possível buscar usuário remoto:", err);
