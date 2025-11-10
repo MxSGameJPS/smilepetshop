@@ -39,23 +39,39 @@ export default function Checkout() {
   const [cartItems, setCartItems] = useState(() => getCart() || []);
 
   useEffect(() => {
-    try {
-      const raw = localStorage.getItem("smilepet_checkout_billing");
-      const saved = raw ? JSON.parse(raw) : null;
-      if (saved && typeof saved === "object")
-        setForm((f) => ({ ...f, ...saved }));
-    } catch (e) {
-      void e;
-    }
+    // We'll compute a finalForm object from (remote/local user) + saved draft
+    // Draft (smilepet_checkout_billing) should have precedence over user values.
+    (async () => {
+      let savedDraft = null;
+      try {
+        const raw = localStorage.getItem("smilepet_checkout_billing");
+        savedDraft = raw ? JSON.parse(raw) : null;
+      } catch {
+        savedDraft = null;
+      }
 
-    try {
-      const user = getUser();
+      // helper: map various user shapes to our form fields
+      const mapUserToForm = (u) => ({
+        firstName: u?.nome || u?.firstName || u?.name || "",
+        lastName: u?.sobrenome || u?.lastName || "",
+        email: u?.email || u?.emailAddress || "",
+        cpf: u?.cpf || u?.cpf_cliente || "",
+        phone: u?.whatsapp || u?.phone || u?.telefone || "",
+        address1: u?.rua || u?.street || u?.address1 || "",
+        numero: u?.numero || u?.number || "",
+        bairro: u?.bairro || u?.neighborhood || "",
+        city: u?.cidade || u?.city || "",
+        state: u?.estado || u?.state || "",
+        postal: u?.cep || u?.postal || "",
+      });
 
-      // helper to fetch remote client (tries cookies and Bearer token if available)
-      const fetchAndApplyRemoteUser = async () => {
+      // try local stored user first
+      const localUser = getUser();
+
+      // helper to fetch remote user (tries cookies or token if present)
+      const fetchRemoteUser = async () => {
         try {
           const headers = {};
-          // try to include a token if present in localStorage under common keys
           const possibleToken =
             localStorage.getItem("smilepet_token") ||
             localStorage.getItem("token") ||
@@ -72,28 +88,6 @@ export default function Checkout() {
           if (!res.ok) return null;
           const client =
             data?.data ?? data?.client ?? data?.user ?? data ?? null;
-          if (!client) return null;
-
-          const mapped = {
-            firstName: client.nome || client.firstName || client.name || "",
-            lastName: client.sobrenome || client.lastName || "",
-            email: client.email || client.emailAddress || "",
-            cpf: client.cpf || client.cpf_cliente || "",
-            phone: client.whatsapp || client.phone || client.telefone || "",
-            address1: client.rua || client.street || client.address1 || "",
-            numero: client.numero || client.number || "",
-            bairro: client.bairro || client.neighborhood || "",
-            city: client.cidade || client.city || "",
-            state: client.estado || client.state || "",
-            postal: client.cep || client.postal || "",
-          };
-          setForm((current) => ({ ...mapped, ...current }));
-          try {
-            setStoredUser(client);
-            broadcastUserUpdate(client);
-          } catch {
-            // ignore
-          }
           return client;
         } catch (err) {
           console.debug("Não foi possível buscar usuário remoto:", err);
@@ -101,42 +95,52 @@ export default function Checkout() {
         }
       };
 
-      if (user) {
-        // if the stored user is missing identifying fields, still try remote fetch
+      let finalUser = null;
+      if (localUser) {
+        // if the local user seems empty, try to fetch remote
         const hasIdent =
-          Boolean(user?.email) ||
-          Boolean(user?.nome) ||
-          Boolean(user?.id) ||
-          Boolean(user?._id) ||
-          Boolean(user?.clienteId) ||
-          Boolean(user?.clientId);
-
+          Boolean(localUser?.email) ||
+          Boolean(localUser?.nome) ||
+          Boolean(localUser?.id) ||
+          Boolean(localUser?._id) ||
+          Boolean(localUser?.clienteId) ||
+          Boolean(localUser?.clientId);
+        finalUser = localUser;
         if (!hasIdent) {
-          // attempt remote lookup and apply if found
-          void fetchAndApplyRemoteUser();
+          const remote = await fetchRemoteUser();
+          if (remote) finalUser = { ...(localUser || {}), ...(remote || {}) };
         }
-
-        const mapped = {
-          firstName: user.nome || user.firstName || user.name || "",
-          lastName: user.sobrenome || user.lastName || "",
-          email: user.email || user.emailAddress || "",
-          cpf: user.cpf || user.cpf_cliente || "",
-          phone: user.whatsapp || user.phone || user.telefone || "",
-          address1: user.rua || user.street || user.address1 || "",
-          numero: user.numero || user.number || "",
-          bairro: user.bairro || user.neighborhood || "",
-          city: user.cidade || user.city || "",
-          state: user.estado || user.state || "",
-          postal: user.cep || user.postal || "",
-        };
-        setForm((current) => ({ ...mapped, ...current }));
       } else {
-        // no local user saved — try to fetch current authenticated user from API
-        void fetchAndApplyRemoteUser();
+        const remote = await fetchRemoteUser();
+        if (remote) finalUser = remote;
       }
-    } catch (e) {
-      void e;
-    }
+
+      // build mapped values and apply draft precedence
+      const mapped = finalUser ? mapUserToForm(finalUser) : {};
+      const finalForm =
+        savedDraft && typeof savedDraft === "object"
+          ? { ...mapped, ...savedDraft }
+          : { ...mapped };
+
+      // apply once
+      setForm((current) => ({ ...current, ...finalForm }));
+
+      // if we fetched a remote user, persist merging with any existing stored user
+      try {
+        if (finalUser) {
+          const existing = getUser() || {};
+          const merged = { ...existing, ...finalUser };
+          // avoid overwriting token with empty values: if merged doesn't have token but existing had, keep existing.token
+          if (!merged.token && existing.token) merged.token = existing.token;
+          if (!merged.accessToken && existing.accessToken)
+            merged.accessToken = existing.accessToken;
+          setStoredUser(merged);
+          broadcastUserUpdate(merged);
+        }
+      } catch {
+        // ignore storage failures
+      }
+    })();
   }, []);
 
   // subscribe to cart changes (custom events and storage fallback)
