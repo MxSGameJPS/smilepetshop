@@ -34,6 +34,7 @@ import CadastroUsuario from "./components/Usuario/cadastro/cadastroUsuario";
 import Perfil from "./components/Usuario/perfil/perfil";
 import MeusPedidos from "./components/Usuario/pedidos/pedidos";
 import Header from "./components/Header/header";
+import CarrinhoModal from "./components/carrinhoModal/carrinhoModal";
 import BlingCallback from "./components/Bling/callback";
 import AdmPage from "./components/Administracao/admPage";
 
@@ -97,6 +98,7 @@ function App() {
         </main>
       </div>
       <Footer />
+      <CarrinhoModal />
     </Router>
   );
 }
