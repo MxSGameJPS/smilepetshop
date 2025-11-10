@@ -5,9 +5,73 @@
   margin-top: 170px;
 }
 .container {
-  max-width: 980px;
+  max-width: 1400px;
   margin: 0 auto;
   background: transparent;
+}
+.layout {
+  display: grid;
+  grid-template-columns: 1fr 520px 420px;
+  gap: 24px;
+  align-items: start;
+}
+.leftCol {
+  background: transparent;
+}
+.centerCol {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+.box {
+  background: #fff;
+  border: 1px solid #eee;
+  border-radius: 10px;
+  padding: 14px;
+  box-shadow: 0 2px 8px rgba(7, 59, 76, 0.04);
+}
+.box h3 {
+  margin: 0 0 8px 0;
+  font-size: 1.05rem;
+  color: #073b4c;
+}
+.boxContent {
+  color: #666;
+  font-size: 0.95rem;
+}
+.rightCol {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.summaryCard {
+  background: #fff;
+  border: 1px solid #eee;
+  border-radius: 12px;
+  padding: 12px;
+  box-shadow: 0 4px 16px rgba(7, 59, 76, 0.04);
+}
+.summaryCard h3 {
+  margin: 0 0 10px 0;
+  color: #073b4c;
+}
+.summaryItems {
+  min-height: 120px;
+  border-top: 1px dashed #f0f0f0;
+  margin-top: 8px;
+  padding-top: 8px;
+}
+.emptySummary {
+  color: #888;
+  padding: 12px 0;
+}
+.summaryTotal {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 12px;
+  font-weight: 800;
+  color: #073b4c;
 }
 .title {
   font-size: 1.8rem;
@@ -19,11 +83,13 @@
   display: flex;
   flex-direction: column;
   gap: 12px;
+  justify-content: flex-start;
 }
 .row2 {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 12px;
+  align-items: flex-start;
 }
 
 /* Specific row where address + numero sit: make address wider */
@@ -34,6 +100,7 @@
   display: flex;
   flex-direction: column;
   gap: 8px;
+  justify-content: flex-start;
 }
 /* allow grid children to shrink properly and avoid overflow */
 .row2 > .field {
@@ -53,6 +120,7 @@
 .field span {
   font-size: 0.9rem;
   color: #666;
+  justify-content: flex-start;
 }
 
 .checkbox {
@@ -92,6 +160,19 @@
   }
 }
 
+@media (max-width: 1000px) {
+  .layout {
+    grid-template-columns: 1fr;
+  }
+  .centerCol,
+  .rightCol {
+    order: 2;
+  }
+  .leftCol {
+    order: 1;
+  }
+}
+
 /* Make the 'numero' input smaller on wide screens while keeping responsive behavior */
 /* Make numero input fill its grid column (which is fixed at 120px) */
 .rowAddress .field:nth-child(2) input[name="numero"] {
@@ -104,4 +185,155 @@
   .rowAddress {
     grid-template-columns: 1fr 120px;
   }
+}
+
+/* step actions */
+.actionsSingle {
+  display: flex;
+  justify-content: flex-start;
+  margin-top: 16px;
+}
+.primaryAction {
+  background: #fc6100;
+  color: #fff;
+  padding: 6px 8px;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+  font-weight: 700;
+}
+
+/* personal summary card shown after advancing to delivery/payment */
+.personCard {
+  background: #fff;
+  border: 1px solid #eee;
+  border-radius: 12px;
+  padding: 14px;
+  box-shadow: 0 2px 8px rgba(7, 59, 76, 0.04);
+}
+.personHeader {
+  display: flex;
+  justify-content: flex-end;
+}
+.editBtn {
+  background: transparent;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  padding: 6px 8px;
+  border-radius: 8px;
+  cursor: pointer;
+  color: #073b4c;
+}
+.personBody {
+  padding: 8px 0 0 0;
+  color: #073b4c;
+  justify-content: flex-start;
+}
+.personEmail {
+  color: #666;
+  margin-bottom: 8px;
+  justify-content: flex-start;
+}
+.personName {
+  font-weight: 800;
+  margin-bottom: 6px;
+  justify-content: flex-start;
+}
+.personPhone {
+  color: #444;
+  justify-content: flex-start;
+}
+.deliveryActions {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  margin-top: 22px;
+}
+.payMethods {
+  display: flex;
+  gap: 8px;
+  margin-top: 8px;
+}
+.payBtn {
+  padding: 8px 12px;
+  border: 1px solid #ddd;
+  background: #fff;
+  border-radius: 8px;
+  cursor: pointer;
+  color: #073b4c;
+}
+.payBtn:hover {
+  background: #f7f7f7;
+}
+.active {
+  border-color: #fc6100;
+  background: #fff7f0;
+}
+
+/* delivery summary shown above payment */
+.deliverySummary {
+  background: #fff;
+  border: 1px solid #eee;
+  border-radius: 10px;
+  padding: 12px;
+  box-shadow: 0 2px 8px rgba(7, 59, 76, 0.04);
+}
+.deliveryHeader {
+  display: flex;
+  justify-content: flex-end;
+}
+.deliveryBody {
+  padding-top: 8px;
+  color: #073b4c;
+  justify-content: flex-start;
+}
+.deliveryAddressLine {
+  font-size: 0.95rem;
+  color: #444;
+  justify-content: flex-start;
+  margin-bottom: 4px;
+}
+.deliveryNote {
+  font-size: 0.85rem;
+  color: #666;
+  margin-top: 8px;
+  justify-content: flex-start;
+}
+
+/* summary item row */
+.summaryItem {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 0;
+  border-bottom: 1px dashed #f2f2f2;
+}
+.itemLeft {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+.itemName {
+  font-weight: 700;
+  color: #073b4c;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 220px;
+  text-align: start;
+}
+.itemVariant {
+  font-size: 0.85rem;
+  color: #666;
+}
+.itemRight {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.itemQty {
+  color: #666;
+}
+.itemPrice {
+  font-weight: 800;
+  color: #073b4c;
 }

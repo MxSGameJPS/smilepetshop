@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import styles from "./checkout.module.css";
 import { useNavigate } from "react-router-dom";
 import { getUser } from "../../lib/auth";
+import { getCart } from "../../lib/cart";
 
 export default function Checkout() {
   const navigate = useNavigate();
@@ -12,6 +13,7 @@ export default function Checkout() {
     company: "",
     address1: "",
     numero: "",
+    bairro: "",
     address2: "",
     city: "",
     state: "",
@@ -20,139 +22,96 @@ export default function Checkout() {
     email: "",
     shipDifferent: false,
     notes: "",
+    paymentMethod: "",
+    cardNumber: "",
+    installments: 1,
+    cardName: "",
+    cardMonth: "",
+    cardYear: "",
+    cardCvv: "",
+    cardCpf: "",
   });
+  const [step, setStep] = useState("personal");
+  const [cartItems, setCartItems] = useState(() => getCart() || []);
 
-  // pre-fill form from logged-in user if available
   useEffect(() => {
-    let mounted = true;
-    async function loadUserData() {
-      try {
-        const u = getUser();
-        if (!u) return;
-
-        // determine id field (support several possible shapes)
-        let id =
-          u.id ||
-          u._id ||
-          u.uuid ||
-          u.clientId ||
-          u.cliente_id ||
-          (u.user && (u.user.id || u.user._id)) ||
-          null;
-
-        let data = null;
-        if (id) {
-          const resp = await fetch(
-            `https://apismilepet.vercel.app/api/client/${id}`
-          );
-          // consider 2xx and 304 as acceptable (server may return 304 Not Modified)
-          if (resp.status >= 200 && resp.status < 400)
-            data = await resp.json().catch(() => null);
-        }
-
-        // if we still don't have id/email but we have a token (JWT), try decode it
-        if (!data && !id && u && typeof u.token === "string") {
-          try {
-            const t = u.token;
-            const parts = t.split(".");
-            if (parts.length === 3) {
-              const payload = parts[1].replace(/-/g, "+").replace(/_/g, "/");
-              const json = decodeURIComponent(
-                atob(payload)
-                  .split("")
-                  .map(function (c) {
-                    return (
-                      "%" + ("00" + c.charCodeAt(0).toString(16)).slice(-2)
-                    );
-                  })
-                  .join("")
-              );
-              const obj = JSON.parse(json);
-              // try common fields
-              id = id || obj.id || obj._id || obj.sub || obj.userId || null;
-              if (!data && id) {
-                const resp2 = await fetch(
-                  `https://apismilepet.vercel.app/api/client/${id}`
-                );
-                if (resp2.status >= 200 && resp2.status < 400)
-                  data = await resp2.json().catch(() => null);
-              }
-              // if token payload has email, we can use it later for fallback
-              if (!u.email && obj.email) u.email = obj.email;
-            }
-          } catch {
-            // ignore decode errors
-          }
-        }
-
-        // if we didn't get data by id, try to find by email (fallback)
-        if (!data && u.email) {
-          try {
-            const listResp = await fetch(
-              `https://apismilepet.vercel.app/api/client`
-            );
-            if (listResp.status >= 200 && listResp.status < 400) {
-              const listData = await listResp.json().catch(() => null);
-              const arr = Array.isArray(listData)
-                ? listData
-                : listData?.data || listData?.items || listData?.clientes || [];
-              const matched = arr.find((it) => {
-                const em = (it.email || it.e_mail || it.correo || "") + "";
-                return em.toLowerCase() === String(u.email).toLowerCase();
-              });
-              if (matched) data = matched;
-            }
-          } catch {
-            // ignore
-          }
-        }
-
-        if (!data) return;
-
-        // normalize returned client data to our form shape
-        const client = data?.data || data?.client || data;
-        const mapped = {
-          firstName: client.first_name || client.nome || client.name || "",
-          lastName: client.last_name || client.sobrenome || "",
-          cpf: client.cpf || client.cpf_cnpj || client.document || "",
-          company: client.company || "",
-          address1: client.address1 || client.rua || client.logradouro || "",
-          numero: client.numero || client.number || "",
-          address2: client.address2 || client.complemento || "",
-          city: client.city || client.cidade || "",
-          state: client.state || client.estado || "",
-          postal: client.postal || client.cep || client.cep_cliente || "",
-          phone: client.phone || client.whatsapp || client.telefone || "",
-          email: client.email || "",
-        };
-
-        if (mounted) {
-          // debug: log what we are about to set so developer can inspect
-          try {
-            console.debug("checkout: fetched client ->", client);
-            console.debug("checkout: mapped form ->", mapped);
-          } catch {
-            // ignore
-          }
-          setForm((f) => ({ ...f, ...mapped }));
-        }
-      } catch {
-        // ignore failures silently
-      }
+    try {
+      const raw = localStorage.getItem("smilepet_checkout_billing");
+      const saved = raw ? JSON.parse(raw) : null;
+      if (saved && typeof saved === "object")
+        setForm((f) => ({ ...f, ...saved }));
+    } catch (e) {
+      void e;
     }
 
-    loadUserData();
+    try {
+      const user = getUser();
+      if (!user) return;
+      const mapped = {
+        firstName: user.nome || user.firstName || user.name || "",
+        lastName: user.sobrenome || user.lastName || "",
+        email: user.email || user.emailAddress || "",
+        cpf: user.cpf || user.cpf_cliente || "",
+        phone: user.whatsapp || user.phone || user.telefone || "",
+        address1: user.rua || user.street || user.address1 || "",
+        numero: user.numero || user.number || "",
+        bairro: user.bairro || user.neighborhood || "",
+        city: user.cidade || user.city || "",
+        state: user.estado || user.state || "",
+        postal: user.cep || user.postal || "",
+      };
+      setForm((current) => ({ ...mapped, ...current }));
+    } catch (e) {
+      void e;
+    }
+  }, []);
+
+  // subscribe to cart changes (custom events and storage fallback)
+  useEffect(() => {
+    const reload = () => setCartItems(getCart() || []);
+
+    // common custom event names (project used a custom event to broadcast cart updates)
+    window.addEventListener("smilepet_cart_update", reload);
+    window.addEventListener("smilepet_cart_updated", reload);
+    window.addEventListener("cart-update", reload);
+
+    // storage event (cross-tab) - when localStorage smilepet_cart changes
+    const onStorage = (e) => {
+      if (e.key === "smilepet_cart") reload();
+    };
+    window.addEventListener("storage", onStorage);
+
     return () => {
-      mounted = false;
+      window.removeEventListener("smilepet_cart_update", reload);
+      window.removeEventListener("smilepet_cart_updated", reload);
+      window.removeEventListener("cart-update", reload);
+      window.removeEventListener("storage", onStorage);
     };
   }, []);
 
+  const formatPrice = (v) => {
+    const num = Number(v) || 0;
+    return new Intl.NumberFormat("pt-BR", {
+      style: "currency",
+      currency: "BRL",
+    }).format(num);
+  };
+
+  const summaryTotal = cartItems.reduce((acc, it) => {
+    const qty =
+      Number(it.quantidade ?? it.quantity ?? it.qtd ?? it.qty ?? 1) || 0;
+    const priceRaw =
+      Number(
+        it.precoUnit ?? it.preco ?? it.price ?? it.valor ?? it.unit_price ?? 0
+      ) || 0;
+    // assume precoUnit is already BRL number; if very large, treat as cents
+    const priceNorm = priceRaw > 10000 ? priceRaw / 100 : priceRaw;
+    return acc + qty * priceNorm;
+  }, 0);
+
   const handleCpfChange = (e) => {
-    // allow only digits for CPF
     const digits = (e.target.value || "").replace(/\D/g, "");
-    // limit to 11 digits (CPF)
-    const limited = digits.slice(0, 11);
-    setForm((f) => ({ ...f, cpf: limited }));
+    setForm((f) => ({ ...f, cpf: digits.slice(0, 11) }));
   };
 
   const handleChange = (e) => {
@@ -161,11 +120,47 @@ export default function Checkout() {
   };
 
   const handlePostalChange = (e) => {
-    // allow only digits
     const digits = (e.target.value || "").replace(/\D/g, "");
-    // limit to 8 characters (CEP padrão BR)
-    const limited = digits.slice(0, 8);
-    setForm((f) => ({ ...f, postal: limited }));
+    setForm((f) => ({ ...f, postal: digits.slice(0, 8) }));
+  };
+
+  const goToDelivery = () => {
+    if (!form.firstName || !form.lastName || !form.email || !form.phone) {
+      alert(
+        "Preencha Primeiro nome, Sobrenome, E-mail e Telefone antes de continuar."
+      );
+      return;
+    }
+    setStep("delivery");
+    try {
+      localStorage.setItem("smilepet_checkout_billing", JSON.stringify(form));
+    } catch (e) {
+      void e;
+    }
+  };
+
+  const goToPayment = () => {
+    if (!form.postal || !form.address1 || !form.numero || !form.city) {
+      alert(
+        "Preencha CEP, Rua, Número e Cidade antes de continuar para o pagamento."
+      );
+      return;
+    }
+    setStep("payment");
+  };
+
+  const handlePaymentMethod = (method) =>
+    setForm((f) => ({ ...f, paymentMethod: method }));
+  const handleCardChange = (e) =>
+    setForm((f) => ({ ...f, [e.target.name]: e.target.value }));
+
+  const performPayment = async () => {
+    alert("Compra finalizada");
+    try {
+      await handleSubmit({ preventDefault: () => {} });
+    } catch (e) {
+      void e;
+    }
   };
 
   const handleSubmit = async (e) => {
@@ -173,7 +168,6 @@ export default function Checkout() {
     const ENDPOINT =
       "https://apismilepet.vercel.app/api/checkout/billing/create";
     try {
-      // map local camelCase form fields to API expected snake_case
       const payload = {
         first_name: form.firstName,
         last_name: form.lastName,
@@ -202,13 +196,11 @@ export default function Checkout() {
         alert("Erro ao enviar dados. Tente novamente mais tarde.");
         return;
       }
-      // salvar localmente também como backup
       try {
         localStorage.setItem("smilepet_checkout_billing", JSON.stringify(form));
       } catch (err) {
         console.warn("localStorage save failed", err);
       }
-      // navegar para a página de confirmação do pedido
       navigate("/pedido", { replace: true });
     } catch (err) {
       console.error(err);
@@ -219,157 +211,456 @@ export default function Checkout() {
   return (
     <div className={styles.page}>
       <div className={styles.container}>
-        <h1 className={styles.title}>Detalhes de faturamento</h1>
+        <div className={styles.layout}>
+          <main className={styles.leftCol}>
+            <h1 className={styles.title}>Dados pessoais</h1>
 
-        <form className={styles.form} onSubmit={handleSubmit}>
-          <div className={styles.row2}>
-            <label className={styles.field}>
-              <span>Primeiro nome *</span>
-              <input
-                name="firstName"
-                value={form.firstName}
-                onChange={handleChange}
-                required
-              />
-            </label>
-            <label className={styles.field}>
-              <span>Sobrenome *</span>
-              <input
-                name="lastName"
-                value={form.lastName}
-                onChange={handleChange}
-                required
-              />
-            </label>
-            <label className={styles.field}>
-              <span>CPF</span>
-              <input
-                name="cpf"
-                value={form.cpf}
-                onChange={handleCpfChange}
-                inputMode="numeric"
-                placeholder="Apenas números"
-                maxLength={11}
-              />
-            </label>
-          </div>
+            {step === "personal" ? (
+              <form className={styles.form} onSubmit={handleSubmit}>
+                <div className={styles.row2}>
+                  <label className={styles.field}>
+                    <span>Primeiro nome *</span>
+                    <input
+                      name="firstName"
+                      value={form.firstName}
+                      onChange={handleChange}
+                      required
+                    />
+                  </label>
+                  <label className={styles.field}>
+                    <span>Sobrenome *</span>
+                    <input
+                      name="lastName"
+                      value={form.lastName}
+                      onChange={handleChange}
+                      required
+                    />
+                  </label>
+                  <label className={styles.field}>
+                    <span>Endereço de email *</span>
+                    <input
+                      name="email"
+                      type="email"
+                      value={form.email}
+                      onChange={handleChange}
+                      required
+                    />
+                  </label>
+                  <label className={styles.field}>
+                    <span>CPF</span>
+                    <input
+                      name="cpf"
+                      value={form.cpf}
+                      onChange={handleCpfChange}
+                      inputMode="numeric"
+                      placeholder="Apenas números"
+                      maxLength={11}
+                    />
+                  </label>
+                  <label className={styles.field}>
+                    <span>Telefone *</span>
+                    <input
+                      name="phone"
+                      value={form.phone}
+                      onChange={handleChange}
+                      required
+                    />
+                  </label>
+                </div>
 
-          <label className={styles.field}>
-            <span>Nome da empresa (opcional)</span>
-            <input
-              name="company"
-              value={form.company}
-              onChange={handleChange}
-            />
-          </label>
+                <div className={styles.actionsSingle}>
+                  <button
+                    type="button"
+                    className={styles.primaryAction}
+                    onClick={goToDelivery}
+                  >
+                    IR PARA A ENTREGA
+                  </button>
+                </div>
+              </form>
+            ) : (
+              <div className={styles.personCard}>
+                <div className={styles.personHeader}>
+                  <button
+                    type="button"
+                    className={styles.editBtn}
+                    onClick={() => setStep("personal")}
+                  >
+                    Alterar
+                  </button>
+                </div>
+                <div className={styles.personBody}>
+                  <div className={styles.personEmail}>{form.email}</div>
+                  <div className={styles.personName}>
+                    {(form.firstName || "") +
+                      (form.lastName ? ` ${form.lastName}` : "")}
+                  </div>
+                  <div className={styles.personPhone}>{form.phone}</div>
+                </div>
+              </div>
+            )}
+          </main>
 
-          <div className={styles.row2}>
-            <label className={styles.field}>
-              <span>CEP *</span>
-              <input
-                name="postal"
-                value={form.postal}
-                onChange={handlePostalChange}
-                inputMode="numeric"
-                pattern="\d*"
-                maxLength={8}
-                required
-              />
-            </label>
-            <label className={styles.field}>
-              <span>Estado</span>
-              <input name="state" value={form.state} onChange={handleChange} />
-            </label>
-          </div>
+          <aside className={styles.centerCol}>
+            {step === "personal" && (
+              <>
+                <div className={styles.box}>
+                  <h3>Entrega</h3>
+                  <div className={styles.boxContent}>
+                    Aguardando o preenchimento dos dados
+                  </div>
+                </div>
+                <div className={styles.box}>
+                  <h3>Pagamento</h3>
+                  <div className={styles.boxContent}>
+                    Aguardando o preenchimento dos dados
+                  </div>
+                </div>
+              </>
+            )}
 
-          <div className={`${styles.row2} ${styles.rowAddress}`}>
-            <label className={styles.field}>
-              <span>Endereço da Rua *</span>
-              <input
-                name="address1"
-                value={form.address1}
-                onChange={handleChange}
-                required
-                placeholder="Nome da rua"
-              />
-            </label>
-            <label className={styles.field}>
-              <span>Número *</span>
-              <input
-                name="numero"
-                value={form.numero}
-                onChange={handleChange}
-                required
-                placeholder="Ex: 123"
-              />
-            </label>
-          </div>
-          <label className={styles.field}>
-            <span>Complemento</span>
-            <input
-              name="address2"
-              value={form.address2}
-              onChange={handleChange}
-              placeholder="Apartamento, suíte, unidade, etc. (opcional)"
-            />
-          </label>
+            {step === "delivery" && (
+              <div className={styles.box}>
+                <h3>Entrega</h3>
+                <div className={styles.boxContent}>
+                  <div className={styles.row2}>
+                    <label className={styles.field}>
+                      <span>CEP *</span>
+                      <input
+                        name="postal"
+                        value={form.postal}
+                        onChange={handlePostalChange}
+                        inputMode="numeric"
+                        pattern="\\d*"
+                        maxLength={8}
+                        required
+                      />
+                    </label>
+                    <label className={styles.field}>
+                      <span>Estado</span>
+                      <input
+                        name="state"
+                        value={form.state}
+                        onChange={handleChange}
+                      />
+                    </label>
+                  </div>
 
-          <div className={styles.row2}>
-            <label className={styles.field}>
-              <span>Cidade *</span>
-              <input
-                name="city"
-                value={form.city}
-                onChange={handleChange}
-                required
-              />
-            </label>
-            <label className={styles.field}>
-              <span>Telefone *</span>
-              <input
-                name="phone"
-                value={form.phone}
-                onChange={handleChange}
-                required
-              />
-            </label>
-          </div>
+                  <div className={`${styles.row2} ${styles.rowAddress}`}>
+                    <label className={styles.field}>
+                      <span>Rua *</span>
+                      <input
+                        name="address1"
+                        value={form.address1}
+                        onChange={handleChange}
+                        required
+                        placeholder="Nome da rua"
+                      />
+                    </label>
+                    <label className={styles.field}>
+                      <span>Número *</span>
+                      <input
+                        name="numero"
+                        value={form.numero}
+                        onChange={handleChange}
+                        required
+                        placeholder="Ex: 123"
+                      />
+                    </label>
+                  </div>
 
-          <label className={styles.field}>
-            <span>Endereço de email *</span>
-            <input
-              name="email"
-              type="email"
-              value={form.email}
-              onChange={handleChange}
-              required
-            />
-          </label>
+                  <div className={styles.row2}>
+                    <label className={styles.field}>
+                      <span>Complemento</span>
+                      <input
+                        name="address2"
+                        value={form.address2}
+                        onChange={handleChange}
+                        placeholder="Apartamento, suíte, unidade, etc. (opcional)"
+                      />
+                    </label>
+                    <label className={styles.field}>
+                      <span>Bairro</span>
+                      <input
+                        name="bairro"
+                        value={form.bairro}
+                        onChange={handleChange}
+                      />
+                    </label>
+                  </div>
 
-          <label className={styles.field}>
-            <span>Observações sobre o pedido (opcional)</span>
-            <textarea
-              name="notes"
-              value={form.notes}
-              onChange={handleChange}
-              rows={4}
-              placeholder="Observações sobre o seu pedido, por exemplo, notas especiais para a entrega."
-            ></textarea>
-          </label>
+                  <div className={styles.row2}>
+                    <label className={styles.field}>
+                      <span>Cidade *</span>
+                      <input
+                        name="city"
+                        value={form.city}
+                        onChange={handleChange}
+                        required
+                      />
+                    </label>
+                    <div className={styles.deliveryActions}>
+                      <button
+                        type="button"
+                        className={styles.backBtn}
+                        onClick={() => setStep("personal")}
+                      >
+                        Voltar
+                      </button>
+                      <button
+                        type="button"
+                        className={styles.primaryAction}
+                        onClick={goToPayment}
+                      >
+                        Ir para o Pagamento
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
 
-          <div className={styles.actions}>
-            <button type="submit" className={styles.submitBtn}>
-              Continuar
-            </button>
-            <button
-              type="button"
-              className={styles.backBtn}
-              onClick={() => navigate(-1)}
-            >
-              Voltar
-            </button>
-          </div>
-        </form>
+            {step === "payment" && (
+              <>
+                <div className={styles.deliverySummary}>
+                  <div className={styles.deliveryHeader}>
+                    <button
+                      type="button"
+                      className={styles.editBtn}
+                      onClick={() => setStep("delivery")}
+                    >
+                      Alterar
+                    </button>
+                  </div>
+                  <div className={styles.deliveryBody}>
+                    <div className={styles.deliveryAddressLine}>
+                      {form.address1} {form.numero}
+                      {form.address2 ? `, ${form.address2}` : ""}
+                    </div>
+                    <div className={styles.deliveryAddressLine}>
+                      {form.bairro ? `${form.bairro} - ` : ""}
+                      {form.city} - {form.state}
+                    </div>
+                    <div className={styles.deliveryAddressLine}>
+                      {form.postal}
+                    </div>
+                    <div className={styles.deliveryNote}>
+                      Entrega estimada: Em até 9 dias úteis
+                    </div>
+                  </div>
+                </div>
+
+                <div className={styles.box}>
+                  <h3>Pagamento</h3>
+                  <div className={styles.boxContent}>
+                    <div className={styles.field}>
+                      <span>Método de pagamento</span>
+                      <div className={styles.payMethods}>
+                        <button
+                          type="button"
+                          className={`${styles.payBtn} ${
+                            form.paymentMethod === "PIX" ? styles.active : ""
+                          }`}
+                          onClick={() => handlePaymentMethod("PIX")}
+                        >
+                          PIX
+                        </button>
+                        <button
+                          type="button"
+                          className={`${styles.payBtn} ${
+                            form.paymentMethod === "BOLETO" ? styles.active : ""
+                          }`}
+                          onClick={() => handlePaymentMethod("BOLETO")}
+                        >
+                          BOLETO
+                        </button>
+                        <button
+                          type="button"
+                          className={`${styles.payBtn} ${
+                            form.paymentMethod === "CARD" ? styles.active : ""
+                          }`}
+                          onClick={() => handlePaymentMethod("CARD")}
+                        >
+                          CARTÃO DE CRÉDITO
+                        </button>
+                      </div>
+                    </div>
+
+                    {form.paymentMethod === "CARD" && (
+                      <div>
+                        <label className={styles.field}>
+                          <span>Número do cartão</span>
+                          <input
+                            name="cardNumber"
+                            value={form.cardNumber}
+                            onChange={handleCardChange}
+                          />
+                        </label>
+                        <label className={styles.field}>
+                          <span>Parcelas</span>
+                          <select
+                            name="installments"
+                            value={form.installments}
+                            onChange={handleCardChange}
+                          >
+                            {[1, 2, 3, 4, 5].map((n) => (
+                              <option key={n} value={n}>
+                                {n}x
+                              </option>
+                            ))}
+                          </select>
+                        </label>
+                        <label className={styles.field}>
+                          <span>Nome impresso no cartão</span>
+                          <input
+                            name="cardName"
+                            value={form.cardName}
+                            onChange={handleCardChange}
+                          />
+                        </label>
+                        <div className={styles.row2}>
+                          <label className={styles.field}>
+                            <span>Mes</span>
+                            <select
+                              name="cardMonth"
+                              value={form.cardMonth}
+                              onChange={handleCardChange}
+                            >
+                              {Array.from({ length: 12 }, (_, i) => i + 1).map(
+                                (m) => (
+                                  <option
+                                    key={m}
+                                    value={String(m).padStart(2, "0")}
+                                  >
+                                    {String(m).padStart(2, "0")}
+                                  </option>
+                                )
+                              )}
+                            </select>
+                          </label>
+                          <label className={styles.field}>
+                            <span>Ano</span>
+                            <select
+                              name="cardYear"
+                              value={form.cardYear}
+                              onChange={handleCardChange}
+                            >
+                              {Array.from(
+                                { length: 11 },
+                                (_, i) => new Date().getFullYear() + i
+                              ).map((y) => (
+                                <option key={y} value={y}>
+                                  {y}
+                                </option>
+                              ))}
+                            </select>
+                          </label>
+                        </div>
+                        <div className={styles.row2}>
+                          <label className={styles.field}>
+                            <span>Codigo de segurança</span>
+                            <input
+                              name="cardCvv"
+                              value={form.cardCvv}
+                              onChange={handleCardChange}
+                            />
+                          </label>
+                          <label className={styles.field}>
+                            <span>CPF do Titular</span>
+                            <input
+                              name="cardCpf"
+                              value={form.cardCpf}
+                              onChange={handleCardChange}
+                            />
+                          </label>
+                        </div>
+                      </div>
+                    )}
+
+                    <div className={styles.actions}>
+                      <button
+                        type="button"
+                        className={styles.backBtn}
+                        onClick={() => setStep("delivery")}
+                      >
+                        Voltar
+                      </button>
+                      <button
+                        type="button"
+                        className={styles.submitBtn}
+                        onClick={performPayment}
+                      >
+                        Efetuar pagamento
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </>
+            )}
+          </aside>
+
+          <aside className={styles.rightCol}>
+            <div className={styles.summaryCard}>
+              <h3>Resumo da Compra</h3>
+              <div className={styles.summaryItems}>
+                {cartItems && cartItems.length > 0 ? (
+                  cartItems.map((it, idx) => {
+                    const name =
+                      it.title ||
+                      it.nome ||
+                      it.name ||
+                      it.productName ||
+                      it.nome_produto ||
+                      "Item";
+                    const qty =
+                      Number(
+                        it.quantity ?? it.quantidade ?? it.qtd ?? it.qty ?? 1
+                      ) || 1;
+                    // prefer the cart's precoUnit field (canonical in cart.js),
+                    // then fall back to other common names
+                    const priceRaw =
+                      Number(
+                        it.precoUnit ??
+                          it.preco ??
+                          it.price ??
+                          it.valor ??
+                          it.unit_price ??
+                          0
+                      ) || 0;
+                    const price = priceRaw > 10000 ? priceRaw / 100 : priceRaw;
+                    const lineTotal = qty * price;
+                    return (
+                      <div key={idx} className={styles.summaryItem}>
+                        <div className={styles.itemLeft}>
+                          <div className={styles.itemName}>{name}</div>
+                          {(it.variant || it.variante) && (
+                            <div className={styles.itemVariant}>
+                              {it.variant || it.variante}
+                            </div>
+                          )}
+                        </div>
+                        <div className={styles.itemRight}>
+                          <div className={styles.itemQty}>x{qty}</div>
+                          <div className={styles.itemPrice}>
+                            {formatPrice(lineTotal)}
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })
+                ) : (
+                  <div className={styles.emptySummary}>
+                    Nenhum item selecionado
+                  </div>
+                )}
+              </div>
+              <div className={styles.summaryTotal}>
+                <span>Total</span>
+                <span>{formatPrice(summaryTotal)}</span>
+              </div>
+            </div>
+          </aside>
+        </div>
       </div>
     </div>
   );

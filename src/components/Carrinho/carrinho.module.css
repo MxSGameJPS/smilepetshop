@@ -76,6 +76,7 @@
 .itemControls {
   display: flex;
   justify-content: center;
+  margin-left: auto;
 }
 /* custom quantity control (minus / qty / plus) matching design */
 .qtyControl {
