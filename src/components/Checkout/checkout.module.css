@@ -62,7 +62,7 @@
   padding-top: 8px;
 }
 .emptySummary {
-  color: #888;
+  color: #000000;
   padding: 12px 0;
 }
 .summaryTotal {
@@ -119,7 +119,7 @@
 
 .field span {
   font-size: 0.9rem;
-  color: #666;
+  color: #000000;
   justify-content: flex-start;
 }
 
@@ -229,7 +229,7 @@
   justify-content: flex-start;
 }
 .personEmail {
-  color: #666;
+  color: #000000;
   margin-bottom: 8px;
   justify-content: flex-start;
 }
@@ -239,7 +239,7 @@
   justify-content: flex-start;
 }
 .personPhone {
-  color: #444;
+  color: #000000;
   justify-content: flex-start;
 }
 .deliveryActions {
@@ -288,13 +288,13 @@
 }
 .deliveryAddressLine {
   font-size: 0.95rem;
-  color: #444;
+  color: #000000;
   justify-content: flex-start;
   margin-bottom: 4px;
 }
 .deliveryNote {
   font-size: 0.85rem;
-  color: #666;
+  color: #000000;
   margin-top: 8px;
   justify-content: flex-start;
 }

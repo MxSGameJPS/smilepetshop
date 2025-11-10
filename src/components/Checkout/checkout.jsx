@@ -1,149 +1,258 @@
 import React, { useState, useEffect } from "react";
 import styles from "./checkout.module.css";
 import { useNavigate } from "react-router-dom";
-import {
-  getUser,
-  setUser as setStoredUser,
-  broadcastUserUpdate,
-} from "../../lib/auth";
+import { getUser, setUser as setStoredUser } from "../../lib/auth";
 import { getCart } from "../../lib/cart";
+
+// empty form template used to reset/initialize checkout form
+const EMPTY_FORM = {
+  firstName: "",
+  lastName: "",
+  cpf: "",
+  company: "",
+  address1: "",
+  numero: "",
+  bairro: "",
+  address2: "",
+  city: "",
+  state: "",
+  postal: "",
+  phone: "",
+  email: "",
+  shipDifferent: false,
+  notes: "",
+  paymentMethod: "",
+  cardNumber: "",
+  installments: 1,
+  cardName: "",
+  cardMonth: "",
+  cardYear: "",
+  cardCvv: "",
+  cardCpf: "",
+};
 
 export default function Checkout() {
   const navigate = useNavigate();
-  const [form, setForm] = useState({
-    firstName: "",
-    lastName: "",
-    cpf: "",
-    company: "",
-    address1: "",
-    numero: "",
-    bairro: "",
-    address2: "",
-    city: "",
-    state: "",
-    postal: "",
-    phone: "",
-    email: "",
-    shipDifferent: false,
-    notes: "",
-    paymentMethod: "",
-    cardNumber: "",
-    installments: 1,
-    cardName: "",
-    cardMonth: "",
-    cardYear: "",
-    cardCvv: "",
-    cardCpf: "",
-  });
+
+  const [form, setForm] = useState(() => ({ ...EMPTY_FORM }));
   const [step, setStep] = useState("personal");
   const [cartItems, setCartItems] = useState(() => getCart() || []);
 
+  // helper: map various user shapes to our form fields (shared)
+  const mapUserToForm = (u) => ({
+    firstName: u?.nome || u?.firstName || u?.name || "",
+    lastName: u?.sobrenome || u?.lastName || "",
+    email: u?.email || u?.emailAddress || "",
+    cpf: u?.cpf || u?.cpf_cliente || "",
+    phone: u?.whatsapp || u?.phone || u?.telefone || "",
+    address1: u?.rua || u?.street || u?.address1 || "",
+    numero: u?.numero || u?.number || "",
+    bairro: u?.bairro || u?.neighborhood || "",
+    city: u?.cidade || u?.city || "",
+    state: u?.estado || u?.state || "",
+    postal: u?.cep || u?.postal || "",
+  });
+
+  // helper to pick a stable id from various user shapes
+  const pickUserId = (u) =>
+    u?.id || u?._id || u?.clienteId || u?.clientId || u?.client || null;
+  // fetch remote user; if id provided, call /api/client/{id}, else /api/client
+  const fetchRemoteUser = async (id) => {
+    try {
+      const headers = {};
+      const possibleToken =
+        localStorage.getItem("smilepet_token") ||
+        localStorage.getItem("token") ||
+        (getUser() && (getUser().token || getUser().accessToken)) ||
+        null;
+      if (possibleToken) headers["Authorization"] = `Bearer ${possibleToken}`;
+
+      const url = id
+        ? `https://apismilepet.vercel.app/api/client/${encodeURIComponent(id)}`
+        : "https://apismilepet.vercel.app/api/client";
+
+      const res = await fetch(url, {
+        cache: "no-store",
+        credentials: headers.Authorization ? "omit" : "include",
+        headers,
+      });
+      const data = await res.json().catch(() => null);
+      if (!res.ok) return null;
+      let client = data?.data ?? data?.client ?? data?.user ?? data ?? null;
+      if (Array.isArray(client) && client.length > 0) client = client[0];
+      return client;
+    } catch (err) {
+      console.debug("Não foi possível buscar usuário remoto:", err);
+      return null;
+    }
+  };
+
   useEffect(() => {
-    // We'll compute a finalForm object from (remote/local user) + saved draft
-    // Draft (smilepet_checkout_billing) should have precedence over user values.
+    // Compute finalForm from: canonical server user (by id if available) + local stored user + saved draft.
+    // Draft (`smilepet_checkout_billing`) keeps precedence over user values.
     (async () => {
       let savedDraft = null;
+      let savedDraftOwner = null;
       try {
         const raw = localStorage.getItem("smilepet_checkout_billing");
         savedDraft = raw ? JSON.parse(raw) : null;
+        try {
+          savedDraftOwner = localStorage.getItem(
+            "smilepet_checkout_billing_owner"
+          );
+        } catch {
+          savedDraftOwner = null;
+        }
       } catch {
         savedDraft = null;
       }
 
-      // helper: map various user shapes to our form fields
-      const mapUserToForm = (u) => ({
-        firstName: u?.nome || u?.firstName || u?.name || "",
-        lastName: u?.sobrenome || u?.lastName || "",
-        email: u?.email || u?.emailAddress || "",
-        cpf: u?.cpf || u?.cpf_cliente || "",
-        phone: u?.whatsapp || u?.phone || u?.telefone || "",
-        address1: u?.rua || u?.street || u?.address1 || "",
-        numero: u?.numero || u?.number || "",
-        bairro: u?.bairro || u?.neighborhood || "",
-        city: u?.cidade || u?.city || "",
-        state: u?.estado || u?.state || "",
-        postal: u?.cep || u?.postal || "",
-      });
-
-      // try local stored user first
       const localUser = getUser();
-
-      // helper to fetch remote user (tries cookies or token if present)
-      const fetchRemoteUser = async () => {
-        try {
-          const headers = {};
-          const possibleToken =
-            localStorage.getItem("smilepet_token") ||
-            localStorage.getItem("token") ||
-            (getUser() && (getUser().token || getUser().accessToken)) ||
-            null;
-          if (possibleToken)
-            headers["Authorization"] = `Bearer ${possibleToken}`;
-
-          const res = await fetch("https://apismilepet.vercel.app/api/client", {
-            // avoid cached 304 responses in prod by forcing a fresh network request
-            cache: "no-store",
-            credentials: headers.Authorization ? "omit" : "include",
-            headers,
-          });
-          const data = await res.json().catch(() => null);
-          if (!res.ok) return null;
-          let client = data?.data ?? data?.client ?? data?.user ?? data ?? null;
-          // some APIs return an array under data (e.g. data: [ { ... } ])
-          if (Array.isArray(client) && client.length > 0) client = client[0];
-          return client;
-        } catch (err) {
-          console.debug("Não foi possível buscar usuário remoto:", err);
-          return null;
-        }
-      };
-
       let finalUser = null;
+
+      // prefer fetching the canonical user by id when possible to avoid using stale local data
+      const pickId = (u) =>
+        u?.id || u?._id || u?.clienteId || u?.clientId || u?.client || null;
+
       if (localUser) {
-        // if the local user seems empty, try to fetch remote
-        const hasIdent =
-          Boolean(localUser?.email) ||
-          Boolean(localUser?.nome) ||
-          Boolean(localUser?.id) ||
-          Boolean(localUser?._id) ||
-          Boolean(localUser?.clienteId) ||
-          Boolean(localUser?.clientId);
-        finalUser = localUser;
-        if (!hasIdent) {
+        const id = pickId(localUser);
+        if (id) {
+          const remote = await fetchRemoteUser(id);
+          finalUser = remote
+            ? { ...(localUser || {}), ...(remote || {}) }
+            : localUser;
+        } else {
+          // no id available — try to fetch generic endpoint as fallback
           const remote = await fetchRemoteUser();
-          if (remote) finalUser = { ...(localUser || {}), ...(remote || {}) };
+          finalUser = remote
+            ? { ...(localUser || {}), ...(remote || {}) }
+            : localUser;
         }
       } else {
+        // no local user — try to fetch remote (may return null or a single client)
         const remote = await fetchRemoteUser();
         if (remote) finalUser = remote;
       }
 
-      // build mapped values and apply draft precedence
       const mapped = finalUser ? mapUserToForm(finalUser) : {};
-      const finalForm =
-        savedDraft && typeof savedDraft === "object"
-          ? { ...mapped, ...savedDraft }
-          : { ...mapped };
 
-      // apply once
-      setForm((current) => ({ ...current, ...finalForm }));
+      // If a draft exists but belongs to a different user, ignore it.
+      let useDraft = savedDraft && typeof savedDraft === "object";
+      if (useDraft && finalUser) {
+        const finalId = pickUserId(finalUser);
+        if (savedDraftOwner) {
+          if (finalId && savedDraftOwner !== String(finalId)) useDraft = false;
+        } else if (savedDraft.email) {
+          // best-effort: if draft email doesn't match server email, ignore draft
+          if (
+            String(mapped.email || "").toLowerCase() !==
+            String(savedDraft.email || "").toLowerCase()
+          )
+            useDraft = false;
+        }
+      }
 
-      // if we fetched a remote user, persist merging with any existing stored user
+      const finalForm = useDraft ? { ...mapped, ...savedDraft } : { ...mapped };
+
+      // replace whole form atomically to avoid carrying previous user's values
+      setForm(() => ({ ...EMPTY_FORM, ...finalForm }));
+
+      // persist a merged canonical user (but preserve tokens) so other UI reads up-to-date data
       try {
         if (finalUser) {
           const existing = getUser() || {};
           const merged = { ...existing, ...finalUser };
-          // avoid overwriting token with empty values: if merged doesn't have token but existing had, keep existing.token
           if (!merged.token && existing.token) merged.token = existing.token;
           if (!merged.accessToken && existing.accessToken)
             merged.accessToken = existing.accessToken;
           setStoredUser(merged);
-          broadcastUserUpdate(merged);
         }
       } catch {
         // ignore storage failures
       }
     })();
+  }, []);
+
+  // listen for user updates (login/logout) and storage changes to refresh the form
+  useEffect(() => {
+    const handleUserUpdate = (ev) => {
+      (async () => {
+        try {
+          const draftRaw = localStorage.getItem("smilepet_checkout_billing");
+          const draft = draftRaw ? JSON.parse(draftRaw) : null;
+          const detail = ev?.detail ?? null;
+          const payload = detail || getUser();
+
+          // if payload is falsy -> logout happened, clear form and draft
+          if (!payload) {
+            setForm(() => ({ ...EMPTY_FORM }));
+            try {
+              localStorage.removeItem("smilepet_checkout_billing");
+            } catch {
+              /* ignore */
+            }
+            return;
+          }
+
+          // unwrap wrappers if necessary
+          const userObj =
+            payload?.data ??
+            payload?.user ??
+            payload?.client ??
+            payload ??
+            null;
+
+          // prefer to fetch canonical server record when we have an id to avoid stale local copies
+          const id =
+            userObj?.id ||
+            userObj?._id ||
+            userObj?.clienteId ||
+            userObj?.clientId ||
+            null;
+          let finalUserObj = userObj;
+          if (id) {
+            const remote = await fetchRemoteUser(id);
+            if (remote) {
+              finalUserObj = { ...(userObj || {}), ...(remote || {}) };
+              // persist the canonical merged user
+              try {
+                const existing = getUser() || {};
+                const merged = { ...existing, ...finalUserObj };
+                if (!merged.token && existing.token)
+                  merged.token = existing.token;
+                if (!merged.accessToken && existing.accessToken)
+                  merged.accessToken = existing.accessToken;
+                setStoredUser(merged);
+              } catch {
+                // ignore
+              }
+            }
+          }
+
+          const mapped = finalUserObj ? mapUserToForm(finalUserObj) : {};
+          const finalForm =
+            draft && typeof draft === "object"
+              ? { ...mapped, ...draft }
+              : { ...mapped };
+          setForm(() => ({ ...EMPTY_FORM, ...finalForm }));
+        } catch (err) {
+          console.debug("Erro ao aplicar user update no checkout:", err);
+        }
+      })();
+    };
+
+    window.addEventListener("smilepet_user_update", handleUserUpdate);
+    const onStorage = (e) => {
+      if (e.key === "smilepet_user" || e.key === "smilepet_checkout_billing") {
+        handleUserUpdate({ detail: getUser() });
+      }
+    };
+    window.addEventListener("storage", onStorage);
+
+    return () => {
+      window.removeEventListener("smilepet_user_update", handleUserUpdate);
+      window.removeEventListener("storage", onStorage);
+    };
   }, []);
 
   // subscribe to cart changes (custom events and storage fallback)
@@ -214,6 +323,18 @@ export default function Checkout() {
     setStep("delivery");
     try {
       localStorage.setItem("smilepet_checkout_billing", JSON.stringify(form));
+      // persist owner id so we can avoid applying stale drafts between different users
+      try {
+        const user = getUser();
+        const ownerId = pickUserId(user) || "";
+        if (ownerId)
+          localStorage.setItem(
+            "smilepet_checkout_billing_owner",
+            String(ownerId)
+          );
+      } catch {
+        /* ignore */
+      }
     } catch (e) {
       void e;
     }
