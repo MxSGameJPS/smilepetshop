@@ -1,7 +1,11 @@
 import React, { useState, useEffect } from "react";
 import styles from "./checkout.module.css";
 import { useNavigate } from "react-router-dom";
-import { getUser } from "../../lib/auth";
+import {
+  getUser,
+  setUser as setStoredUser,
+  broadcastUserUpdate,
+} from "../../lib/auth";
 import { getCart } from "../../lib/cart";
 
 export default function Checkout() {
@@ -46,21 +50,64 @@ export default function Checkout() {
 
     try {
       const user = getUser();
-      if (!user) return;
-      const mapped = {
-        firstName: user.nome || user.firstName || user.name || "",
-        lastName: user.sobrenome || user.lastName || "",
-        email: user.email || user.emailAddress || "",
-        cpf: user.cpf || user.cpf_cliente || "",
-        phone: user.whatsapp || user.phone || user.telefone || "",
-        address1: user.rua || user.street || user.address1 || "",
-        numero: user.numero || user.number || "",
-        bairro: user.bairro || user.neighborhood || "",
-        city: user.cidade || user.city || "",
-        state: user.estado || user.state || "",
-        postal: user.cep || user.postal || "",
-      };
-      setForm((current) => ({ ...mapped, ...current }));
+      if (user) {
+        const mapped = {
+          firstName: user.nome || user.firstName || user.name || "",
+          lastName: user.sobrenome || user.lastName || "",
+          email: user.email || user.emailAddress || "",
+          cpf: user.cpf || user.cpf_cliente || "",
+          phone: user.whatsapp || user.phone || user.telefone || "",
+          address1: user.rua || user.street || user.address1 || "",
+          numero: user.numero || user.number || "",
+          bairro: user.bairro || user.neighborhood || "",
+          city: user.cidade || user.city || "",
+          state: user.estado || user.state || "",
+          postal: user.cep || user.postal || "",
+        };
+        // keep any existing draft values (draft should override saved user)
+        setForm((current) => ({ ...mapped, ...current }));
+      } else {
+        // no local user saved — try to fetch current authenticated user from API
+        (async () => {
+          try {
+            const res = await fetch(
+              "https://apismilepet.vercel.app/api/client",
+              { credentials: "include" }
+            );
+            const data = await res.json().catch(() => null);
+            if (!res.ok) return;
+            const client =
+              data?.data ?? data?.client ?? data?.user ?? data ?? null;
+            if (!client) return;
+            const mapped = {
+              firstName: client.nome || client.firstName || client.name || "",
+              lastName: client.sobrenome || client.lastName || "",
+              email: client.email || client.emailAddress || "",
+              cpf: client.cpf || client.cpf_cliente || "",
+              phone: client.whatsapp || client.phone || client.telefone || "",
+              address1: client.rua || client.street || client.address1 || "",
+              numero: client.numero || client.number || "",
+              bairro: client.bairro || client.neighborhood || "",
+              city: client.cidade || client.city || "",
+              state: client.estado || client.state || "",
+              postal: client.cep || client.postal || "",
+            };
+            // merge mapped into form but keep any existing draft values
+            setForm((current) => ({ ...mapped, ...current }));
+            // persist canonical client locally for future renders
+            try {
+              setStoredUser(client);
+              // notify other components
+              broadcastUserUpdate(client);
+            } catch {
+              // ignore storage failures
+            }
+          } catch (err) {
+            // ignore fetch errors here — checkout can work with manual input
+            console.debug("Não foi possível buscar usuário remoto:", err);
+          }
+        })();
+      }
     } catch (e) {
       void e;
     }
