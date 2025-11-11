@@ -1,15 +1,22 @@
-import React, { useEffect, useState } from "react";
-import { useParams, useNavigate } from "react-router-dom";
-import styles from "./produtoAdm.module.css";
+import React, { useEffect, useMemo, useState } from "react";
+import { useNavigate, useSearchParams } from "react-router-dom";
+import styles from "../Produtos/produtoAdm.module.css";
 
-export default function ProdutoAdm() {
-  const { id } = useParams();
+export default function CadastroProduto() {
   const navigate = useNavigate();
-  const [loading, setLoading] = useState(false);
+  const [searchParams] = useSearchParams();
+  const skuPrefill = useMemo(
+    () => searchParams.get("sku") || "",
+    [searchParams]
+  );
+
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState(null);
-  const [product, setProduct] = useState(null);
-  const [currentProductId, setCurrentProductId] = useState(null);
+  const [product, setProduct] = useState(() => ({
+    sku: skuPrefill,
+    dimensoes: {},
+    promocao: false,
+  }));
   const [showVariationPrompt, setShowVariationPrompt] = useState(false);
   const [showVariationModal, setShowVariationModal] = useState(false);
   const [variationSku, setVariationSku] = useState("");
@@ -20,98 +27,13 @@ export default function ProdutoAdm() {
   const [categoriesLoading, setCategoriesLoading] = useState(false);
   const [categoriesError, setCategoriesError] = useState(null);
 
-  const resolveProductId = (prod) => {
-    if (!prod || typeof prod !== "object") return null;
-    const value =
-      prod.id ??
-      prod._id ??
-      prod._key ??
-      prod.codigo ??
-      prod.codigo_produto ??
-      prod.productId ??
-      null;
-    return value ?? null;
-  };
-
-  const normalizeSku = (value) => {
-    if (value === null || value === undefined) return "";
-    return String(value).trim().toLowerCase();
-  };
-
-  const extractProductsFromResponse = (raw) => {
-    if (!raw) return [];
-    if (Array.isArray(raw)) return raw;
-    if (Array.isArray(raw?.data)) return raw.data;
-    if (raw?.data) return [raw.data];
-    if (Array.isArray(raw?.produtos)) return raw.produtos;
-    if (raw?.produto) return [raw.produto];
-    return [raw];
-  };
-
-  const findProductBySku = (responseData, skuValue) => {
-    const candidates = extractProductsFromResponse(responseData);
-    if (!candidates.length) return null;
-    const normalizedTarget = normalizeSku(skuValue);
-    if (!normalizedTarget) return candidates[0] ?? null;
-    const match = candidates.find((item) => {
-      if (!item || typeof item !== "object") return false;
-      const fields = [
-        item.sku,
-        item.SKU,
-        item.codigo,
-        item.codigo_produto,
-        item.productId,
-        item.id,
-      ];
-      return fields.some((field) => normalizeSku(field) === normalizedTarget);
-    });
-    return match ?? candidates[0] ?? null;
-  };
-
-  const fetchProduct = async () => {
-    setLoading(true);
-    setError(null);
-    try {
-      const res = await fetch(
-        `https://apismilepet.vercel.app/api/produtos/${encodeURIComponent(id)}`,
-        { cache: "no-store" }
-      );
-      const data = await res.json().catch(() => null);
-      if (!res.ok) {
-        setError(`Erro ${res.status}`);
-        setProduct(null);
-        setCurrentProductId(null);
-        return;
-      }
-      // data may be wrapped
-      const p = data?.data ?? data?.produto ?? data ?? null;
-      if (p && typeof p === "object") {
-        const normalized = { ...p };
-        const resolvedId = resolveProductId(normalized) ?? id ?? null;
-        if (resolvedId != null && normalized.id == null) {
-          normalized.id = resolvedId;
-        }
-        setProduct(normalized);
-        setCurrentProductId(resolvedId ?? null);
-      } else {
-        setProduct({});
-        setCurrentProductId(id ?? null);
-      }
-    } catch (err) {
-      setError(String(err));
-      setProduct(null);
-      setCurrentProductId(null);
-    } finally {
-      setLoading(false);
-    }
-  };
-
   useEffect(() => {
-    void fetchProduct();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [id]);
+    setProduct((prev) => ({
+      ...prev,
+      sku: prev.sku || skuPrefill,
+    }));
+  }, [skuPrefill]);
 
-  // fetch categories for the categoria select
   useEffect(() => {
     let mounted = true;
     const load = async () => {
@@ -160,7 +82,7 @@ export default function ProdutoAdm() {
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
     setProduct((p) => ({
-      ...p,
+      ...(p || {}),
       [name]: type === "checkbox" ? checked : value,
     }));
   };
@@ -168,33 +90,28 @@ export default function ProdutoAdm() {
   const handleDimChange = (e) => {
     const { name, value } = e.target;
     setProduct((p) => ({
-      ...p,
+      ...(p || {}),
       dimensoes: { ...(p?.dimensoes || {}), [name]: value },
     }));
   };
 
   const handleSave = async (e) => {
     e.preventDefault();
-    if (!product) return;
     setSaving(true);
     setError(null);
     try {
-      // prepare payload - convert some numeric-looking fields to strings as API expects
-      const payload = { ...product };
-      // imagens_secundarias: normalize into an array of non-empty strings
+      const payload = { ...(product || {}) };
+
       const normalizeImages = (v) => {
         if (v == null) return undefined;
-        // already array -> normalize elements
         if (Array.isArray(v)) {
           return v
             .map((x) => (x == null ? "" : String(x).trim()))
             .filter((s) => s !== "");
         }
-        // string -> could be JSON array, comma-separated list, or single URL
         if (typeof v === "string") {
           const s = v.trim();
           if (s === "") return [];
-          // try parse JSON array
           if (
             (s.startsWith("[") && s.endsWith("]")) ||
             (s.startsWith('"[') && s.endsWith(']"'))
@@ -203,19 +120,16 @@ export default function ProdutoAdm() {
               const parsed = JSON.parse(s);
               if (Array.isArray(parsed)) return normalizeImages(parsed);
             } catch {
-              // fallthrough to split
+              // ignore parse errors
             }
           }
-          // comma separated
           if (s.includes(","))
             return s
               .split(",")
               .map((x) => x.trim())
               .filter(Boolean);
-          // single value
           return [s];
         }
-        // other types: coerce to string
         return [String(v)];
       };
 
@@ -223,7 +137,6 @@ export default function ProdutoAdm() {
       if (!imgs || imgs.length === 0) delete payload.imagens_secundarias;
       else payload.imagens_secundarias = imgs;
 
-      // ensure dimensoes numbers
       if (payload.dimensoes) {
         payload.dimensoes = {
           altura_cm: Number(payload.dimensoes.altura_cm) || 0,
@@ -232,16 +145,10 @@ export default function ProdutoAdm() {
         };
       }
 
-      // normalize numeric-like fields (handle Brazilian formats like 1.234,56)
       const normalizeNumber = (v) => {
         if (v === null || v === undefined || v === "") return undefined;
         if (typeof v === "number") return v;
-        // remove spaces
         let s = String(v).trim();
-        // handle common formats:
-        // - if both '.' and ',' present assume '.' is thousands and ',' is decimal: remove dots, replace comma with dot
-        // - if only ',' present assume comma is decimal: replace ',' with '.'
-        // - if only '.' present assume dot is decimal and keep it
         s = s.replace(/\s/g, "");
         const hasDot = s.indexOf(".") !== -1;
         const hasComma = s.indexOf(",") !== -1;
@@ -295,8 +202,6 @@ export default function ProdutoAdm() {
         }
       }
 
-      // deep sanitize payload to remove undefined, functions, and convert BigInt
-      // try to parse stringified JSON fields (e.g. someone pasted JSON into a text input)
       const tryParseJsonStrings = (val) => {
         if (val == null) return val;
         if (typeof val === "string") {
@@ -324,6 +229,7 @@ export default function ProdutoAdm() {
         return val;
       };
       const parsedPayload = tryParseJsonStrings(payload);
+
       const sanitize = (value) => {
         if (value === undefined) return undefined;
         if (value === null) return null;
@@ -341,7 +247,6 @@ export default function ProdutoAdm() {
           return arr;
         }
         if (t === "object") {
-          // Date -> ISO
           if (value instanceof Date) return value.toISOString();
           const out = {};
           Object.keys(value).forEach((k) => {
@@ -353,9 +258,8 @@ export default function ProdutoAdm() {
         return undefined;
       };
 
-      const safePayload = sanitize(parsedPayload);
+      const safePayload = sanitize(parsedPayload) || {};
 
-      // Build a conservative update payload: only include known schema fields
       const allowed = [
         "nome",
         "sku",
@@ -373,9 +277,7 @@ export default function ProdutoAdm() {
         "custo",
         "custo_real",
         "custoReal",
-        "preco_classic",
-        "preco_premium",
-        "preco_sp",
+
         "preco_am",
         "peso_kg",
         "dimensoes",
@@ -390,78 +292,60 @@ export default function ProdutoAdm() {
         "categoria_id",
       ];
 
-      const updatePayload = {};
+      const createPayload = {};
       allowed.forEach((k) => {
         if (Object.prototype.hasOwnProperty.call(safePayload, k)) {
           const v = safePayload[k];
-          // skip undefined
-          if (v === undefined) return;
-          // avoid sending empty string for object/array fields
-          if (
-            (k === "dimensoes" || k === "imagens_secundarias") &&
-            (v === "" || v == null)
-          )
-            return;
-          updatePayload[k] = v;
+          if (v !== undefined) {
+            if (
+              (k === "dimensoes" || k === "imagens_secundarias") &&
+              (v === "" || v == null)
+            )
+              return;
+            createPayload[k] = v;
+          }
         }
       });
 
-      // normalize imagens_secundarias into the backend-accepted shape
-      // The API expects an object (ex: { lista: [...] }) for this JSONB column.
-      if (updatePayload.imagens_secundarias) {
-        const v = updatePayload.imagens_secundarias;
+      if (createPayload.imagens_secundarias) {
+        const v = createPayload.imagens_secundarias;
         if (Array.isArray(v)) {
-          // convert array -> { lista: [...] }
-          updatePayload.imagens_secundarias = v.map((x) => String(x));
-          // wrap into object shape the API accepts
-          updatePayload.imagens_secundarias = {
-            lista: updatePayload.imagens_secundarias,
+          createPayload.imagens_secundarias = {
+            lista: v.map((x) => String(x)),
           };
         } else if (typeof v === "object" && v !== null) {
-          // already an object; if it has a lista array, ensure items are strings
           if (Array.isArray(v.lista)) {
-            updatePayload.imagens_secundarias = {
+            createPayload.imagens_secundarias = {
               lista: v.lista.map((x) => String(x)),
             };
-          } else {
-            // leave other object shapes untouched (server may accept them)
-            updatePayload.imagens_secundarias = v;
           }
         } else {
-          // scalar value -> wrap as single item
-          updatePayload.imagens_secundarias = { lista: [String(v)] };
+          createPayload.imagens_secundarias = { lista: [String(v)] };
         }
       }
 
       let body;
       try {
-        body = JSON.stringify(updatePayload);
+        body = JSON.stringify(createPayload);
       } catch (err) {
-        console.error("Failed to stringify product payload", err, payload);
+        console.error("cadastroProduto: payload stringify error", err);
         setError("Erro interno: payload inválido");
         setSaving(false);
         return;
       }
 
-      // debug: log sanitized payload and json body so we can inspect what is sent
       try {
-        console.debug("produtoAdm: safePayload", safePayload);
-        console.debug("produtoAdm: body", body);
+        console.debug("cadastroProduto: createPayload", createPayload);
       } catch {
         // ignore console errors
       }
 
-      // send sanitized body
-      const res = await fetch(
-        `https://apismilepet.vercel.app/api/produtos/${encodeURIComponent(id)}`,
-        {
-          method: "PATCH",
-          headers: { "Content-Type": "application/json" },
-          body,
-        }
-      );
+      const res = await fetch("https://apismilepet.vercel.app/api/produtos", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body,
+      });
 
-      // read raw text and try to parse JSON for better error messages
       const respText = await res.text().catch(() => null);
       let data = null;
       try {
@@ -471,7 +355,7 @@ export default function ProdutoAdm() {
       }
 
       if (!res.ok) {
-        console.error("produtoAdm: PATCH error", res.status, respText, data);
+        console.error("cadastroProduto: POST error", res.status, respText);
         const message =
           (data && (data.message || data.error)) ||
           respText ||
@@ -480,67 +364,29 @@ export default function ProdutoAdm() {
         return;
       }
 
-      // success — try to use the API response as the updated product so we
-      // keep the authoritative id (and any server-side defaulted fields).
-      // The API may return different shapes, so normalize.
-      let updatedProduct = null;
-      try {
-        if (data) {
-          if (Array.isArray(data)) updatedProduct = data[0];
-          else updatedProduct = data.data ?? data.produto ?? data;
-        }
-      } catch {
-        // ignore parsing issues, we'll fallback below
-      }
+      const created =
+        (Array.isArray(data) ? data[0] : null) ??
+        data?.data ??
+        data?.produto ??
+        data?.product ??
+        data ??
+        {};
 
-      // If the server didn't return the updated product, try to re-fetch it
-      // from the API to obtain the id and canonical representation.
-      if (!updatedProduct) {
-        try {
-          const refetch = await fetch(
-            `https://apismilepet.vercel.app/api/produtos/${encodeURIComponent(
-              id
-            )}`,
-            { cache: "no-store" }
-          );
-          const refText = await refetch.text().catch(() => null);
-          let refData = null;
-          try {
-            refData = refText ? JSON.parse(refText) : null;
-          } catch {
-            refData = null;
-          }
-          if (refetch.ok) {
-            updatedProduct =
-              refData?.data ?? refData?.produto ?? refData ?? null;
-          }
-        } catch {
-          // ignore fetch errors
-        }
-      }
+      const nextProduct = {
+        ...(product || {}),
+        ...(created || {}),
+      };
 
-      // final fallback: use the sanitized payload we sent
-      if (!updatedProduct) updatedProduct = payload;
+      const createdId =
+        nextProduct.id ??
+        nextProduct._id ??
+        nextProduct._key ??
+        nextProduct.codigo ??
+        null;
 
-      let normalizedProduct;
-      if (updatedProduct && typeof updatedProduct === "object") {
-        normalizedProduct = { ...updatedProduct };
-      } else {
-        normalizedProduct = {
-          ...(product || {}),
-          ...(payload && typeof payload === "object" ? payload : {}),
-        };
-      }
-
-      const resolvedId =
-        resolveProductId(normalizedProduct) ?? currentProductId ?? id ?? null;
-      if (resolvedId != null && normalizedProduct.id == null) {
-        normalizedProduct.id = resolvedId;
-      }
-
-      setCurrentProductId(resolvedId ?? null);
-      setProduct(normalizedProduct);
-      setShowVariationPrompt(true);
+      setProduct(nextProduct);
+      setShowVariationPrompt(!!createdId);
+      setError(null);
     } catch (err) {
       setError(String(err));
     } finally {
@@ -548,11 +394,21 @@ export default function ProdutoAdm() {
     }
   };
 
+  const extractCurrentId = () =>
+    product?.id ?? product?._id ?? product?._key ?? product?.codigo ?? null;
+
   const handleDelete = async () => {
+    const currentId = extractCurrentId();
+    if (!currentId) {
+      alert("Produto ainda não cadastrado no sistema.");
+      return;
+    }
     if (!confirm("Excluir este produto?")) return;
     try {
       const res = await fetch(
-        `https://apismilepet.vercel.app/api/produtos/${encodeURIComponent(id)}`,
+        `https://apismilepet.vercel.app/api/produtos/${encodeURIComponent(
+          currentId
+        )}`,
         { method: "DELETE" }
       );
       if (!res.ok) {
@@ -566,23 +422,20 @@ export default function ProdutoAdm() {
     }
   };
 
-  // --- Variation helpers and UI ---
   const handleVariationPromptAnswer = async (answer) => {
     setShowVariationPrompt(false);
     if (!answer) {
-      // user answered No -> go back to list
       navigate("/adm/produtos");
       return;
     }
 
-    // user answered Yes -> mark product as having variations and open modal
+    const parentId = extractCurrentId();
+    if (!parentId) {
+      setVariationMsg("ID do produto não encontrado para variações.");
+      return;
+    }
+
     try {
-      const parentId =
-        currentProductId ?? resolveProductId(product) ?? id ?? null;
-      if (parentId == null) {
-        setVariationMsg("ID do produto pai não encontrado.");
-        return;
-      }
       const res = await fetch(
         `https://apismilepet.vercel.app/api/produtos/${encodeURIComponent(
           parentId
@@ -598,13 +451,7 @@ export default function ProdutoAdm() {
         setVariationMsg(d?.message || `Erro ${res.status}`);
         return;
       }
-      // update local product state
-      setProduct((p) => {
-        const next = { ...(p || {}), tem_variacao: true };
-        if (next.id == null && parentId != null) next.id = parentId;
-        return next;
-      });
-      setCurrentProductId(parentId);
+      setProduct((p) => ({ ...(p || {}), tem_variacao: true }));
       setVariationQuantity("");
       setShowVariationModal(true);
       setVariationMsg(null);
@@ -621,7 +468,6 @@ export default function ProdutoAdm() {
     setVariationProcessing(true);
     setVariationMsg(null);
     try {
-      // try to find product by SKU
       const res = await fetch(
         `https://apismilepet.vercel.app/api/produtos?sku=${encodeURIComponent(
           variationSku
@@ -629,30 +475,34 @@ export default function ProdutoAdm() {
         { cache: "no-store" }
       );
       const data = await res.json().catch(() => null);
-      const found = findProductBySku(data, variationSku);
+      let found = null;
+      if (Array.isArray(data)) found = data[0];
+      else if (data?.data)
+        found = Array.isArray(data.data) ? data.data[0] : data.data;
+      else found = data?.produto ?? data ?? null;
 
       if (!found) {
         const goCreate = confirm(
           "Produto com esse SKU não encontrado. Deseja criar um novo produto com esse SKU?"
         );
         if (goCreate) {
-          // Navigate to product creation page (assumed route)
           navigate(
             `/adm/produtos/novo?sku=${encodeURIComponent(variationSku)}`
           );
-          return;
         }
         return;
       }
 
       const variationId =
-        resolveProductId(found) ??
-        found?.sku ??
-        found?.codigo ??
-        found?.codigo_produto ??
-        null;
+        found.id ?? found._id ?? found._key ?? found.codigo ?? null;
       if (!variationId) {
         setVariationMsg("ID da variação não encontrado na resposta da API.");
+        return;
+      }
+
+      const parentId = extractCurrentId();
+      if (!parentId) {
+        setVariationMsg("ID do produto pai não disponível.");
         return;
       }
 
@@ -680,12 +530,6 @@ export default function ProdutoAdm() {
         return;
       }
 
-      const parentId =
-        currentProductId ?? resolveProductId(product) ?? id ?? null;
-      if (parentId == null) {
-        setVariationMsg("ID do produto pai não encontrado.");
-        return;
-      }
       const patchRes = await fetch(
         `https://apismilepet.vercel.app/api/produtos/${encodeURIComponent(
           variationId
@@ -729,34 +573,34 @@ export default function ProdutoAdm() {
     navigate("/adm/produtos");
   };
 
-  if (loading) return <div className={styles.wrap}>Carregando produto…</div>;
-  if (error) return <div className={styles.wrap}>Erro: {String(error)}</div>;
-  if (!product)
-    return <div className={styles.wrap}>Produto não encontrado.</div>;
-
   return (
     <div className={styles.wrap}>
-      <h2>Editar Produto</h2>
+      <h2>Cadastrar Produto</h2>
+      {error && <div className={styles.error}>{error}</div>}
       <form className={styles.form} onSubmit={handleSave}>
         <label>
           Nome
           <input
             name="nome"
-            value={product.nome || ""}
+            value={product?.nome || ""}
             onChange={handleChange}
           />
         </label>
 
         <label>
           SKU
-          <input name="sku" value={product.sku || ""} onChange={handleChange} />
+          <input
+            name="sku"
+            value={product?.sku || ""}
+            onChange={handleChange}
+          />
         </label>
 
         <label>
           Preço
           <input
             name="preco"
-            value={product.preco ?? ""}
+            value={product?.preco ?? ""}
             onChange={handleChange}
           />
         </label>
@@ -765,14 +609,18 @@ export default function ProdutoAdm() {
           Estoque
           <input
             name="estoque"
-            value={product.estoque ?? product.stock ?? ""}
+            value={product?.estoque ?? product?.stock ?? ""}
             onChange={handleChange}
           />
         </label>
 
         <label>
           NCM
-          <input name="ncm" value={product.ncm || ""} onChange={handleChange} />
+          <input
+            name="ncm"
+            value={product?.ncm || ""}
+            onChange={handleChange}
+          />
         </label>
 
         <label>
@@ -784,7 +632,7 @@ export default function ProdutoAdm() {
           ) : (
             <select
               name="categoria"
-              value={product.categoria || ""}
+              value={product?.categoria || ""}
               onChange={handleChange}
               className={styles.select}
             >
@@ -810,7 +658,7 @@ export default function ProdutoAdm() {
           Marca
           <input
             name="marca"
-            value={product.marca || ""}
+            value={product?.marca || ""}
             onChange={handleChange}
           />
         </label>
@@ -819,7 +667,7 @@ export default function ProdutoAdm() {
           Quantidade
           <input
             name="quantidade"
-            value={product.quantidade ?? ""}
+            value={product?.quantidade ?? ""}
             onChange={handleChange}
           />
         </label>
@@ -828,7 +676,7 @@ export default function ProdutoAdm() {
           Descrição curta
           <textarea
             name="descricao_curta"
-            value={product.descricao_curta || ""}
+            value={product?.descricao_curta || ""}
             onChange={handleChange}
           />
         </label>
@@ -837,7 +685,7 @@ export default function ProdutoAdm() {
           Descrição completa
           <textarea
             name="descricao_completa"
-            value={product.descricao_completa || ""}
+            value={product?.descricao_completa || ""}
             onChange={handleChange}
           />
         </label>
@@ -846,7 +694,7 @@ export default function ProdutoAdm() {
           Imagem principal (URL)
           <input
             name="imagem_url"
-            value={product.imagem_url || ""}
+            value={product?.imagem_url || ""}
             onChange={handleChange}
           />
         </label>
@@ -856,9 +704,9 @@ export default function ProdutoAdm() {
           <input
             name="imagens_secundarias"
             value={
-              Array.isArray(product.imagens_secundarias)
+              Array.isArray(product?.imagens_secundarias)
                 ? product.imagens_secundarias.join(", ")
-                : product.imagens_secundarias || ""
+                : product?.imagens_secundarias || ""
             }
             onChange={handleChange}
           />
@@ -866,131 +714,48 @@ export default function ProdutoAdm() {
 
         <label>
           EAN
-          <input name="ean" value={product.ean || ""} onChange={handleChange} />
+          <input
+            name="ean"
+            value={product?.ean || ""}
+            onChange={handleChange}
+          />
         </label>
 
         <label>
           Pet
-          <input name="pet" value={product.pet || ""} onChange={handleChange} />
+          <input
+            name="pet"
+            value={product?.pet || ""}
+            onChange={handleChange}
+          />
         </label>
 
         <label>
           Fornecedor
           <input
             name="fornecedor"
-            value={product.fornecedor || ""}
+            value={product?.fornecedor || ""}
             onChange={handleChange}
           />
         </label>
-
-        {/* <label>
-          Item Ref
-          <input
-            name="item_ref"
-            value={product.item_ref || ""}
-            onChange={handleChange}
-          />
-        </label> */}
-
-        {/* <label>
-          Pallet
-          <input
-            name="pallet"
-            value={product.pallet || ""}
-            onChange={handleChange}
-          />
-        </label> */}
 
         <label>
           Custo
           <input
             name="custo"
-            value={product.custo ?? ""}
+            value={product?.custo ?? ""}
             onChange={handleChange}
           />
         </label>
-
-        {/* <label>
-          Custo Real
-          <input
-            name="custoReal"
-            value={product.custoReal ?? product.custo_real ?? ""}
-            onChange={handleChange}
-          />
-        </label>
-
-        <label>
-          Preço Classic
-          <input
-            name="preco_classic"
-            value={product.preco_classic ?? ""}
-            onChange={handleChange}
-          />
-        </label>
-
-        <label>
-          Preço Premium
-          <input
-            name="preco_premium"
-            value={product.preco_premium ?? ""}
-            onChange={handleChange}
-          />
-        </label>
-
-        <label>
-          Preço SP
-          <input
-            name="preco_sp"
-            value={product.preco_sp ?? ""}
-            onChange={handleChange}
-          />
-        </label>
-
-        <label>
-          Preço AM
-          <input
-            name="preco_am"
-            value={product.preco_am ?? ""}
-            onChange={handleChange}
-          />
-        </label> */}
 
         <label>
           Peso (kg)
           <input
             name="peso_kg"
-            value={product.peso_kg ?? ""}
+            value={product?.peso_kg ?? ""}
             onChange={handleChange}
           />
         </label>
-
-        {/* <label>
-          Produto Pai ID
-          <input
-            name="produto_pai_id"
-            value={product.produto_pai_id ?? ""}
-            onChange={handleChange}
-          />
-        </label> */}
-
-        {/* <label>
-          Categoria ID
-          <input
-            name="categoria_id"
-            value={product.categoria_id ?? ""}
-            onChange={handleChange}
-          />
-        </label>
-
-        <label>
-          Criado em
-          <input
-            name="criado_em"
-            value={product.criado_em || ""}
-            onChange={handleChange}
-            disabled
-          />
-        </label> */}
 
         <fieldset className={styles.fieldset}>
           <legend>Dimensões (cm)</legend>
@@ -998,7 +763,7 @@ export default function ProdutoAdm() {
             Altura
             <input
               name="altura_cm"
-              value={product.dimensoes?.altura_cm ?? ""}
+              value={product?.dimensoes?.altura_cm ?? ""}
               onChange={handleDimChange}
             />
           </label>
@@ -1006,7 +771,7 @@ export default function ProdutoAdm() {
             Largura
             <input
               name="largura_cm"
-              value={product.dimensoes?.largura_cm ?? ""}
+              value={product?.dimensoes?.largura_cm ?? ""}
               onChange={handleDimChange}
             />
           </label>
@@ -1014,7 +779,7 @@ export default function ProdutoAdm() {
             Comprimento
             <input
               name="comprimento_cm"
-              value={product.dimensoes?.comprimento_cm ?? ""}
+              value={product?.dimensoes?.comprimento_cm ?? ""}
               onChange={handleDimChange}
             />
           </label>
@@ -1024,9 +789,9 @@ export default function ProdutoAdm() {
           <input
             type="checkbox"
             name="promocao"
-            checked={!!product.promocao}
+            checked={!!product?.promocao}
             onChange={handleChange}
-          />{" "}
+          />
           Promoção
         </label>
 
@@ -1034,7 +799,7 @@ export default function ProdutoAdm() {
           Desconto promoção
           <input
             name="desconto_promocao"
-            value={product.desconto_promocao ?? ""}
+            value={product?.desconto_promocao ?? ""}
             onChange={handleChange}
           />
         </label>
@@ -1046,7 +811,7 @@ export default function ProdutoAdm() {
           <button
             type="button"
             className={styles.btnSecondary}
-            onClick={() => navigate(-1)}
+            onClick={() => navigate("/adm/produtos")}
           >
             Cancelar
           </button>
@@ -1054,13 +819,13 @@ export default function ProdutoAdm() {
             type="button"
             className={styles.btnDanger}
             onClick={handleDelete}
+            disabled={!extractCurrentId()}
           >
             Excluir
           </button>
         </div>
       </form>
 
-      {/* Variation prompt */}
       {showVariationPrompt && (
         <div className={styles.variationPrompt}>
           <div>
@@ -1083,7 +848,6 @@ export default function ProdutoAdm() {
         </div>
       )}
 
-      {/* Variation modal */}
       {showVariationModal && (
         <div className={styles.modal}>
           <div className={styles.modalContent}>

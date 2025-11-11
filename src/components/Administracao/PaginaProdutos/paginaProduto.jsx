@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import styles from "./paginaProdutos.module.css";
 import { useNavigate } from "react-router-dom";
-import { FaEye, FaEdit, FaTrash } from "react-icons/fa";
+import { FaEye, FaEdit, FaTrash, FaPlus } from "react-icons/fa";
 
 export default function PaginaProdutos() {
   const [products, setProducts] = useState([]);
@@ -9,6 +9,37 @@ export default function PaginaProdutos() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [page, setPage] = useState(0);
+
+  const resolveStockValue = (value) => {
+    if (value === null || value === undefined) return "-";
+    if (typeof value === "number") return String(value);
+    if (typeof value === "string") {
+      const trimmed = value.trim();
+      return trimmed === "" ? "-" : trimmed;
+    }
+    if (Array.isArray(value)) {
+      return value.length ? resolveStockValue(value[0]) : "-";
+    }
+    if (typeof value === "object") {
+      const preferredKeys = [
+        "valor",
+        "value",
+        "estoque",
+        "quantidade",
+        "amount",
+        "current",
+      ];
+      for (const key of preferredKeys) {
+        if (Object.prototype.hasOwnProperty.call(value, key)) {
+          const nested = resolveStockValue(value[key]);
+          if (nested !== "-") return nested;
+        }
+      }
+      const first = Object.values(value)[0];
+      return first !== undefined ? resolveStockValue(first) : "-";
+    }
+    return String(value);
+  };
 
   const formatPrice = (v) => {
     const num = Number(v) || 0;
@@ -100,22 +131,32 @@ export default function PaginaProdutos() {
   const handleView = (id) => navigate(`/adm/produtos/${id}`);
   // abrir a página do produto (rota de edição/visualização)
   const handleEdit = (id) => navigate(`/adm/produtos/${id}`);
+  const handleCreate = () => navigate(`/adm/produtos/novo`);
 
   return (
     <section className={styles.paginaProdutosBg}>
       <h3>Página de Produtos — Administração</h3>
 
       <div style={{ marginTop: 8, marginBottom: 8 }}>
-        <button
-          className={styles.btnPrimary}
-          onClick={() => {
-            setPage(0);
-            fetchProducts();
-          }}
-          disabled={loading}
-        >
-          Atualizar
-        </button>
+        <div className={styles.actionsRow}>
+          <button
+            className={styles.btnPrimary}
+            onClick={() => {
+              setPage(0);
+              fetchProducts();
+            }}
+            disabled={loading}
+          >
+            Atualizar
+          </button>
+          <button
+            className={styles.btnSuccess}
+            onClick={handleCreate}
+            type="button"
+          >
+            <FaPlus style={{ marginRight: 6 }} /> Cadastrar produto
+          </button>
+        </div>
         <div className={styles.searchWrapper}>
           <input
             className={styles.searchInput}
@@ -193,8 +234,9 @@ export default function PaginaProdutos() {
                         it.unit_price ??
                         0
                     ) || 0;
-                  const stock =
-                    it.estoque ?? it.stock ?? it.qtd ?? it.quantity ?? "-";
+                  const stockRaw =
+                    it.estoque ?? it.stock ?? it.qtd ?? it.quantity ?? null;
+                  const stock = resolveStockValue(stockRaw);
                   return (
                     <tr key={String(id)}>
                       <td>{name}</td>

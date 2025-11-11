@@ -51,6 +51,24 @@
   cursor: pointer;
 }
 
+.actionsRow {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.btnSuccess {
+  padding: 8px 12px;
+  background: #28a745;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+}
+
 .searchWrapper {
   display: inline-flex;
   align-items: center;
