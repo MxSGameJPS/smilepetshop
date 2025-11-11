@@ -8,7 +8,7 @@ export default function Destaques() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [carouselIndex, setCarouselIndex] = useState(0);
-  const CARDS_PER_PAGE = 5;
+  const CARDS_PER_PAGE = 10; // duas fileiras de 5 cards
 
   useEffect(() => {
     fetch("https://apismilepet.vercel.app/api/produtos")
@@ -22,7 +22,15 @@ export default function Destaques() {
         } else if (Array.isArray(data.produtos)) {
           arr = data.produtos;
         }
-        setProdutos(arr);
+        // mostrar apenas produtos pai (produto_pai_id === null)
+        const parents = arr.filter((p) => {
+          // o campo pode vir nomeado como 'produto_pai_id' ou 'produto.produto_pai_id'
+          return (
+            (p && p.produto_pai_id === null) ||
+            (p && p.produto && p.produto.produto_pai_id === null)
+          );
+        });
+        setProdutos(parents);
         setLoading(false);
       })
       .catch(() => {
@@ -46,36 +54,78 @@ export default function Destaques() {
       </div>
       <div className={styles.cardsGrid}>
         {Array.isArray(produtos) && produtos.length > 0 ? (
-          produtos
-            .slice(carouselIndex, carouselIndex + CARDS_PER_PAGE)
-            .map((produto) => (
-              <ProductCard
-                key={produto.id}
-                image={
-                  produto.imagem_url && produto.imagem_url.trim()
-                    ? produto.imagem_url
-                    : "/imgCards/RacaoSeca.png"
-                }
-                title={produto.nome}
-                price={produto.preco}
-                priceOld={produto.precoOld}
-                promocao={produto.promocao}
-                priceSubscriber={produto.precoAssinante}
-                productId={produto.id}
-                onAdd={() =>
-                  addToCart({
-                    id: produto.id,
-                    nome: produto.nome,
-                    quantidade: 1,
-                    precoUnit: produto.preco,
-                    imagem_url:
-                      produto.imagem_url && produto.imagem_url.trim()
-                        ? produto.imagem_url
-                        : "/imgCards/RacaoSeca.png",
-                  })
-                }
-              />
-            ))
+          (() => {
+            const visible = produtos.slice(
+              carouselIndex,
+              carouselIndex + CARDS_PER_PAGE
+            );
+            const firstRow = visible.slice(0, 5);
+            const secondRow = visible.slice(5, 10);
+            return (
+              <>
+                <div className={styles.cardsRow}>
+                  {firstRow.map((produto) => (
+                    <ProductCard
+                      key={produto.id}
+                      image={
+                        produto.imagem_url && produto.imagem_url.trim()
+                          ? produto.imagem_url
+                          : "/imgCards/RacaoSeca.png"
+                      }
+                      title={produto.nome}
+                      price={produto.preco}
+                      priceOld={produto.precoOld}
+                      promocao={produto.promocao}
+                      priceSubscriber={produto.precoAssinante}
+                      productId={produto.id}
+                      onAdd={() =>
+                        addToCart({
+                          id: produto.id,
+                          nome: produto.nome,
+                          quantidade: 1,
+                          precoUnit: produto.preco,
+                          imagem_url:
+                            produto.imagem_url && produto.imagem_url.trim()
+                              ? produto.imagem_url
+                              : "/imgCards/RacaoSeca.png",
+                        })
+                      }
+                    />
+                  ))}
+                </div>
+                <div className={styles.cardsRow}>
+                  {secondRow.map((produto) => (
+                    <ProductCard
+                      key={produto.id}
+                      image={
+                        produto.imagem_url && produto.imagem_url.trim()
+                          ? produto.imagem_url
+                          : "/imgCards/RacaoSeca.png"
+                      }
+                      title={produto.nome}
+                      price={produto.preco}
+                      priceOld={produto.precoOld}
+                      promocao={produto.promocao}
+                      priceSubscriber={produto.precoAssinante}
+                      productId={produto.id}
+                      onAdd={() =>
+                        addToCart({
+                          id: produto.id,
+                          nome: produto.nome,
+                          quantidade: 1,
+                          precoUnit: produto.preco,
+                          imagem_url:
+                            produto.imagem_url && produto.imagem_url.trim()
+                              ? produto.imagem_url
+                              : "/imgCards/RacaoSeca.png",
+                        })
+                      }
+                    />
+                  ))}
+                </div>
+              </>
+            );
+          })()
         ) : (
           <div className={styles.loading}>Nenhum produto encontrado.</div>
         )}

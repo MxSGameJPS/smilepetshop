@@ -78,9 +78,30 @@
 }
 .cardsGrid {
   display: flex;
-  gap: 32px;
+  flex-direction: column; /* empilhar as fileiras verticalmente */
+  gap: 24px;
   margin-top: 24px;
+  align-items: center;
+}
+/* duas fileiras de cards (cada row contém até 5 cards) */
+.cardsRow {
+  display: flex;
+  gap: 24px;
   justify-content: center;
+  margin-bottom: 20px;
+  flex-wrap: nowrap;
+}
+
+/* responsividade: em telas pequenas, permitir wrap e duas colunas por row */
+@media (max-width: 800px) {
+  .cardsRow {
+    flex-wrap: wrap;
+    gap: 12px;
+    justify-content: center;
+  }
+  .card {
+    width: calc(50% - 12px);
+  }
 }
 .card {
   background: #fff;

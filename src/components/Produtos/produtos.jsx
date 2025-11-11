@@ -4,6 +4,8 @@ import ProductCard from "../ProductCard/ProductCard";
 import { addToCart } from "../../lib/cart";
 import { useLocation } from "react-router-dom";
 
+const MARCA_CLEAR = "__NONE__";
+
 export default function Produtos() {
   const [openGrupo, setOpenGrupo] = useState({
     preco: true,
@@ -15,15 +17,103 @@ export default function Produtos() {
   const [error, setError] = useState(null);
   const [filtroMarca, setFiltroMarca] = useState("");
   const [filtroCategoria, setFiltroCategoria] = useState("");
+  const [selectedCategorias, setSelectedCategorias] = useState([]);
+  const [filtroPet, setFiltroPet] = useState("");
+  const [filtroOfertas, setFiltroOfertas] = useState(false);
+  const [categoriasOptions, setCategoriasOptions] = useState([]);
   const [precoMin, setPrecoMin] = useState(0);
   const [precoMax, setPrecoMax] = useState(100);
+  const [priceRangeMin, setPriceRangeMin] = useState(0);
+  const [priceRangeMax, setPriceRangeMax] = useState(100);
   const location = useLocation();
+  // helper: parse prices returned by the API (handles '1.234,56' Brazilian format)
+  const parsePrice = (v) => {
+    if (v == null) return NaN;
+    if (typeof v === "number") return v;
+    let s = String(v).trim();
+    if (s === "") return NaN;
+    // remover prefixos/símbolos não numéricos (R$, $, espaço, letras)
+    s = s.replace(/[^0-9.,-]/g, "");
+    if (s === "") return NaN;
+    // se tiver vírgula, assume formato brasileiro (1.234,56)
+    if (s.indexOf(",") >= 0) {
+      s = s.replace(/\./g, "").replace(/,/g, ".");
+    } else {
+      // caso sem vírgula, remover vírgulas remanescentes e deixar pontos decimais
+      s = s.replace(/,/g, "");
+    }
+    const n = Number(s);
+    return Number.isFinite(n) ? n : NaN;
+  };
+  const formatCurrency = (val) => {
+    try {
+      const n = Number(val) || 0;
+      return new Intl.NumberFormat("pt-BR", {
+        style: "currency",
+        currency: "BRL",
+      }).format(n);
+    } catch {
+      return String(val);
+    }
+  };
+  const normalize = (val) =>
+    val == null
+      ? ""
+      : String(val)
+          .normalize("NFD")
+          .replace(/[\u0300-\u036f]/g, "")
+          .toLowerCase()
+          .trim();
+
+  const getCategoriaNome = (produto) => {
+    if (!produto) return "";
+    const cat = produto.categoria;
+    if (typeof cat === "string" && cat.trim() !== "") return cat;
+    if (cat && typeof cat === "object") {
+      return (
+        cat.nome ||
+        cat.name ||
+        cat.label ||
+        cat.descricao ||
+        cat.description ||
+        ""
+      );
+    }
+    return (
+      produto.categoria_nome ||
+      produto.categoriaName ||
+      produto.categoriaLabel ||
+      produto.categoriaDescricao ||
+      produto.categoria_description ||
+      ""
+    );
+  };
+
+  const getCategoriaId = (produto) => {
+    if (!produto) return null;
+    const direct =
+      produto.categoria_id ??
+      produto.categoriaId ??
+      produto.categoriaID ??
+      null;
+    if (direct !== null && direct !== undefined && direct !== "") return direct;
+    const cat = produto.categoria;
+    if (cat && typeof cat === "object") {
+      const nested = cat.id ?? cat.ID ?? cat.categoria_id ?? cat.categoriaId;
+      if (nested !== null && nested !== undefined && nested !== "")
+        return nested;
+    }
+    if (typeof cat === "number") return cat;
+    if (typeof cat === "string" && /^\d+$/.test(cat.trim())) return cat.trim();
+    return null;
+  };
   // parse categorias from query string (comma separated names)
   const params = new URLSearchParams(location.search);
   const categoriasParam = params.get("categorias") || "";
   const categoriasFiltro = categoriasParam
     ? categoriasParam.split(",").map((s) => s.trim())
     : [];
+  const categoriasFiltroNormalized = categoriasFiltro.map((c) => normalize(c));
   const marcaParam = params.get("marca") || "";
 
   useEffect(() => {
@@ -38,12 +128,47 @@ export default function Produtos() {
         } else if (Array.isArray(data.produtos)) {
           arr = data.produtos;
         }
-        setProdutos(arr);
+        // manter apenas produtos pai (produto_pai_id === null)
+        const parents = arr.filter((p) => {
+          return (
+            (p && p.produto_pai_id === null) ||
+            (p && p.produto && p.produto.produto_pai_id === null)
+          );
+        });
+        setProdutos(parents);
+        // calcular faixa de preço disponível a partir da propriedade `preco`
+        const prices = parents
+          .map((p) =>
+            parsePrice(p.preco ?? p.precoMin ?? p.precoMax ?? p.precoAssinante)
+          )
+          .filter((n) => Number.isFinite(n));
+        if (prices.length) {
+          const min = Math.floor(Math.min(...prices));
+          const max = Math.ceil(Math.max(...prices));
+          setPriceRangeMin(min);
+          setPriceRangeMax(max);
+          // inicializar seletores com toda a faixa disponível
+          setPrecoMin(min);
+          setPrecoMax(max);
+        }
         setLoading(false);
       })
       .catch(() => {
         setError("Erro ao carregar produtos");
         setLoading(false);
+      });
+    // buscar categorias para os filtros (uma vez)
+    fetch("https://apismilepet.vercel.app/api/categorias/produtos")
+      .then((r) => r.json())
+      .then((data) => {
+        let arr = [];
+        if (Array.isArray(data)) arr = data;
+        else if (Array.isArray(data.data)) arr = data.data;
+        else if (Array.isArray(data.categorias)) arr = data.categorias;
+        setCategoriasOptions(arr);
+      })
+      .catch(() => {
+        // silencioso: se falhar, os checkboxes ficarão desabilitados
       });
   }, []);
 
@@ -51,20 +176,131 @@ export default function Produtos() {
   const marcas = Array.from(
     new Set(produtos.map((p) => p.marca).filter(Boolean))
   );
-  // categorias list intentionally omitted (not used directly)
+  const marcaSelecionada =
+    filtroMarca === MARCA_CLEAR ? "" : filtroMarca || marcaParam;
+  // helpers para filtros de checkbox
+  const toggleSelectedCategoria = (catInfo) => {
+    const normalizedName = normalize(
+      catInfo?.nome ?? catInfo?.label ?? catInfo?.nomeBusca ?? ""
+    );
+    const id =
+      catInfo && catInfo.id !== undefined && catInfo.id !== null
+        ? String(catInfo.id)
+        : catInfo?.idString ?? null;
+    setSelectedCategorias((prev) => {
+      const exists = prev.some((item) => {
+        const matchId = id && item.id && String(item.id) === id;
+        const matchName =
+          normalizedName && item.normalizedName === normalizedName;
+        return matchId || matchName;
+      });
+      if (exists) {
+        return prev.filter((item) => {
+          const matchId = id && item.id && String(item.id) === id;
+          const matchName =
+            normalizedName && item.normalizedName === normalizedName;
+          return !(matchId || matchName);
+        });
+      }
+      return [
+        ...prev,
+        {
+          id: id ?? null,
+          normalizedName,
+        },
+      ];
+    });
+  };
+  const specialCategoriasPorPet = {
+    Gato: [
+      { label: "Ração Seca", nomeBusca: "Ração para Gatos" },
+      { label: "Ração Úmida", nomeBusca: "Ração Úmida para Gatos" },
+      { label: "Petiscos", nomeBusca: "Petiscos Cat" },
+      { label: "Areias", nomeBusca: "Higiene e Cuidados para Gatos" },
+    ],
+    Cachorro: [
+      { label: "Ração Seca", nomeBusca: "Ração para Cachorro" },
+      { label: "Ração Úmida", nomeBusca: "Ração Úmida para Cães" },
+      { label: "Petiscos", nomeBusca: "Petiscos Dog" },
+      { label: "Tapetes", nomeBusca: "Higiene e Cuidados para Cães" },
+    ],
+  };
+  const toggleFiltroPetPorNome = (petNome) => {
+    setFiltroPet((prev) => (prev === petNome ? "" : petNome));
+  };
+  const buscarCategoriaOption = (nomeBusca) =>
+    categoriasOptions.find((cat) => {
+      const nomeMatch = normalize(cat?.nome) === normalize(nomeBusca);
+      const descricaoMatch = normalize(cat?.descricao) === normalize(nomeBusca);
+      return nomeMatch || descricaoMatch;
+    });
+  const isCategoriaSelecionada = (id, nome) => {
+    const normalizedName = normalize(nome);
+    const idStr = id != null ? String(id) : null;
+    return selectedCategorias.some((item) => {
+      const matchName =
+        normalizedName && item.normalizedName === normalizedName;
+      const matchId = idStr && item.id && String(item.id) === idStr;
+      return matchName || matchId;
+    });
+  };
+  const toggleMarca = (marca) => {
+    setFiltroMarca((prev) => {
+      if (prev === marca) return MARCA_CLEAR;
+      return marca;
+    });
+  };
 
   const produtosFiltrados = produtos.filter((p) => {
-    const effectiveMarca = marcaParam || filtroMarca;
+    const effectiveMarca =
+      filtroMarca === MARCA_CLEAR ? "" : filtroMarca || marcaParam;
     const marcaOk = !effectiveMarca || p.marca === effectiveMarca;
+    const categoriaNome = getCategoriaNome(p);
+    const categoriaNomeNorm = normalize(categoriaNome);
+    const categoriaId = getCategoriaId(p);
+    const categoriaIdStr =
+      categoriaId !== null && categoriaId !== undefined
+        ? String(categoriaId)
+        : null;
+    const categoriaIdNorm = categoriaIdStr ? normalize(categoriaIdStr) : "";
     // if categoriasFiltro is provided in URL, match any of them
     let categoriaOk = true;
-    if (categoriasFiltro.length) {
-      categoriaOk = categoriasFiltro.includes(p.categoria);
+    if (categoriasFiltroNormalized.length) {
+      categoriaOk = categoriasFiltroNormalized.some((target) => {
+        if (target === categoriaNomeNorm) return true;
+        if (categoriaIdStr && target === categoriaIdStr) return true;
+        if (categoriaIdNorm && target === categoriaIdNorm) return true;
+        return false;
+      });
+    } else if (selectedCategorias.length) {
+      categoriaOk = selectedCategorias.some((sel) => {
+        const matchName =
+          sel.normalizedName && sel.normalizedName === categoriaNomeNorm;
+        const matchId =
+          sel.id != null &&
+          (sel.id === categoriaIdStr || sel.id === categoriaIdNorm);
+        return matchName || matchId;
+      });
     } else {
-      categoriaOk = !filtroCategoria || p.categoria === filtroCategoria;
+      const filtroCatNorm = normalize(filtroCategoria);
+      categoriaOk = !filtroCatNorm || filtroCatNorm === categoriaNomeNorm;
     }
-    // Simulação de faixa de preço
-    return marcaOk && categoriaOk;
+    // filtrar por pet (ex.: Gato)
+    const petOk = !filtroPet || normalize(p.pet) === normalize(filtroPet);
+    const isPromocao =
+      p.promocao === true ||
+      p.promocao === "true" ||
+      p.promocao === 1 ||
+      p.promocao === "1";
+    const ofertaOk = !filtroOfertas || isPromocao;
+    // Filtrar por faixa de preço usando propriedade `preco` (ou alternativas)
+    const raw =
+      p.preco ?? p.precoMin ?? p.precoMax ?? p.precoAssinante ?? p.price;
+    const pPrice = parsePrice(raw);
+    const priceOk = Number.isFinite(pPrice)
+      ? pPrice >= precoMin && pPrice <= precoMax
+      : true;
+    return marcaOk && categoriaOk && priceOk && petOk && ofertaOk;
   });
 
   // navigation handled inside ProductCard via useNavigate when opening a product
@@ -77,10 +313,13 @@ export default function Produtos() {
           <button
             className={styles.limparTudoBtn}
             onClick={() => {
-              setFiltroMarca("");
+              setFiltroMarca(MARCA_CLEAR);
               setFiltroCategoria("");
-              setPrecoMin(0);
-              setPrecoMax(100);
+              setSelectedCategorias([]);
+              setFiltroPet("");
+              setFiltroOfertas(false);
+              setPrecoMin(priceRangeMin);
+              setPrecoMax(priceRangeMax);
             }}
           >
             Limpar tudo
@@ -99,16 +338,46 @@ export default function Produtos() {
             </div>
             {openGrupo.preco && (
               <div className={styles.precoFaixa}>
-                <input
-                  type="range"
-                  min={0}
-                  max={100}
-                  value={precoMin}
-                  onChange={(e) => setPrecoMin(Number(e.target.value))}
-                  className={styles.precoRange}
-                />
+                <div className={styles.precoInputs}>
+                  <label className={styles.precoLabelInput}>
+                    Mínimo
+                    <input
+                      type="number"
+                      min={priceRangeMin}
+                      max={priceRangeMax}
+                      value={precoMin}
+                      onChange={(e) =>
+                        setPrecoMin(
+                          Math.max(
+                            Number(e.target.value) || priceRangeMin,
+                            priceRangeMin
+                          )
+                        )
+                      }
+                      className={styles.precoNumber}
+                    />
+                  </label>
+                  <label className={styles.precoLabelInput}>
+                    Máximo
+                    <input
+                      type="number"
+                      min={priceRangeMin}
+                      max={priceRangeMax}
+                      value={precoMax}
+                      onChange={(e) =>
+                        setPrecoMax(
+                          Math.min(
+                            Number(e.target.value) || priceRangeMax,
+                            priceRangeMax
+                          )
+                        )
+                      }
+                      className={styles.precoNumber}
+                    />
+                  </label>
+                </div>
                 <span className={styles.precoLabel}>
-                  $ {precoMin},00–$ {precoMax},00
+                  {formatCurrency(precoMin)} – {formatCurrency(precoMax)}
                 </span>
               </div>
             )}
@@ -130,54 +399,95 @@ export default function Produtos() {
             {openGrupo.categoria && (
               <ul className={styles.filtroLista}>
                 <li>
-                  <input type="checkbox" /> Gato
+                  <label>
+                    <input
+                      type="checkbox"
+                      checked={filtroPet === "Gato"}
+                      onChange={() => toggleFiltroPetPorNome("Gato")}
+                    />
+                    Gato
+                  </label>
                   <ul className={styles.filtroSublista}>
-                    <li>
-                      <input type="checkbox" /> Catnip e grama
-                    </li>
-                    <li>
-                      <input type="checkbox" /> Comida seca
-                    </li>
-                    <li>
-                      <input type="checkbox" /> Toppers de comida
-                    </li>
-                    <li>
-                      <input type="checkbox" /> Comida úmida
-                    </li>
+                    {(specialCategoriasPorPet.Gato || []).map((s) => {
+                      const catOption = buscarCategoriaOption(s.nomeBusca);
+                      const nomeToUse = catOption?.nome ?? s.nomeBusca;
+                      const idStr =
+                        catOption &&
+                        catOption.id !== undefined &&
+                        catOption.id !== null
+                          ? String(catOption.id)
+                          : null;
+                      const checked = isCategoriaSelecionada(idStr, nomeToUse);
+                      return (
+                        <li key={s.nomeBusca}>
+                          <label>
+                            <input
+                              type="checkbox"
+                              checked={checked}
+                              onChange={() =>
+                                toggleSelectedCategoria({
+                                  id: idStr,
+                                  nome: nomeToUse,
+                                  nomeBusca: s.nomeBusca,
+                                })
+                              }
+                            />
+                            {s.label}
+                          </label>
+                        </li>
+                      );
+                    })}
                   </ul>
                 </li>
                 <li>
-                  <input type="checkbox" /> Ofertas
+                  <label>
+                    <input
+                      type="checkbox"
+                      checked={filtroOfertas}
+                      onChange={() => setFiltroOfertas((prev) => !prev)}
+                    />
+                    Ofertas
+                  </label>
                 </li>
                 <li>
-                  <input type="checkbox" /> Cachorro
+                  <label>
+                    <input
+                      type="checkbox"
+                      checked={filtroPet === "Cachorro"}
+                      onChange={() => toggleFiltroPetPorNome("Cachorro")}
+                    />
+                    Cachorro
+                  </label>
                   <ul className={styles.filtroSublista}>
-                    <li>
-                      <input type="checkbox" /> Comida enlatada
-                    </li>
-                    <li>
-                      <input type="checkbox" /> Comida seca
-                    </li>
-                    <li>
-                      <input type="checkbox" /> Toppers de comida
-                    </li>
-                    <li>
-                      <input type="checkbox" /> Dietas Veterinárias Autorizadas
-                    </li>
-                    <li>
-                      <input type="checkbox" /> Comida úmida
-                    </li>
-                  </ul>
-                </li>
-                <li>
-                  <input type="checkbox" /> Guloseimas
-                  <ul className={styles.filtroSublista}>
-                    <li>
-                      <input type="checkbox" /> Biscoitos e Padaria
-                    </li>
-                    <li>
-                      <input type="checkbox" /> Guloseimas mastigáveis
-                    </li>
+                    {(specialCategoriasPorPet.Cachorro || []).map((s) => {
+                      const catOption = buscarCategoriaOption(s.nomeBusca);
+                      const nomeToUse = catOption?.nome ?? s.nomeBusca;
+                      const idStr =
+                        catOption &&
+                        catOption.id !== undefined &&
+                        catOption.id !== null
+                          ? String(catOption.id)
+                          : null;
+                      const checked = isCategoriaSelecionada(idStr, nomeToUse);
+                      return (
+                        <li key={s.nomeBusca}>
+                          <label>
+                            <input
+                              type="checkbox"
+                              checked={checked}
+                              onChange={() =>
+                                toggleSelectedCategoria({
+                                  id: idStr,
+                                  nome: nomeToUse,
+                                  nomeBusca: s.nomeBusca,
+                                })
+                              }
+                            />
+                            {s.label}
+                          </label>
+                        </li>
+                      );
+                    })}
                   </ul>
                 </li>
               </ul>
@@ -199,7 +509,14 @@ export default function Produtos() {
               <ul className={styles.filtroLista}>
                 {marcas.map((marca) => (
                   <li key={marca}>
-                    <input type="checkbox" /> {marca}
+                    <label>
+                      <input
+                        type="checkbox"
+                        checked={marcaSelecionada === marca}
+                        onChange={() => toggleMarca(marca)}
+                      />
+                      {marca}
+                    </label>
                   </li>
                 ))}
               </ul>

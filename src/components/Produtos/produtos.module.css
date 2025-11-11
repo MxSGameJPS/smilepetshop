@@ -14,7 +14,7 @@
   transition: color 0.2s;
 }
 .cardFavorito:hover .cardHeart {
-  color: #FFD600;
+  color: #ffd600;
 }
 
 /* Botão amarelo com + e hover */
@@ -72,7 +72,7 @@
   opacity: 0;
 }
 .cardBtn:hover .cardBtnIcon {
-  background: #FFD600;
+  background: #ffd600;
   color: #09344a;
 }
 
@@ -255,6 +255,28 @@
   gap: 8px;
   margin-bottom: 8px;
 }
+.precoInputs {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+.precoLabelInput {
+  display: flex;
+  flex-direction: column;
+  font-size: 0.9rem;
+  color: #09344a;
+}
+.precoNumber {
+  width: 120px;
+  padding: 6px 8px;
+  border-radius: 8px;
+  border: 1px solid #e6e6e6;
+  margin-top: 6px;
+  background: transparent;
+  color: #09344a;
+  font-weight: 700;
+  text-align: center;
+}
 .precoRange {
   accent-color: #ffd600;
   width: 120px;
@@ -264,6 +286,7 @@
   font-size: 1rem;
   color: #09344a;
   font-weight: 600;
+  margin-top: 6%;
 }
 .filtroLista {
   list-style: none;
