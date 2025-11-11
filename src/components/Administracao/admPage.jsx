@@ -6,6 +6,7 @@ import PaginaClientes from "./PaginaClientes/paginaCliente";
 import PaginaProdutos from "./PaginaProdutos/paginaProduto";
 import PaginaVendas from "./PaginaVendas/paginaVendas";
 import AdmHome from "./AdmHome/admHome";
+import ProdutoAdm from "./PaginaProdutos/Produtos/produtoAdm";
 
 function readAdminFromStorage() {
   try {
@@ -50,6 +51,8 @@ export default function AdmPage() {
           <Route path="home" element={<AdmHome />} />
           <Route path="clientes" element={<PaginaClientes />} />
           <Route path="produtos" element={<PaginaProdutos />} />
+          <Route path="produtos/:id" element={<ProdutoAdm />} />
+          <Route path="produtos/:id/editar" element={<ProdutoAdm />} />
           <Route path="vendas" element={<PaginaVendas />} />
         </Routes>
       </div>

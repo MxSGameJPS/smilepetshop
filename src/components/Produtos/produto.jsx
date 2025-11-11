@@ -11,6 +11,59 @@ export default function Produto() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
+  // helper: build thumbnails list (secondary images). Prefer explicit imagens_secundarias or produto.imagens excluding imagem_url
+  const buildThumbs = (p) => {
+    try {
+      if (!p) return ["/imgCards/RacaoSeca.png"];
+      const primary = p.imagem_url ? String(p.imagem_url).trim() : null;
+      // prefer imagens_secundarias field
+      const sec = p.imagens_secundarias;
+      let thumbs = [];
+      if (sec) {
+        if (Array.isArray(sec))
+          thumbs = sec.map((x) => String(x).trim()).filter(Boolean);
+        else if (sec && Array.isArray(sec.lista))
+          thumbs = sec.lista.map((x) => String(x).trim()).filter(Boolean);
+        else if (typeof sec === "string" && sec.trim()) {
+          try {
+            const parsed = JSON.parse(sec);
+            if (Array.isArray(parsed))
+              thumbs = parsed.map((x) => String(x).trim()).filter(Boolean);
+            else thumbs = [sec.trim()];
+          } catch {
+            thumbs = sec
+              .split(",")
+              .map((s) => s.trim())
+              .filter(Boolean);
+          }
+        }
+      }
+      // also consider produto.imagens as secondary source
+      if (
+        (!thumbs || thumbs.length === 0) &&
+        Array.isArray(p.imagens) &&
+        p.imagens.length
+      ) {
+        thumbs = p.imagens.map((x) => String(x).trim()).filter(Boolean);
+      }
+
+      // build final list: primary first (if exists), then unique thumbnails without duplicating primary
+      const out = [];
+      if (primary) out.push(primary);
+      const seen = new Set(out);
+      (thumbs || []).forEach((t) => {
+        if (!t) return;
+        if (seen.has(t)) return;
+        seen.add(t);
+        out.push(t);
+      });
+
+      return out.length ? out : [primary || "/imgCards/RacaoSeca.png"];
+    } catch {
+      return [p?.imagem_url || "/imgCards/RacaoSeca.png"];
+    }
+  };
+
   useEffect(() => {
     fetch(`https://apismilepet.vercel.app/api/produtos/${id}`)
       .then((res) => res.json())
@@ -35,6 +88,9 @@ export default function Produto() {
   const [quantidade, setQuantidade] = useState(1);
   const [variante, setVariante] = useState();
   const [indiceSelecionado, setIndiceSelecionado] = useState(0);
+  // display fields that should update when a variation is chosen
+  const [displayTitle, setDisplayTitle] = useState("");
+  const [displaySku, setDisplaySku] = useState("");
   const [thumbStartIndex, setThumbStartIndex] = useState(0);
   // Accordion state (hook deve ser chamado em topo para evitar chamada condicional)
   const [openIndex, setOpenIndex] = useState(null);
@@ -205,20 +261,100 @@ export default function Produto() {
 
   useEffect(() => {
     if (produto) {
-      const imagens = produto.imagens || [
-        produto.imagem_url || "/imgCards/RacaoSeca.png",
-      ];
-      // Seleciona a terceira imagem por padrão se existir, senão a primeira
-      const defaultIndex = imagens.length >= 3 ? 2 : 0;
-      setIndiceSelecionado(defaultIndex);
-      setImgSelecionada(imagens[defaultIndex]);
+      // prefer imagem_url as main; thumbnails are secondary images only
+      const thumbs = buildThumbs(produto);
+      const primary = produto?.imagem_url
+        ? String(produto.imagem_url).trim()
+        : thumbs[0] || "/imgCards/RacaoSeca.png";
+      setIndiceSelecionado(0);
+      setImgSelecionada(primary);
       // garante que a miniatura selecionada esteja visível
-      setThumbStartIndex(Math.max(0, defaultIndex - 1));
+      setThumbStartIndex(0);
+      // initialize display title/sku from the loaded product
+      try {
+        setDisplayTitle(
+          produto.nome || produto.title || produto.name || "Produto"
+        );
+      } catch {
+        setDisplayTitle("Produto");
+      }
+      try {
+        setDisplaySku(
+          produto.sku ||
+            produto.SKU ||
+            produto.codigo ||
+            String(produto.id) ||
+            ""
+        );
+      } catch {
+        setDisplaySku("");
+      }
       if (produto.variacoes && produto.variacoes.length > 0) {
         setVariante(produto.variacoes[0]);
       }
     }
   }, [produto]);
+
+  // when variante changes, update displayed title and sku to match the selected variation
+  useEffect(() => {
+    if (!variante) return;
+    const key = String(variante);
+    // try to find a matching variation object in variacoesList
+    const found = (variacoesList || []).find((v) => {
+      if (!v) return false;
+      const candidates = [
+        v.id,
+        v.codigo,
+        v.sku,
+        v.SKU,
+        v.nome,
+        v.name,
+        v.label,
+        v.quantidade,
+      ];
+      return candidates.some((c) => c != null && String(c) === key);
+    });
+
+    if (found) {
+      setDisplayTitle(
+        found.nome || found.title || found.name || produto?.nome || "Produto"
+      );
+      setDisplaySku(
+        found.sku ||
+          found.SKU ||
+          found.codigo ||
+          String(found.id) ||
+          produto?.sku ||
+          produto?.codigo ||
+          ""
+      );
+      return;
+    }
+
+    // fallback: if the selected key matches the parent product, use product fields
+    try {
+      const prodKey = String(
+        produto?.id ?? produto?.SKU ?? produto?.codigo ?? produto?.nome ?? ""
+      );
+      if (prodKey === key) {
+        setDisplayTitle(
+          produto?.nome || produto?.title || produto?.name || "Produto"
+        );
+        setDisplaySku(
+          produto?.sku ||
+            produto?.SKU ||
+            produto?.codigo ||
+            String(produto?.id) ||
+            ""
+        );
+        return;
+      }
+    } catch {
+      /* ignore */
+    }
+
+    // if nothing matched, keep current display values (or reset to product defaults)
+  }, [variante, variacoesList, produto]);
 
   // Garantir que a página abra no topo ao navegar para um produto
   useEffect(() => {
@@ -241,9 +377,8 @@ export default function Produto() {
     }
   }, [variacoesList]);
 
-  const imagens = produto?.imagens || [
-    produto?.imagem_url || "/imgCards/RacaoSeca.png",
-  ];
+  // thumbnails list (secondary images). The primary image is shown separately via imgSelecionada
+  const imagens = buildThumbs(produto);
   // Tenta descobrir o mapa de preços por variação em diferentes formatos possíveis
   const mapaPrecosRaw =
     produto?.precoVariacoes ||
@@ -304,10 +439,13 @@ export default function Produto() {
   if (!produto) return <div>Produto não encontrado.</div>;
 
   // Dados defensivos para campos que podem ter nomes variados
-  const titulo = produto.nome || produto.title || produto.name || "Produto";
+  // preferir valores dinâmicos atualizados pela seleção de variação
+  const titulo =
+    displayTitle || produto.nome || produto.title || produto.name || "Produto";
   const vendedor =
     produto.vendedor || produto.marca || produto.brand || "NextGard";
-  const sku = produto.sku || produto.SKU || produto.codigo || "0984504";
+  const sku =
+    displaySku || produto.sku || produto.SKU || produto.codigo || "0984504";
 
   const visiveisThumbs = imagens.slice(thumbStartIndex, thumbStartIndex + 4);
 
@@ -452,22 +590,24 @@ export default function Produto() {
                 ) : variacoesList && variacoesList.length > 0 ? (
                   // mostrar o produto pai como primeira opção (quando existir), seguido pelas variações
                   <>
-                    {produto && produto.nome ? (
+                    {produto && (produto.quantidade ?? produto.nome) ? (
                       <option
                         key={String(
                           produto.id ??
                             produto.SKU ??
                             produto.codigo ??
+                            produto.quantidade ??
                             produto.nome
                         )}
                         value={String(
                           produto.id ??
                             produto.SKU ??
                             produto.codigo ??
+                            produto.quantidade ??
                             produto.nome
                         )}
                       >
-                        {`${produto.nome} ${
+                        {`${produto.quantidade ?? produto.nome} ${
                           produto.preco
                             ? " - " + formatarPreco(produto.preco)
                             : ""
@@ -480,7 +620,10 @@ export default function Produto() {
                       );
                       const price =
                         v.preco ?? v.price ?? v.precoMin ?? v.preco_min ?? null;
-                      const label = `${v.nome ?? v.label ?? key}${
+                      // prefer 'quantidade' as the displayed variant name, fall back to nome/label/key
+                      const variantName =
+                        v.quantidade ?? v.quantity ?? v.nome ?? v.label ?? key;
+                      const label = `${variantName}${
                         price != null ? " - " + formatarPreco(price) : ""
                       }`;
                       return (
