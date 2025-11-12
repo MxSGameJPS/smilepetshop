@@ -573,80 +573,119 @@ export default function Produto() {
               </div>
             )}
             <div className={styles.variacoesRow}>
-              <select
-                className={styles.select}
-                value={variante ?? defaultVariantValue}
-                onChange={(e) => {
-                  setVariante(e.target.value);
-                }}
-              >
-                {
-                  // Preferir variações vindas do endpoint, senão usar produto.variacoes se existir
-                }
+              <div className={styles.variacaoButtons}>
                 {loadingVariacoes ? (
-                  <option key="loading" value="">
+                  <span className={styles.variacaoStatus}>
                     Carregando variações...
-                  </option>
-                ) : variacoesList && variacoesList.length > 0 ? (
-                  // mostrar o produto pai como primeira opção (quando existir), seguido pelas variações
-                  <>
-                    {produto && (produto.quantidade ?? produto.nome) ? (
-                      <option
-                        key={String(
-                          produto.id ??
-                            produto.SKU ??
-                            produto.codigo ??
-                            produto.quantidade ??
-                            produto.nome
-                        )}
-                        value={String(
-                          produto.id ??
-                            produto.SKU ??
-                            produto.codigo ??
-                            produto.quantidade ??
-                            produto.nome
-                        )}
-                      >
-                        {`${produto.quantidade ?? produto.nome} ${
-                          produto.preco
-                            ? " - " + formatarPreco(produto.preco)
-                            : ""
-                        }`}
-                      </option>
-                    ) : null}
-                    {variacoesList.map((v) => {
-                      const key = String(
-                        v.id ?? v.codigo ?? v.sku ?? v.nome ?? v.label ?? v
-                      );
-                      const price =
-                        v.preco ?? v.price ?? v.precoMin ?? v.preco_min ?? null;
-                      // prefer 'quantidade' as the displayed variant name, fall back to nome/label/key
-                      const variantName =
-                        v.quantidade ?? v.quantity ?? v.nome ?? v.label ?? key;
-                      const label = `${variantName}${
-                        price != null ? " - " + formatarPreco(price) : ""
-                      }`;
-                      return (
-                        <option key={key} value={key}>
-                          {label}
-                        </option>
-                      );
-                    })}
-                  </>
-                ) : Array.isArray(produto.variacoes) &&
-                  produto.variacoes.length > 0 ? (
-                  produto.variacoes.map((v) => (
-                    <option key={v} value={v}>
-                      {v}
-                    </option>
-                  ))
+                  </span>
                 ) : (
-                  <option key="none" value="" disabled>
-                    Sem variações
-                  </option>
-                )}
-              </select>
+                  (() => {
+                    const buttons = [];
+                    const baseKeyRaw = produto
+                      ? produto.id ??
+                        produto.SKU ??
+                        produto.codigo ??
+                        produto.quantidade ??
+                        produto.nome
+                      : null;
+                    const baseKey =
+                      baseKeyRaw != null && baseKeyRaw !== ""
+                        ? String(baseKeyRaw)
+                        : null;
+                    const baseLabel =
+                      produto?.quantidade != null && produto.quantidade !== ""
+                        ? String(produto.quantidade)
+                        : produto?.nome
+                        ? String(produto.nome)
+                        : null;
+                    const activeKey =
+                      variante ??
+                      (baseKey ? baseKey : defaultVariantValue || "");
 
+                    if (baseKey && baseLabel) {
+                      const isActive = activeKey === baseKey;
+                      buttons.push(
+                        <button
+                          key={`base-${baseKey}`}
+                          type="button"
+                          className={`${styles.variacaoButton} ${
+                            isActive ? styles.variacaoButtonAtiva : ""
+                          }`}
+                          onClick={() => setVariante(baseKey)}
+                          aria-pressed={isActive}
+                        >
+                          {baseLabel}
+                        </button>
+                      );
+                    }
+
+                    if (Array.isArray(variacoesList) && variacoesList.length) {
+                      variacoesList.forEach((v) => {
+                        if (!v) return;
+                        const key = String(
+                          v.id ?? v.codigo ?? v.sku ?? v.nome ?? v.label ?? v
+                        );
+                        if (baseKey && key === baseKey) return;
+                        const quantityLabel =
+                          v.quantidade ??
+                          v.quantity ??
+                          v.nome ??
+                          v.label ??
+                          key;
+                        const label = String(quantityLabel);
+                        const isActive = activeKey === key;
+                        buttons.push(
+                          <button
+                            key={`var-${key}`}
+                            type="button"
+                            className={`${styles.variacaoButton} ${
+                              isActive ? styles.variacaoButtonAtiva : ""
+                            }`}
+                            onClick={() => setVariante(key)}
+                            aria-pressed={isActive}
+                          >
+                            {label}
+                          </button>
+                        );
+                      });
+                    } else if (
+                      Array.isArray(produto?.variacoes) &&
+                      produto.variacoes.length > 0
+                    ) {
+                      produto.variacoes.forEach((v) => {
+                        const key = String(v);
+                        if (baseKey && key === baseKey) return;
+                        const label = String(v);
+                        const isActive = activeKey === key;
+                        buttons.push(
+                          <button
+                            key={`fallback-${key}`}
+                            type="button"
+                            className={`${styles.variacaoButton} ${
+                              isActive ? styles.variacaoButtonAtiva : ""
+                            }`}
+                            onClick={() => setVariante(key)}
+                            aria-pressed={isActive}
+                          >
+                            {label}
+                          </button>
+                        );
+                      });
+                    } else if (!buttons.length) {
+                      buttons.push(
+                        <span
+                          key="no-variacoes"
+                          className={styles.variacaoStatus}
+                        >
+                          Sem variações disponíveis
+                        </span>
+                      );
+                    }
+
+                    return buttons;
+                  })()
+                )}
+              </div>
               <div className={styles.precoAtual}>
                 {formatarPreco(precoPrincipal)}
               </div>
