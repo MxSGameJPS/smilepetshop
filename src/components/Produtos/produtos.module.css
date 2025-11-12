@@ -347,6 +347,28 @@
   gap: 32px;
   padding: 32px 48px;
 }
+.searchResultsSummary {
+  grid-column: 1 / -1;
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #09344a;
+}
+.searchResultsSummary span {
+  color: #fc6100;
+}
+.noResultsMessage {
+  grid-column: 1 / -1;
+  color: #666;
+  font-size: 1rem;
+  background: #f7f8f8;
+  border-radius: 12px;
+  padding: 24px;
+  text-align: center;
+}
+.noResultsMessage span {
+  font-weight: 700;
+  color: #09344a;
+}
 .produtosSection .produtoCard {
   background: #f7f8f8;
   border-radius: 16px;

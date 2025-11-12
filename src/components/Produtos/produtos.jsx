@@ -117,6 +117,8 @@ export default function Produtos() {
   const categoriasFiltroNormalized = categoriasFiltro.map((c) => normalize(c));
   const marcaParam = params.get("marca") || "";
   const petParam = params.get("pet") || "";
+  const searchQueryParam = params.get("q") || "";
+  const normalizedSearchQuery = normalize(searchQueryParam);
   const effectivePetFilter = filtroPet || petParam;
 
   useEffect(() => {
@@ -320,7 +322,21 @@ export default function Produtos() {
     const priceOk = Number.isFinite(pPrice)
       ? pPrice >= precoMin && pPrice <= precoMax
       : true;
-    return marcaOk && categoriaOk && priceOk && petOk && ofertaOk;
+    const produtoNomeCandidates = [
+      p.nome,
+      p.title,
+      p.name,
+      p.descricao,
+      p.descricao_curta,
+      p.descricaoCompleta,
+    ];
+    const searchOk =
+      !normalizedSearchQuery ||
+      produtoNomeCandidates.some((candidate) =>
+        normalize(candidate).includes(normalizedSearchQuery)
+      );
+
+    return marcaOk && categoriaOk && priceOk && petOk && ofertaOk && searchOk;
   });
 
   // navigation handled inside ProductCard via useNavigate when opening a product
@@ -547,40 +563,58 @@ export default function Produtos() {
         </aside>
         <div className={styles.produtosGrid}>
           {loading ? (
-            <div>Carregando...</div>
+            <div className={styles.noResultsMessage}>Carregando...</div>
           ) : error ? (
-            <div>{error}</div>
-          ) : produtosFiltrados.length === 0 ? (
-            <div>Nenhum produto encontrado.</div>
+            <div className={styles.noResultsMessage}>{error}</div>
           ) : (
-            produtosFiltrados.map((p) => {
-              const image =
-                p.imagem_url && p.imagem_url.trim()
-                  ? p.imagem_url
-                  : "/imgCards/RacaoSeca.png";
-              const price = p.precoMin || p.preco || null;
-              const priceOld = p.precoMax || null;
-              return (
-                <ProductCard
-                  key={p.id}
-                  image={image}
-                  title={p.nome}
-                  priceOld={priceOld}
-                  price={price}
-                  promocao={p.promocao}
-                  productId={p.id}
-                  onAdd={() =>
-                    addToCart({
-                      id: p.id,
-                      nome: p.nome,
-                      quantidade: 1,
-                      precoUnit: price,
-                      imagem_url: image,
-                    })
-                  }
-                />
-              );
-            })
+            <>
+              {normalizedSearchQuery && produtosFiltrados.length > 0 && (
+                <div className={styles.searchResultsSummary}>
+                  Resultados para <span>"{searchQueryParam}"</span>
+                </div>
+              )}
+              {produtosFiltrados.length === 0 ? (
+                <div className={styles.noResultsMessage}>
+                  {normalizedSearchQuery ? (
+                    <>
+                      Nenhum produto encontrado para
+                      <span> "{searchQueryParam}".</span>
+                    </>
+                  ) : (
+                    "Nenhum produto encontrado."
+                  )}
+                </div>
+              ) : (
+                produtosFiltrados.map((p) => {
+                  const image =
+                    p.imagem_url && p.imagem_url.trim()
+                      ? p.imagem_url
+                      : "/imgCards/RacaoSeca.png";
+                  const price = p.precoMin || p.preco || null;
+                  const priceOld = p.precoMax || null;
+                  return (
+                    <ProductCard
+                      key={p.id}
+                      image={image}
+                      title={p.nome}
+                      priceOld={priceOld}
+                      price={price}
+                      promocao={p.promocao}
+                      productId={p.id}
+                      onAdd={() =>
+                        addToCart({
+                          id: p.id,
+                          nome: p.nome,
+                          quantidade: 1,
+                          precoUnit: price,
+                          imagem_url: image,
+                        })
+                      }
+                    />
+                  );
+                })
+              )}
+            </>
           )}
         </div>
       </div>

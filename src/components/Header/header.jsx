@@ -1,6 +1,11 @@
 import styles from "./header.module.css";
-import { FaSearch, FaHeart, FaShoppingBag, FaInstagramSquare } from "react-icons/fa";
-import { useState, useEffect } from "react";
+import {
+  FaSearch,
+  FaHeart,
+  FaShoppingBag,
+  FaInstagramSquare,
+} from "react-icons/fa";
+import { useState, useEffect, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { getCartCount } from "../../lib/cart";
 import { getUser, clearUser, broadcastUserUpdate } from "../../lib/auth";
@@ -42,6 +47,8 @@ export default function Header() {
   const [loadingBrands, setLoadingBrands] = useState(false);
   const [activeSubLabel, setActiveSubLabel] = useState("");
   const [showOverlay, setShowOverlay] = useState(false);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [suggestionsOpen, setSuggestionsOpen] = useState(false);
 
   useEffect(() => {
     if (openCachorro || openGato) {
@@ -295,6 +302,90 @@ export default function Header() {
     };
   }
 
+  const parsePrice = (valor) => {
+    if (valor == null) return NaN;
+    if (typeof valor === "number") return valor;
+    let s = String(valor).trim();
+    if (!s) return NaN;
+    s = s.replace(/[^0-9.,-]/g, "");
+    if (!s) return NaN;
+    if (s.includes(",")) s = s.replace(/\./g, "").replace(/,/g, ".");
+    else s = s.replace(/,/g, "");
+    const n = Number(s);
+    return Number.isFinite(n) ? n : NaN;
+  };
+
+  const formatCurrency = (valor) => {
+    if (!Number.isFinite(valor)) return "";
+    try {
+      return new Intl.NumberFormat("pt-BR", {
+        style: "currency",
+        currency: "BRL",
+      }).format(valor);
+    } catch {
+      return "";
+    }
+  };
+
+  const normalizedProducts = useMemo(() => {
+    if (!products) return [];
+    return products.map((p) => {
+      const name = String(
+        p?.nome || p?.title || p?.name || p?.descricao || ""
+      ).trim();
+      const rawPrice =
+        p?.precoMin ??
+        p?.preco ??
+        p?.precoAssinante ??
+        p?.precoMax ??
+        p?.price ??
+        null;
+      const priceNumber = parsePrice(rawPrice);
+      const formattedPrice = formatCurrency(priceNumber);
+      const image =
+        p?.imagem_url && String(p.imagem_url).trim()
+          ? String(p.imagem_url).trim()
+          : "/imgCards/RacaoSeca.png";
+      return {
+        raw: p,
+        name,
+        normalized: normalizeText(name),
+        formattedPrice,
+        priceNumber,
+        image,
+      };
+    });
+  }, [products]);
+
+  const suggestionResults = useMemo(() => {
+    const term = normalizeText(searchTerm);
+    if (!term) return [];
+    return normalizedProducts
+      .filter((p) => p.name && p.normalized.includes(term))
+      .slice(0, 6);
+  }, [searchTerm, normalizedProducts]);
+
+  function handleSearchSubmit(e) {
+    if (e) e.preventDefault();
+    const query = searchTerm.trim();
+    const params = new URLSearchParams();
+    if (query) params.set("q", query);
+    const queryString = params.toString();
+    navigate(queryString ? `/produtos?${queryString}` : "/produtos");
+    setSuggestionsOpen(false);
+  }
+
+  function handleSuggestionClick(product) {
+    const query = product?.name || searchTerm.trim();
+    if (!query) return;
+    const params = new URLSearchParams();
+    params.set("q", query);
+    const queryString = params.toString();
+    navigate(queryString ? `/produtos?${queryString}` : "/produtos");
+    setSuggestionsOpen(false);
+    setSearchTerm(product?.name || "");
+  }
+
   async function handleHoverSubItem(itemLabel, species = "cachorro") {
     if (!showOverlay) setShowOverlay(true);
     setBrands([]);
@@ -442,14 +533,90 @@ export default function Header() {
             </div>
 
             <div className={styles.searchCenter}>
-              <div className={styles.searchBox}>
-                <FaSearch className={styles.searchIcon} />
+              <form
+                className={styles.searchBox}
+                onSubmit={(e) => {
+                  handleSearchSubmit(e);
+                }}
+              >
+                <button
+                  type="submit"
+                  className={styles.searchSubmit}
+                  aria-label="Buscar produtos"
+                >
+                  <FaSearch className={styles.searchIcon} />
+                </button>
                 <input
                   type="text"
                   placeholder="Pesquisar produtos..."
                   className={styles.searchInput}
+                  value={searchTerm}
+                  onChange={(e) => {
+                    setSearchTerm(e.target.value);
+                    setSuggestionsOpen(true);
+                    void ensureDataFetched();
+                  }}
+                  onFocus={() => {
+                    setSuggestionsOpen(true);
+                    void ensureDataFetched();
+                  }}
+                  onBlur={() => {
+                    setTimeout(() => setSuggestionsOpen(false), 120);
+                  }}
                 />
-              </div>
+              </form>
+              {suggestionsOpen && searchTerm.trim() ? (
+                <div className={styles.searchDropdown}>
+                  {!products ? (
+                    <div className={styles.searchNoResults}>
+                      Carregando sugestões...
+                    </div>
+                  ) : suggestionResults.length > 0 ? (
+                    <>
+                      <div className={styles.searchSuggestionsHeader}>
+                        Produtos sugeridos
+                      </div>
+                      <ul className={styles.searchSuggestionsList}>
+                        {suggestionResults.map((item) => (
+                          <li key={item.raw?.id || item.name}>
+                            <button
+                              type="button"
+                              onMouseDown={(e) => {
+                                e.preventDefault();
+                                handleSuggestionClick(item);
+                              }}
+                            >
+                              <div className={styles.searchSuggestionContent}>
+                                <img
+                                  src={item.image}
+                                  alt={item.name}
+                                  className={styles.searchSuggestionThumb}
+                                />
+                                <div className={styles.searchSuggestionInfo}>
+                                  <span className={styles.searchSuggestionName}>
+                                    {item.name}
+                                  </span>
+                                  {item.formattedPrice ? (
+                                    <span
+                                      className={styles.searchSuggestionPrice}
+                                    >
+                                      {item.formattedPrice}
+                                    </span>
+                                  ) : null}
+                                </div>
+                              </div>
+                            </button>
+                          </li>
+                        ))}
+                      </ul>
+                    </>
+                  ) : (
+                    <div className={styles.searchNoResults}>
+                      Nenhum produto encontrado
+                    </div>
+                  )}
+                </div>
+              ) : null}
             </div>
 
             <div className={styles.socialMediaIcons}>
