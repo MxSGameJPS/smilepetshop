@@ -20,6 +20,17 @@
   box-shadow: 0 1px 4px rgba(252, 97, 0, 0.12);
   transition: background 0.2s, color 0.2s;
 }
+
+.socialMediaIcons {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 16px;
+  color: #fff;
+  font-size: 2rem;
+  cursor: pointer;
+}
+
 /* clickable name button inside userArea */
 .userArea .userNameBtn {
   background: transparent;
@@ -73,7 +84,7 @@
 /* layout top bar as a 3-column grid: logo | search | actions */
 .headerTop .headerContent {
   display: grid;
-  grid-template-columns: auto 1fr auto;
+  grid-template-columns: auto 1fr auto auto;
   align-items: center;
   column-gap: 24px;
   max-width: 1400px;

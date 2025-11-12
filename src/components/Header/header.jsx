@@ -1,9 +1,10 @@
 import styles from "./header.module.css";
-import { FaSearch, FaHeart, FaShoppingBag } from "react-icons/fa";
+import { FaSearch, FaHeart, FaShoppingBag, FaInstagramSquare } from "react-icons/fa";
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { getCartCount } from "../../lib/cart";
 import { getUser, clearUser, broadcastUserUpdate } from "../../lib/auth";
+import { AiFillTikTok } from "react-icons/ai";
 
 export default function Header() {
   const [cartCount, setCartCount] = useState(() => getCartCount());
@@ -432,7 +433,7 @@ export default function Header() {
             <div className={styles.logoArea}>
               <a href="/">
                 <img
-                  src="/logo/produtos.webp"
+                  src="/logo.gif"
                   alt="Logo SmilePet"
                   className={styles.logo}
                 />
@@ -449,6 +450,11 @@ export default function Header() {
                   className={styles.searchInput}
                 />
               </div>
+            </div>
+
+            <div className={styles.socialMediaIcons}>
+              <AiFillTikTok />
+              <FaInstagramSquare />
             </div>
 
             <div className={styles.headerRight}>
