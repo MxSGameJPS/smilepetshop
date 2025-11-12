@@ -11,6 +11,16 @@ const marcas = [
   { nome: "Proplan", img: "/Marcas/proplan.webp" },
   { nome: "Purina", img: "/Marcas/purina.png" },
   { nome: "Qualiday", img: "/Marcas/qualiday.png" },
+  { nome: "Prolife", img: "/Marcas/prolife.png" },
+  { nome: "ProHealth", img: "/Marcas/prohealth.png" },
+  { nome: "Kanina", img: "/Marcas/kanina.png" },
+  { nome: "AllCanis", img: "/Marcas/allcanis.png" },
+  { nome: "CleanPads", img: "/Marcas/cleanpads.png" },
+  { nome: "DentaLife", img: "/Marcas/dentalife.png" },
+  { nome: "Doguitos", img: "/Marcas/doguitos.png" },
+  { nome: "SpecialCroc", img: "/Marcas/specialcroc.png" },
+  { nome: "TapeTudo", img: "/Marcas/tapetudo.png" },
+  { nome: "FluffyRoe", img: "/Marcas/fluffy.png" },
 ];
 
 export default function Marcas() {
@@ -22,12 +32,14 @@ export default function Marcas() {
           Ver tudo &nbsp;→
         </a>
       </div>
-      <div className={styles.grid}>
-        {marcas.map((marca) => (
-          <div className={styles.card} key={marca.nome}>
-            <img src={marca.img} alt={marca.nome} className={styles.logo} />
-          </div>
-        ))}
+      <div className={styles.marquee}>
+        <div className={styles.marqueeTrack} aria-hidden="false">
+          {[...marcas, ...marcas].map((marca, idx) => (
+            <div className={styles.card} key={`${marca.nome}-${idx}`}>
+              <img src={marca.img} alt={marca.nome} className={styles.logo} />
+            </div>
+          ))}
+        </div>
       </div>
     </section>
   );
