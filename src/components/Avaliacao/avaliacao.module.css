@@ -56,6 +56,12 @@
   gap: 6px;
   margin-bottom: 8px;
 }
+
+.imagemLogoML {
+  width: 200px;
+  height: auto;
+}
+
 .avaliacoesGrid {
   display: flex;
   gap: 24px;

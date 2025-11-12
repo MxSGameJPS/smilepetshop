@@ -45,8 +45,8 @@ export default function Avaliacao() {
           Baseado em <a href="#">20.921 avaliações</a>
         </div>
         <div className={styles.trustpilot}>
-          <FaStar className={styles.starFull} />
-          Trustpilot
+          {/* <FaStar className={styles.starFull} /> */}
+          <img className={styles.imagemLogoML} src="/Mercado-Livre-logo.png" alt="Mercado Livre" />
         </div>
       </div>
       <div className={styles.avaliacoesGrid}>
