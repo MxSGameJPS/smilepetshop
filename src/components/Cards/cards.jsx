@@ -114,9 +114,13 @@ export default function Cards() {
       if (ids.length) params.set("categorias", ids.join(","));
       else params.set("categorias", cats.join(","));
     }
-    navigate(
-      params.toString() ? `/produtos?${params.toString()}` : "/produtos"
-    );
+    const target = params.toString()
+      ? `/produtos?${params.toString()}`
+      : "/produtos";
+    navigate(target);
+    requestAnimationFrame(() => {
+      window.scrollTo({ top: 0, left: 0, behavior: "auto" });
+    });
   }
 
   return (

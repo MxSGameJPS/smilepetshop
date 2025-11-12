@@ -11,11 +11,19 @@
 .card {
   background: #f7f7f7;
   border-radius: 24px;
-  box-shadow: 0 2px 8px rgba(7, 59, 76, 0.06);
+  box-shadow: 0 12px 28px rgba(7, 59, 76, 0.50);
   overflow: hidden;
   width: 370px;
   display: flex;
   flex-direction: column;
+  cursor: pointer;
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+
+.card:hover,
+.card:focus-visible {
+  transform: translateY(-4px);
+  box-shadow: 0 20px 40px rgba(7, 59, 76, 0.16);
 }
 
 .cardImg {
@@ -29,6 +37,11 @@
 .card:hover .cardImg {
   transform: scale(1.07);
   box-shadow: 0 8px 24px rgba(7, 59, 76, 0.12);
+}
+
+.card:focus-visible {
+  outline: 2px solid #ffd600;
+  outline-offset: 4px;
 }
 
 .cardInfo {
