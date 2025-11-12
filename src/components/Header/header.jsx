@@ -40,6 +40,15 @@ export default function Header() {
   const [brands, setBrands] = useState([]);
   const [loadingBrands, setLoadingBrands] = useState(false);
   const [activeSubLabel, setActiveSubLabel] = useState("");
+  const [showOverlay, setShowOverlay] = useState(false);
+
+  useEffect(() => {
+    if (openCachorro || openGato) {
+      setShowOverlay(true);
+    } else {
+      setShowOverlay(false);
+    }
+  }, [openCachorro, openGato]);
 
   // mapping for submenu item -> target category name(s) for products filter
   // separate maps for cachorro and gato (arrays so we can join multiple categories)
@@ -54,37 +63,239 @@ export default function Header() {
     Ração: ["Ração para Gatos"],
     "Ração Úmida": ["Ração Úmida para Gatos"],
     Petiscos: ["Petiscos Cat"],
-    Areia: ["Higiene e Cuidados para Gatos"],
+    "Tapetes Higienicos": ["Higiene e Cuidados para Gatos"],
   };
 
   const [activeSubSpecies, setActiveSubSpecies] = useState("");
 
+  const normalizeText = (value) =>
+    value == null
+      ? ""
+      : String(value)
+          .normalize("NFD")
+          .replace(/[\u0300-\u036f]/g, "")
+          .toLowerCase()
+          .trim();
+
+  const collectCategoryIds = (product) => {
+    const ids = new Set();
+    const push = (val) => {
+      if (val === null || val === undefined) return;
+      const str = String(val).trim();
+      if (str) ids.add(str);
+    };
+
+    const directCategory = product?.categoria;
+    if (
+      typeof directCategory === "number" ||
+      (typeof directCategory === "string" && directCategory.trim() !== "")
+    ) {
+      push(directCategory);
+    }
+    if (directCategory && typeof directCategory === "object") {
+      push(directCategory?.id);
+      push(directCategory?._id);
+      push(directCategory?.ID);
+      push(directCategory?.codigo);
+    }
+
+    push(product?.categoria_id);
+    push(product?.categoriaId);
+    push(product?.categoriaID);
+
+    return ids;
+  };
+
+  const resolveCategoryMeta = (categoryNames, categoriesList) => {
+    const names = new Set();
+    const normalizedNames = new Set();
+    const ids = new Set();
+
+    (categoryNames || []).forEach((entry) => {
+      const normalizedEntry = normalizeText(entry);
+      if (entry) names.add(entry);
+      if (normalizedEntry) normalizedNames.add(normalizedEntry);
+
+      const match = (categoriesList || []).find((cat) => {
+        const catNames = [cat?.nome, cat?.descricao, cat?.label, cat?.name];
+        return catNames.some(
+          (candidate) => normalizeText(candidate) === normalizedEntry
+        );
+      });
+
+      if (match) {
+        if (match.nome) {
+          names.add(match.nome);
+          normalizedNames.add(normalizeText(match.nome));
+        }
+        const resolvedId = match.id ?? match._id ?? match.ID ?? match.codigo;
+        if (resolvedId !== null && resolvedId !== undefined) {
+          const strId = String(resolvedId).trim();
+          if (strId) ids.add(strId);
+        }
+      }
+    });
+
+    return {
+      names: Array.from(names),
+      normalizedNames: Array.from(normalizedNames),
+      ids: Array.from(ids),
+    };
+  };
+
+  const resolveCategoryArray = (raw) => {
+    if (!raw) return [];
+    if (Array.isArray(raw)) return raw;
+    if (Array.isArray(raw?.data)) return raw.data;
+    if (Array.isArray(raw?.categorias)) return raw.categorias;
+    return raw ? [raw] : [];
+  };
+
+  const resolveProductsArray = (raw) => {
+    if (!raw) return [];
+    if (Array.isArray(raw)) return raw;
+    if (Array.isArray(raw?.data)) return raw.data;
+    if (Array.isArray(raw?.produtos)) return raw.produtos;
+    if (raw && typeof raw === "object") return Object.values(raw);
+    return [];
+  };
+
+  const findCategoryNameById = (idValue, categoriesList) => {
+    if (idValue === null || idValue === undefined) return "";
+    const idStr = String(idValue).trim();
+    if (!idStr) return "";
+    const match = (categoriesList || []).find((item) => {
+      const candidateIds = [
+        item?.id,
+        item?._id,
+        item?.ID,
+        item?.codigo,
+        item?.categoria_id,
+        item?.categoriaId,
+        item?.categoriaID,
+      ];
+      return candidateIds.some((candidate) => String(candidate) === idStr);
+    });
+    return (
+      match?.nome ||
+      match?.name ||
+      match?.label ||
+      match?.descricao ||
+      match?.description ||
+      ""
+    );
+  };
+
+  const collectCategoryNames = (product, categoriesList) => {
+    const names = new Set();
+    const pushName = (val) => {
+      const normalized = normalizeText(val);
+      if (normalized) names.add(normalized);
+    };
+
+    const directCategory = product?.categoria;
+    if (
+      typeof directCategory === "string" ||
+      typeof directCategory === "number"
+    ) {
+      pushName(directCategory);
+    } else if (directCategory && typeof directCategory === "object") {
+      [
+        directCategory.nome,
+        directCategory.name,
+        directCategory.label,
+        directCategory.descricao,
+        directCategory.description,
+      ].forEach(pushName);
+    }
+
+    [
+      product?.categoria_nome,
+      product?.categoriaName,
+      product?.categoria_label,
+      product?.categoriaDescricao,
+      product?.categoria_description,
+    ].forEach(pushName);
+
+    const candidateIds = [
+      product?.categoria_id,
+      product?.categoriaId,
+      product?.categoriaID,
+      typeof directCategory === "number" ? directCategory : null,
+      typeof directCategory === "string" && /^\d+$/.test(directCategory.trim())
+        ? directCategory.trim()
+        : null,
+    ].filter((v) => v !== null && v !== undefined);
+
+    candidateIds.forEach((idCandidate) => {
+      const nameFromId = findCategoryNameById(idCandidate, categoriesList);
+      pushName(nameFromId);
+    });
+
+    return names;
+  };
+
+  const productMatchesCategory = (product, targetNames, categoriesList) => {
+    if (!product || !targetNames) return false;
+    const { names: nameTargets = [], ids: idTargets = [] } = targetNames;
+    const normalizedNameTargets = (targetNames?.normalizedNames || []).filter(
+      Boolean
+    );
+
+    const productNames = collectCategoryNames(product, categoriesList);
+    if (normalizedNameTargets.length) {
+      const hasNameMatch = normalizedNameTargets.some((target) =>
+        productNames.has(target)
+      );
+      if (hasNameMatch) return true;
+    }
+
+    if (idTargets.length) {
+      const productIds = collectCategoryIds(product);
+      const hasIdMatch = idTargets.some((id) => productIds.has(id));
+      if (hasIdMatch) return true;
+    }
+
+    // fallback: compare raw names if available
+    if (nameTargets.length) {
+      const fallbackMatch = nameTargets.some((label) =>
+        productNames.has(normalizeText(label))
+      );
+      if (fallbackMatch) return true;
+    }
+
+    return false;
+  };
+
   async function ensureDataFetched() {
-    // fetch categories and products lazily (only once)
+    let categoriesData = categories;
+    let productsData = products;
     try {
-      if (!categories) {
+      if (!categoriesData) {
         const resC = await fetch(
           "https://apismilepet.vercel.app/api/categorias/produtos"
         );
         const dataC = await resC.json().catch(() => null);
-        setCategories(dataC || []);
+        categoriesData = resolveCategoryArray(dataC);
+        setCategories(categoriesData);
       }
-      if (!products) {
+      if (!productsData) {
         const resP = await fetch("https://apismilepet.vercel.app/api/produtos");
         const dataP = await resP.json().catch(() => null);
-        // normalize to array
-        let arr = [];
-        if (Array.isArray(dataP)) arr = dataP;
-        else if (Array.isArray(dataP.data)) arr = dataP.data;
-        else if (Array.isArray(dataP.produtos)) arr = dataP.produtos;
-        setProducts(arr || []);
+        productsData = resolveProductsArray(dataP);
+        setProducts(productsData);
       }
     } catch (err) {
       console.warn("Erro ao buscar categorias/produtos", err);
     }
+    return {
+      categoriesData: categoriesData || [],
+      productsData: productsData || [],
+    };
   }
 
   async function handleHoverSubItem(itemLabel, species = "cachorro") {
+    if (!showOverlay) setShowOverlay(true);
     setBrands([]);
     setActiveSubLabel(itemLabel);
     setActiveSubSpecies(species);
@@ -93,25 +304,33 @@ export default function Header() {
     const targetCategories = map[itemLabel] || [];
     if (!targetCategories || targetCategories.length === 0) return;
     setLoadingBrands(true);
-    await ensureDataFetched();
     try {
-      const prods = products || [];
-      // filter products whose p.categoria is in targetCategories array
-      const filtered = prods.filter((p) =>
-        targetCategories.includes(String(p.categoria))
+      const { productsData, categoriesData } = await ensureDataFetched();
+      const targetMeta = resolveCategoryMeta(targetCategories, categoriesData);
+      const filtered = productsData.filter((product) =>
+        productMatchesCategory(product, targetMeta, categoriesData)
       );
       const unique = Array.from(
-        new Set(filtered.map((p) => p.marca).filter(Boolean))
+        new Set(
+          filtered
+            .map((p) => (p?.marca ? String(p.marca).trim() : ""))
+            .filter(Boolean)
+        )
       );
-      setBrands(unique.sort());
+      setBrands(
+        unique.sort((a, b) =>
+          a.localeCompare(b, "pt-BR", { sensitivity: "base" })
+        )
+      );
     } catch (err) {
       console.warn("Erro filtrando marcas", err);
       setBrands([]);
+    } finally {
+      setLoadingBrands(false);
     }
-    setLoadingBrands(false);
   }
 
-  function handleBrandClick(brand) {
+  async function handleBrandClick(brand) {
     // determine which species map to use
     const map =
       activeSubSpecies === "gato"
@@ -119,9 +338,53 @@ export default function Header() {
         : submenuCategoryMapCachorro;
     const targetCategories = map[activeSubLabel] || [];
     if (!targetCategories || targetCategories.length === 0) return;
+    try {
+      const { categoriesData } = await ensureDataFetched();
+      const targetMeta = resolveCategoryMeta(targetCategories, categoriesData);
+      const params = new URLSearchParams();
+      if (targetMeta.ids.length)
+        params.set("categorias", targetMeta.ids.join(","));
+      else params.set("categorias", targetCategories.join(","));
+      const petLabel = activeSubSpecies === "gato" ? "Gato" : "Cachorro";
+      params.set("pet", petLabel);
+      if (brand) params.set("marca", brand);
+      setOpenCachorro(false);
+      setOpenGato(false);
+      setShowOverlay(false);
+      navigate(`/produtos?${params.toString()}`);
+    } catch (err) {
+      console.warn("Erro ao navegar por marca", err);
+    }
+  }
+
+  async function handleCategoryNavigate(label, species) {
+    const map =
+      species === "gato" ? submenuCategoryMapGato : submenuCategoryMapCachorro;
+    const targetCategories = map[label] || [];
+    if (!targetCategories || targetCategories.length === 0) return;
+    try {
+      const { categoriesData } = await ensureDataFetched();
+      const targetMeta = resolveCategoryMeta(targetCategories, categoriesData);
+      const params = new URLSearchParams();
+      if (targetMeta.ids.length)
+        params.set("categorias", targetMeta.ids.join(","));
+      else params.set("categorias", targetCategories.join(","));
+      params.set("pet", species === "gato" ? "Gato" : "Cachorro");
+      setOpenCachorro(false);
+      setOpenGato(false);
+      setShowOverlay(false);
+      navigate(`/produtos?${params.toString()}`);
+    } catch (err) {
+      console.warn("Erro ao navegar por categoria", err);
+    }
+  }
+
+  function handlePetNavigation(petName) {
+    setOpenCachorro(false);
+    setOpenGato(false);
+    setShowOverlay(false);
     const params = new URLSearchParams();
-    params.set("categorias", targetCategories.join(","));
-    if (brand) params.set("marca", brand);
+    params.set("pet", petName);
     navigate(`/produtos?${params.toString()}`);
   }
 
@@ -161,219 +424,241 @@ export default function Header() {
   }
 
   return (
-    <header className={styles.header}>
-      {/* Top bar: logo | centered search | right actions */}
-      <div className={styles.headerTop}>
-        <div className={styles.headerContent}>
-          <div className={styles.logoArea}>
-            <a href="/">
-              <img
-                src="/logo/produtos.webp"
-                alt="Logo SmilePet"
-                className={styles.logo}
-              />
-            </a>
-            {/* <span className={styles.brand}>SmilePet</span> */}
-          </div>
-
-          <div className={styles.searchCenter}>
-            <div className={styles.searchBox}>
-              <FaSearch className={styles.searchIcon} />
-              <input
-                type="text"
-                placeholder="Pesquisar produtos..."
-                className={styles.searchInput}
-              />
-            </div>
-          </div>
-
-          <div className={styles.headerRight}>
-            {(() => {
-              // tolerate different shapes returned by API
-              const displayName =
-                user?.nome || user?.name || user?.firstName || user?.email;
-              if (displayName) {
-                return (
-                  <div className={styles.userArea}>
-                    <button
-                      className={styles.userNameBtn}
-                      onClick={() => navigate("/perfil")}
-                      type="button"
-                      title={`Ver perfil de ${displayName}`}
-                    >
-                      Olá, {displayName}
-                    </button>
-                    <button
-                      className={styles.logoutBtn}
-                      onClick={handleLogout}
-                      type="button"
-                    >
-                      Sair
-                    </button>
-                  </div>
-                );
-              }
-              return (
-                <a href="/usuario" className={styles.loginLink}>
-                  Entre ou cadastre-se
-                </a>
-              );
-            })()}
-            <div className={styles.iconGroup}>
-              <button className={styles.iconBtn} aria-label="Favoritos">
-                <FaHeart
-                  className={styles.icon}
-                  focusable="false"
-                  aria-hidden="true"
+    <>
+      <header className={styles.header}>
+        {/* Top bar: logo | centered search | right actions */}
+        <div className={styles.headerTop}>
+          <div className={styles.headerContent}>
+            <div className={styles.logoArea}>
+              <a href="/">
+                <img
+                  src="/logo/produtos.webp"
+                  alt="Logo SmilePet"
+                  className={styles.logo}
                 />
-              </button>
-              <div className={styles.cartIconArea}>
-                <button
-                  className={styles.iconBtn}
-                  aria-label="Sacola de compras"
-                  type="button"
-                  onClick={() => navigate("/carrinho")}
-                >
-                  <FaShoppingBag
+              </a>
+              {/* <span className={styles.brand}>SmilePet</span> */}
+            </div>
+
+            <div className={styles.searchCenter}>
+              <div className={styles.searchBox}>
+                <FaSearch className={styles.searchIcon} />
+                <input
+                  type="text"
+                  placeholder="Pesquisar produtos..."
+                  className={styles.searchInput}
+                />
+              </div>
+            </div>
+
+            <div className={styles.headerRight}>
+              {(() => {
+                // tolerate different shapes returned by API
+                const displayName =
+                  user?.nome || user?.name || user?.firstName || user?.email;
+                if (displayName) {
+                  return (
+                    <div className={styles.userArea}>
+                      <button
+                        className={styles.userNameBtn}
+                        onClick={() => navigate("/perfil")}
+                        type="button"
+                        title={`Ver perfil de ${displayName}`}
+                      >
+                        Olá, {displayName}
+                      </button>
+                      <button
+                        className={styles.logoutBtn}
+                        onClick={handleLogout}
+                        type="button"
+                      >
+                        Sair
+                      </button>
+                    </div>
+                  );
+                }
+                return (
+                  <a href="/usuario" className={styles.loginLink}>
+                    Entre ou cadastre-se
+                  </a>
+                );
+              })()}
+              <div className={styles.iconGroup}>
+                <button className={styles.iconBtn} aria-label="Favoritos">
+                  <FaHeart
                     className={styles.icon}
                     focusable="false"
                     aria-hidden="true"
                   />
                 </button>
-                <span className={styles.cartCount}>{cartCount}</span>
+                <div className={styles.cartIconArea}>
+                  <button
+                    className={styles.iconBtn}
+                    aria-label="Sacola de compras"
+                    type="button"
+                    onClick={() => navigate("/carrinho")}
+                  >
+                    <FaShoppingBag
+                      className={styles.icon}
+                      focusable="false"
+                      aria-hidden="true"
+                    />
+                  </button>
+                  <span className={styles.cartCount}>{cartCount}</span>
+                </div>
               </div>
             </div>
           </div>
         </div>
-      </div>
 
-      {/* Bottom bar: main navigation (keeps existing nav/submenu behavior) */}
-      <div className={styles.headerBottom}>
-        <div className={styles.headerNav}>
-          <nav className={styles.nav}>
-            <ul className={styles.navList}>
-              <li
-                className={styles.hasSubmenu}
-                onMouseEnter={() => setOpenCachorro(true)}
-                onMouseLeave={() => {
-                  setOpenCachorro(false);
-                }}
-              >
-                <a href="/cachorro">Cachorro</a>
-                {openCachorro && (
-                  <div className={styles.submenu} role="menu">
-                    <div className={styles.submenuLeft}>
-                      {Object.keys(submenuCategoryMapCachorro).map((label) => (
-                        <div
-                          key={label}
-                          className={styles.submenuItem}
-                          onMouseEnter={() =>
-                            handleHoverSubItem(label, "cachorro")
-                          }
-                          onClick={() => {
-                            const cats =
-                              submenuCategoryMapCachorro[label] || [];
-                            const params = new URLSearchParams();
-                            if (cats.length)
-                              params.set("categorias", cats.join(","));
-                            navigate(`/produtos?${params.toString()}`);
-                          }}
-                        >
-                          {label}
-                        </div>
-                      ))}
+        {/* Bottom bar: main navigation (keeps existing nav/submenu behavior) */}
+        <div className={styles.headerBottom}>
+          <div className={styles.headerNav}>
+            <nav className={styles.nav}>
+              <ul className={styles.navList}>
+                <li
+                  className={styles.hasSubmenu}
+                  onMouseEnter={() => setOpenCachorro(true)}
+                  onMouseLeave={() => {
+                    setOpenCachorro(false);
+                  }}
+                >
+                  <a
+                    href="/produtos?pet=Cachorro"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      handlePetNavigation("Cachorro");
+                      setShowOverlay(true);
+                    }}
+                  >
+                    Cachorro
+                  </a>
+                  {openCachorro && (
+                    <div className={styles.submenu} role="menu">
+                      <div className={styles.submenuLeft}>
+                        {Object.keys(submenuCategoryMapCachorro).map(
+                          (label) => (
+                            <div
+                              key={label}
+                              className={styles.submenuItem}
+                              onMouseEnter={() =>
+                                handleHoverSubItem(label, "cachorro")
+                              }
+                              onClick={() => {
+                                void handleCategoryNavigate(label, "cachorro");
+                              }}
+                            >
+                              {label}
+                            </div>
+                          )
+                        )}
+                      </div>
+                      <div className={styles.submenuRight}>
+                        <div className={styles.submenuBrandsTitle}>Marcas</div>
+                        {loadingBrands ? (
+                          <div className={styles.submenuLoading}>
+                            Carregando...
+                          </div>
+                        ) : brands.length === 0 ? (
+                          <div className={styles.submenuEmpty}>
+                            Passe o mouse sobre uma categoria
+                          </div>
+                        ) : (
+                          <ul className={styles.brandsList}>
+                            {brands.map((b) => (
+                              <li
+                                key={b}
+                                onClick={() => void handleBrandClick(b)}
+                              >
+                                {b}
+                              </li>
+                            ))}
+                          </ul>
+                        )}
+                      </div>
                     </div>
-                    <div className={styles.submenuRight}>
-                      <div className={styles.submenuBrandsTitle}>Marcas</div>
-                      {loadingBrands ? (
-                        <div className={styles.submenuLoading}>
-                          Carregando...
-                        </div>
-                      ) : brands.length === 0 ? (
-                        <div className={styles.submenuEmpty}>
-                          Passe o mouse sobre uma categoria
-                        </div>
-                      ) : (
-                        <ul className={styles.brandsList}>
-                          {brands.map((b) => (
-                            <li key={b} onClick={() => handleBrandClick(b)}>
-                              {b}
-                            </li>
-                          ))}
-                        </ul>
-                      )}
+                  )}
+                </li>
+                <li
+                  className={styles.hasSubmenu}
+                  onMouseEnter={() => setOpenGato(true)}
+                  onMouseLeave={() => {
+                    setOpenGato(false);
+                  }}
+                >
+                  <a
+                    href="/produtos?pet=Gato"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      handlePetNavigation("Gato");
+                      setShowOverlay(true);
+                    }}
+                  >
+                    Gato
+                  </a>
+                  {openGato && (
+                    <div className={styles.submenu} role="menu">
+                      <div className={styles.submenuLeft}>
+                        {Object.keys(submenuCategoryMapGato).map((label) => (
+                          <div
+                            key={label}
+                            className={styles.submenuItem}
+                            onMouseEnter={() =>
+                              handleHoverSubItem(label, "gato")
+                            }
+                            onClick={() => {
+                              void handleCategoryNavigate(label, "gato");
+                            }}
+                          >
+                            {label}
+                          </div>
+                        ))}
+                      </div>
+                      <div className={styles.submenuRight}>
+                        <div className={styles.submenuBrandsTitle}>Marcas</div>
+                        {loadingBrands ? (
+                          <div className={styles.submenuLoading}>
+                            Carregando...
+                          </div>
+                        ) : brands.length === 0 ? (
+                          <div className={styles.submenuEmpty}>
+                            Passe o mouse sobre uma categoria
+                          </div>
+                        ) : (
+                          <ul className={styles.brandsList}>
+                            {brands.map((b) => (
+                              <li
+                                key={b}
+                                onClick={() => void handleBrandClick(b)}
+                              >
+                                {b}
+                              </li>
+                            ))}
+                          </ul>
+                        )}
+                      </div>
                     </div>
-                  </div>
-                )}
-              </li>
-              <li
-                className={styles.hasSubmenu}
-                onMouseEnter={() => setOpenGato(true)}
-                onMouseLeave={() => {
-                  setOpenGato(false);
-                }}
-              >
-                <a href="/gato">Gato</a>
-                {openGato && (
-                  <div className={styles.submenu} role="menu">
-                    <div className={styles.submenuLeft}>
-                      {Object.keys(submenuCategoryMapGato).map((label) => (
-                        <div
-                          key={label}
-                          className={styles.submenuItem}
-                          onMouseEnter={() => handleHoverSubItem(label, "gato")}
-                          onClick={() => {
-                            const cats = submenuCategoryMapGato[label] || [];
-                            const params = new URLSearchParams();
-                            if (cats.length)
-                              params.set("categorias", cats.join(","));
-                            navigate(`/produtos?${params.toString()}`);
-                          }}
-                        >
-                          {label}
-                        </div>
-                      ))}
-                    </div>
-                    <div className={styles.submenuRight}>
-                      <div className={styles.submenuBrandsTitle}>Marcas</div>
-                      {loadingBrands ? (
-                        <div className={styles.submenuLoading}>
-                          Carregando...
-                        </div>
-                      ) : brands.length === 0 ? (
-                        <div className={styles.submenuEmpty}>
-                          Passe o mouse sobre uma categoria
-                        </div>
-                      ) : (
-                        <ul className={styles.brandsList}>
-                          {brands.map((b) => (
-                            <li key={b} onClick={() => handleBrandClick(b)}>
-                              {b}
-                            </li>
-                          ))}
-                        </ul>
-                      )}
-                    </div>
-                  </div>
-                )}
-              </li>
-              <li>
-                <a href="/ofertas" className={styles.ofertas}>
-                  OFERTAS IMPERDÍVEIS
-                </a>
-              </li>
-              <li>
-                <a href="/atacado">Compre no Atacado</a>
-              </li>
-              {/* <li>
+                  )}
+                </li>
+                <li>
+                  <a href="/ofertas" className={styles.ofertas}>
+                    OFERTAS IMPERDÍVEIS
+                  </a>
+                </li>
+                <li>
+                  <a href="/atacado">Compre no Atacado</a>
+                </li>
+                {/* <li>
                 <a href="/smileclub" className={styles.smileClub}>
                   SmileClub
                 </a>
               </li> */}
-            </ul>
-          </nav>
+              </ul>
+            </nav>
+          </div>
         </div>
-      </div>
-    </header>
+      </header>
+      {showOverlay && <div className={styles.menuOverlay} />}
+    </>
   );
 }

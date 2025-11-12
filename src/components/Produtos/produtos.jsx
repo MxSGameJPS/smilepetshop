@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import styles from "./produtos.module.css";
 import ProductCard from "../ProductCard/ProductCard";
 import { addToCart } from "../../lib/cart";
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 
 const MARCA_CLEAR = "__NONE__";
 
@@ -26,6 +26,7 @@ export default function Produtos() {
   const [priceRangeMin, setPriceRangeMin] = useState(0);
   const [priceRangeMax, setPriceRangeMax] = useState(100);
   const location = useLocation();
+  const navigate = useNavigate();
   // helper: parse prices returned by the API (handles '1.234,56' Brazilian format)
   const parsePrice = (v) => {
     if (v == null) return NaN;
@@ -115,6 +116,8 @@ export default function Produtos() {
     : [];
   const categoriasFiltroNormalized = categoriasFiltro.map((c) => normalize(c));
   const marcaParam = params.get("marca") || "";
+  const petParam = params.get("pet") || "";
+  const effectivePetFilter = filtroPet || petParam;
 
   useEffect(() => {
     fetch("https://apismilepet.vercel.app/api/produtos")
@@ -225,8 +228,24 @@ export default function Produtos() {
       { label: "Tapetes", nomeBusca: "Higiene e Cuidados para Cães" },
     ],
   };
+  const updatePetParamInUrl = (nextValue) => {
+    const nextPet = nextValue || "";
+    if (nextPet === (petParam || "")) return;
+    const nextParams = new URLSearchParams(location.search);
+    if (nextPet) nextParams.set("pet", nextPet);
+    else nextParams.delete("pet");
+    const searchString = nextParams.toString();
+    navigate(searchString ? `/produtos?${searchString}` : "/produtos", {
+      replace: true,
+    });
+  };
+
   const toggleFiltroPetPorNome = (petNome) => {
-    setFiltroPet((prev) => (prev === petNome ? "" : petNome));
+    setFiltroPet((prev) => {
+      const next = prev === petNome ? "" : petNome;
+      updatePetParamInUrl(next);
+      return next;
+    });
   };
   const buscarCategoriaOption = (nomeBusca) =>
     categoriasOptions.find((cat) => {
@@ -286,7 +305,8 @@ export default function Produtos() {
       categoriaOk = !filtroCatNorm || filtroCatNorm === categoriaNomeNorm;
     }
     // filtrar por pet (ex.: Gato)
-    const petOk = !filtroPet || normalize(p.pet) === normalize(filtroPet);
+    const petOk =
+      !effectivePetFilter || normalize(p.pet) === normalize(effectivePetFilter);
     const isPromocao =
       p.promocao === true ||
       p.promocao === "true" ||
@@ -320,6 +340,7 @@ export default function Produtos() {
               setFiltroOfertas(false);
               setPrecoMin(priceRangeMin);
               setPrecoMax(priceRangeMax);
+              navigate("/produtos");
             }}
           >
             Limpar tudo
@@ -402,7 +423,7 @@ export default function Produtos() {
                   <label>
                     <input
                       type="checkbox"
-                      checked={filtroPet === "Gato"}
+                      checked={effectivePetFilter === "Gato"}
                       onChange={() => toggleFiltroPetPorNome("Gato")}
                     />
                     Gato
@@ -453,7 +474,7 @@ export default function Produtos() {
                   <label>
                     <input
                       type="checkbox"
-                      checked={filtroPet === "Cachorro"}
+                      checked={effectivePetFilter === "Cachorro"}
                       onChange={() => toggleFiltroPetPorNome("Cachorro")}
                     />
                     Cachorro
