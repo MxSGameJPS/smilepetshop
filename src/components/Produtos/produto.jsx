@@ -848,11 +848,11 @@ export default function Produto() {
                 <h3 className={styles.relacionadoNome}>{p.nome || p.title}</h3>
                 <div className={styles.relacionadoPreco}>
                   {p.precoMin
-                    ? `$ ${p.precoMin}`
+                    ? formatarPreco(p.precoMin)
                     : p.preco
-                    ? `$ ${p.preco}`
+                    ? formatarPreco(p.preco)
                     : ""}
-                  {p.precoMax ? `–$ ${p.precoMax}` : ""}
+                  {p.precoMax ? ` – ${formatarPreco(p.precoMax)}` : ""}
                 </div>
               </div>
             ))
