@@ -92,13 +92,6 @@ export default function Carrinho() {
 
   const [pendingRemove, setPendingRemove] = useState(null);
 
-  const confirmRemove = () => {
-    if (!pendingRemove) return;
-    removeCartItem(pendingRemove.id, pendingRemove.variante, true);
-    setCart(getCart());
-    setPendingRemove(null);
-  };
-
   const subtotal = cart.reduce(
     (s, it) => s + Number(it.precoUnit || 0) * Number(it.quantidade || 0),
     0
@@ -297,7 +290,7 @@ export default function Carrinho() {
 
             <button
               className={styles.checkoutBtn}
-              onClick={() => navigate("/checkout")}
+              onClick={() => navigate("/coletadeemail")}
             >
               Finalizar Pedido
             </button>

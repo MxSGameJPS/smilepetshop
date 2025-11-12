@@ -22,6 +22,7 @@ import Devolucoes from "./components/Devolucoes/devolucoes";
 import Faq from "./components/Faq/faq";
 import Carrinho from "./components/Carrinho/carrinho";
 import Checkout from "./components/Checkout/checkout";
+import ColetaDeEmail from "./components/Checkout/coletaDeEmail/coletaDeEmail";
 import Pedido from "./components/Pedido/pedido";
 import Ofertas from "./components/ofertas/ofertas";
 import Atacado from "./components/Atacado/atacado";
@@ -82,6 +83,7 @@ function App() {
             <Route path="/produtos" element={<Produtos />} />
             <Route path="/produtos/:id" element={<Produto />} />
             <Route path="/carrinho" element={<Carrinho />} />
+            <Route path="/coletadeemail" element={<ColetaDeEmail />} />
             <Route path="/checkout" element={<Checkout />} />
             <Route path="/pedido" element={<Pedido />} />
             <Route path="/atacado" element={<Atacado />} />

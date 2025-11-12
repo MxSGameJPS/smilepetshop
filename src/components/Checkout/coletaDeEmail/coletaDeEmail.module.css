@@ -1,0 +1,227 @@
+.page {
+  background: linear-gradient(135deg, #f5fbff 0%, #ffffff 100%);
+  min-height: calc(100vh - 120px);
+  padding: 120px 16px 80px 16px;
+  box-sizing: border-box;
+  margin-top: 70px;
+}
+
+.wrapper {
+  width: 100%;
+  max-width: 1400px;
+  margin: 0 auto;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.card {
+  width: 100%;
+  max-width: 1400px;
+  background: #ffffff;
+  border-radius: 20px;
+  padding: 32px;
+  box-shadow: 0 24px 60px rgba(7, 59, 76, 0.08);
+  border: 1px solid rgba(7, 59, 76, 0.08);
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  align-items: center;
+}
+
+.header {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.title {
+  font-size: 2rem;
+  margin: 0;
+  color: #073b4c;
+}
+
+.subtitle {
+  margin: 0;
+  color: #4a5a68;
+  line-height: 1.5;
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  max-width: 600px;
+  width: 100%;
+}
+
+.label {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-weight: 600;
+  color: #073b4c;
+  font-size: 0.95rem;
+}
+
+.input {
+  border-radius: 12px;
+  border: 1px solid #c9d7e0;
+  padding: 14px 16px;
+  font-size: 1rem;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  box-sizing: border-box;
+  background: transparent;
+  color: #000000;
+  text-align: center;
+}
+
+.input:focus {
+  border-color: #3aa1ff;
+  box-shadow: 0 0 0 4px rgba(58, 161, 255, 0.15);
+  outline: none;
+}
+
+.actions {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.primaryAction {
+  background: #fc6100;
+  color: #ffffff;
+  border: none;
+  padding: 14px 16px;
+  border-radius: 12px;
+  font-weight: 700;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: filter 0.2s ease, transform 0.1s ease;
+}
+
+.primaryAction:hover {
+  filter: brightness(1.05);
+}
+
+.primaryAction:active {
+  transform: translateY(1px);
+}
+
+.primaryAction:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.secondaryAction {
+  background: transparent;
+  color: #073b4c;
+  border: 1px solid rgba(7, 59, 76, 0.2);
+  padding: 12px 16px;
+  border-radius: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.secondaryAction:hover {
+  background: rgba(7, 59, 76, 0.04);
+}
+
+.error {
+  color: #c53030;
+  font-size: 0.9rem;
+  margin-top: -6px;
+}
+
+.securityNote {
+  display: flex;
+  gap: 12px;
+  padding: 18px;
+  border-radius: 14px;
+  background: #f3f8ff;
+  border: 1px solid rgba(7, 59, 76, 0.08);
+  align-items: flex-start;
+}
+
+.lockIcon {
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  background: rgba(58, 161, 255, 0.12);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+}
+
+.lockIcon::before {
+  content: "";
+  width: 18px;
+  height: 18px;
+  display: block;
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24'%3E%3Cpath stroke='%23073b4c' stroke-width='2' d='M7 10V7a5 5 0 0110 0v3m-9 0h8a2 2 0 012 2v8a2 2 0 01-2 2H8a2 2 0 01-2-2v-8a2 2 0 012-2zm5 5a1 1 0 10-2 0v2a1 1 0 102 0v-2z'/%3E%3C/svg%3E");
+}
+
+.securityTitle {
+  display: block;
+  font-size: 0.95rem;
+  color: #073b4c;
+  margin-bottom: 4px;
+}
+
+.securityText {
+  margin: 0;
+  color: #4a5a68;
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
+
+.benefits {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.benefitItem {
+  position: relative;
+  padding-left: 28px;
+  color: #30404f;
+  line-height: 1.5;
+}
+
+.benefitItem::before {
+  content: "\2713";
+  position: absolute;
+  left: 0;
+  top: 4px;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: rgba(74, 201, 155, 0.14);
+  color: #12815d;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+
+@media (max-width: 640px) {
+  .page {
+    padding: 100px 12px 60px 12px;
+  }
+  .card {
+    padding: 24px;
+    border-radius: 16px;
+  }
+  .title {
+    font-size: 1.6rem;
+  }
+}

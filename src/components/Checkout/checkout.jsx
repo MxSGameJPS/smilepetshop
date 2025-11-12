@@ -4,6 +4,8 @@ import { useNavigate } from "react-router-dom";
 import { getUser, setUser as setStoredUser } from "../../lib/auth";
 import { getCart } from "../../lib/cart";
 
+const EMAIL_STORAGE_KEY = "smilepet_checkout_email";
+
 // empty form template used to reset/initialize checkout form
 const EMPTY_FORM = {
   firstName: "",
@@ -152,7 +154,23 @@ export default function Checkout() {
         }
       }
 
-      const finalForm = useDraft ? { ...mapped, ...savedDraft } : { ...mapped };
+      let finalForm = useDraft ? { ...mapped, ...savedDraft } : { ...mapped };
+
+      try {
+        const storedEmail = localStorage.getItem(EMAIL_STORAGE_KEY);
+        if (storedEmail) {
+          finalForm = { ...finalForm, email: storedEmail };
+        } else if (
+          typeof finalForm.email === "string" &&
+          finalForm.email.trim()
+        ) {
+          const normalized = finalForm.email.trim();
+          finalForm = { ...finalForm, email: normalized };
+          localStorage.setItem(EMAIL_STORAGE_KEY, normalized);
+        }
+      } catch {
+        /* ignore */
+      }
 
       // replace whole form atomically to avoid carrying previous user's values
       setForm(() => ({ ...EMPTY_FORM, ...finalForm }));
@@ -188,6 +206,11 @@ export default function Checkout() {
             setForm(() => ({ ...EMPTY_FORM }));
             try {
               localStorage.removeItem("smilepet_checkout_billing");
+            } catch {
+              /* ignore */
+            }
+            try {
+              localStorage.removeItem(EMAIL_STORAGE_KEY);
             } catch {
               /* ignore */
             }
@@ -230,10 +253,27 @@ export default function Checkout() {
           }
 
           const mapped = finalUserObj ? mapUserToForm(finalUserObj) : {};
-          const finalForm =
+          let finalForm =
             draft && typeof draft === "object"
               ? { ...mapped, ...draft }
               : { ...mapped };
+
+          try {
+            const storedEmail = localStorage.getItem(EMAIL_STORAGE_KEY);
+            if (storedEmail) {
+              finalForm = { ...finalForm, email: storedEmail };
+            } else if (
+              typeof finalForm.email === "string" &&
+              finalForm.email.trim()
+            ) {
+              const normalized = finalForm.email.trim();
+              finalForm = { ...finalForm, email: normalized };
+              localStorage.setItem(EMAIL_STORAGE_KEY, normalized);
+            }
+          } catch {
+            /* ignore */
+          }
+
           setForm(() => ({ ...EMPTY_FORM, ...finalForm }));
         } catch (err) {
           console.debug("Erro ao aplicar user update no checkout:", err);
@@ -243,7 +283,11 @@ export default function Checkout() {
 
     window.addEventListener("smilepet_user_update", handleUserUpdate);
     const onStorage = (e) => {
-      if (e.key === "smilepet_user" || e.key === "smilepet_checkout_billing") {
+      if (
+        e.key === "smilepet_user" ||
+        e.key === "smilepet_checkout_billing" ||
+        e.key === EMAIL_STORAGE_KEY
+      ) {
         handleUserUpdate({ detail: getUser() });
       }
     };
@@ -305,7 +349,21 @@ export default function Checkout() {
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
-    setForm((f) => ({ ...f, [name]: type === "checkbox" ? checked : value }));
+    const nextValue = type === "checkbox" ? checked : value;
+    setForm((f) => ({ ...f, [name]: nextValue }));
+
+    if (name === "email" && typeof nextValue === "string") {
+      const trimmed = nextValue.trim();
+      try {
+        if (trimmed) {
+          localStorage.setItem(EMAIL_STORAGE_KEY, trimmed);
+        } else {
+          localStorage.removeItem(EMAIL_STORAGE_KEY);
+        }
+      } catch {
+        /* ignore */
+      }
+    }
   };
 
   const handlePostalChange = (e) => {
@@ -399,6 +457,9 @@ export default function Checkout() {
       }
       try {
         localStorage.setItem("smilepet_checkout_billing", JSON.stringify(form));
+        if (typeof form.email === "string" && form.email.trim()) {
+          localStorage.setItem(EMAIL_STORAGE_KEY, form.email.trim());
+        }
       } catch (err) {
         console.warn("localStorage save failed", err);
       }
