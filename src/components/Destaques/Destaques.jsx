@@ -5,9 +5,11 @@ import { addToCart } from "../../lib/cart";
 
 export default function Destaques() {
   const [produtos, setProdutos] = useState([]);
+  const [filteredProdutos, setFilteredProdutos] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [carouselIndex, setCarouselIndex] = useState(0);
+  const [activePetFilter, setActivePetFilter] = useState("");
   const CARDS_PER_PAGE = 10; // duas fileiras de 5 cards
 
   useEffect(() => {
@@ -31,6 +33,7 @@ export default function Destaques() {
           );
         });
         setProdutos(parents);
+        setFilteredProdutos(parents);
         setLoading(false);
       })
       .catch(() => {
@@ -42,20 +45,73 @@ export default function Destaques() {
   if (loading) return <div className={styles.loading}>Carregando...</div>;
   if (error) return <div className={styles.error}>{error}</div>;
 
+  const normalize = (val) =>
+    val == null
+      ? ""
+      : String(val)
+          .normalize("NFD")
+          .replace(/[\u0300-\u036f]/g, "")
+          .toLowerCase()
+          .trim();
+
+  const applyPetFilter = (pet) => {
+    setActivePetFilter(pet);
+    setCarouselIndex(0);
+    if (!pet) {
+      setFilteredProdutos(produtos);
+      return;
+    }
+    const normalizedTarget = normalize(pet);
+    const next = produtos.filter((produto) => {
+      const prodPet = normalize(produto?.pet);
+      if (prodPet === normalizedTarget) return true;
+      if (normalizedTarget === "cachorro")
+        return prodPet === normalize("Cães") || prodPet === normalize("cao");
+      if (normalizedTarget === "gato")
+        return prodPet === normalize("Gatos") || prodPet === normalize("gata");
+      return false;
+    });
+    setFilteredProdutos(next);
+  };
+
+  const handleFilterClick = (pet) => {
+    setActivePetFilter((prev) => {
+      const next = prev === pet ? "" : pet;
+      applyPetFilter(next);
+      return next;
+    });
+  };
+
+  const produtosVisiveis = filteredProdutos;
+
   return (
     <section className={styles.destaquesSection}>
       <h2 className={styles.titulo}>Experimente, ame</h2>
       <div className={styles.categorias}>
-        <button className={styles.categoriaBtn}>🐶 Cães</button>
-        <button className={styles.categoriaBtn}>🐱 Gatos</button>
+        <button
+          className={styles.categoriaBtn}
+          type="button"
+          onClick={() => handleFilterClick("Cachorro")}
+          aria-pressed={activePetFilter === "Cachorro"}
+        >
+          🐶 Cães
+        </button>
+        <button
+          className={styles.categoriaBtn}
+          type="button"
+          onClick={() => handleFilterClick("Gato")}
+          aria-pressed={activePetFilter === "Gato"}
+        >
+          🐱 Gatos
+        </button>
         <a href="/produtos" className={styles.verTudo}>
           Ver tudo delicioso &nbsp;→
         </a>
       </div>
       <div className={styles.cardsGrid}>
-        {Array.isArray(produtos) && produtos.length > 0 ? (
+        {Array.isArray(produtosVisiveis) && produtosVisiveis.length > 0 ? (
           (() => {
-            const visible = produtos.slice(
+            const visible = produtosVisiveis.slice(
               carouselIndex,
               carouselIndex + CARDS_PER_PAGE
             );
@@ -130,7 +186,7 @@ export default function Destaques() {
           <div className={styles.loading}>Nenhum produto encontrado.</div>
         )}
       </div>
-      {produtos.length > CARDS_PER_PAGE && (
+      {produtosVisiveis.length > CARDS_PER_PAGE && (
         <div className={styles.carouselNav}>
           <button
             className={styles.carouselBtn}
@@ -145,10 +201,13 @@ export default function Destaques() {
             className={styles.carouselBtn}
             onClick={() =>
               setCarouselIndex((i) =>
-                Math.min(i + CARDS_PER_PAGE, produtos.length - CARDS_PER_PAGE)
+                Math.min(
+                  i + CARDS_PER_PAGE,
+                  produtosVisiveis.length - CARDS_PER_PAGE
+                )
               )
             }
-            disabled={carouselIndex + CARDS_PER_PAGE >= produtos.length}
+            disabled={carouselIndex + CARDS_PER_PAGE >= produtosVisiveis.length}
           >
             ▶
           </button>
