@@ -62,6 +62,66 @@ const marcas = [
     texto:
       "Qualiday Especial Premium oferece alimentos de alta qualidade para cães e gatos, com foco em saúde e sabor.",
   },
+  {
+    nome: "Prolife",
+    img: "/Marcas/prolife.png",
+    texto:
+      "Prolife traz fórmulas balanceadas e ingredientes selecionados para manter a saúde e a vitalidade do seu pet.",
+  },
+  {
+    nome: "ProHealth",
+    img: "/Marcas/prohealth.png",
+    texto:
+      "ProHealth desenvolve produtos com foco em bem-estar e nutrição funcional para necessidades específicas.",
+  },
+  {
+    nome: "Kanina",
+    img: "/Marcas/kanina.png",
+    texto:
+      "Kanina oferece opções práticas e nutritivas para animais de estimação, com foco em qualidade e sabor.",
+  },
+  {
+    nome: "AllCanis",
+    img: "/Marcas/allcanis.png",
+    texto:
+      "AllCanis tem uma linha completa de produtos para cuidados diários e alimentação de cães, com bom custo-benefício.",
+  },
+  {
+    nome: "CleanPads",
+    img: "/Marcas/cleanpads.png",
+    texto:
+      "CleanPads oferece soluções de higiene para pets, incluindo tapetes higiênicos e acessórios práticos.",
+  },
+  {
+    nome: "DentaLife",
+    img: "/Marcas/dentalife.png",
+    texto:
+      "DentaLife ajuda na higiene oral do seu pet com produtos especializados que auxiliam na prevenção do tártaro.",
+  },
+  {
+    nome: "Doguitos",
+    img: "/Marcas/doguitos.png",
+    texto:
+      "Doguitos produz petiscos crocantes e saborosos, perfeitos para recompensas e treinamento.",
+  },
+  {
+    nome: "SpecialCroc",
+    img: "/Marcas/specialcroc.png",
+    texto:
+      "SpecialCroc oferece alimentos premium com formulações específicas para diferentes fases e necessidades.",
+  },
+  {
+    nome: "TapeTudo",
+    img: "/Marcas/tapetudo.png",
+    texto:
+      "TapeTudo traz acessórios e produtos práticos para o cuidado e conforto do lar com pets.",
+  },
+  {
+    nome: "FluffyRoe",
+    img: "/Marcas/fluffy.png",
+    texto:
+      "FluffyRoe apresenta produtos estéticos e nutritivos para quem busca cuidar da pelagem e do bem-estar do pet.",
+  },
 ];
 
 export default function MarcasTodas() {

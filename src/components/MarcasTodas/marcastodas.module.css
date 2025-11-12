@@ -9,7 +9,7 @@
   margin-top: 170px;
 }
 .title {
-  font-family: "Baloo 2", cursive;
+  font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
   font-size: 2.2rem;
   font-weight: 700;
   margin-bottom: 32px;

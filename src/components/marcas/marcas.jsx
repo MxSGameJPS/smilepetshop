@@ -36,7 +36,12 @@ export default function Marcas() {
         <div className={styles.marqueeTrack} aria-hidden="false">
           {[...marcas, ...marcas].map((marca, idx) => (
             <div className={styles.card} key={`${marca.nome}-${idx}`}>
-              <img src={marca.img} alt={marca.nome} className={styles.logo} />
+              <img
+                src={marca.img}
+                alt={marca.nome}
+                className={styles.logo}
+                loading="lazy"
+              />
             </div>
           ))}
         </div>
