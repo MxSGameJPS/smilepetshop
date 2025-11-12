@@ -525,6 +525,7 @@ export default function Header() {
                 >
                   <a
                     href="/produtos?pet=Cachorro"
+                    className={`${styles.petLink} ${styles.petLinkDog}`}
                     onClick={(e) => {
                       e.preventDefault();
                       handlePetNavigation("Cachorro");
@@ -588,6 +589,7 @@ export default function Header() {
                 >
                   <a
                     href="/produtos?pet=Gato"
+                    className={`${styles.petLink} ${styles.petLinkCat}`}
                     onClick={(e) => {
                       e.preventDefault();
                       handlePetNavigation("Gato");

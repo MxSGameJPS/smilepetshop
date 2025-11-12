@@ -122,7 +122,6 @@
 
 .headerNav {
   margin: 0 auto;
-  padding: 12px;
   text-align: center;
   background: #f1f1f1;
 }
@@ -157,6 +156,40 @@
 
 .navList li a:hover {
   color: #ffd600;
+}
+
+.petLink {
+  position: relative;
+  display: inline-block;
+  padding-left: 38px;
+}
+
+.petLink::before {
+  content: "";
+  position: absolute;
+  left: -30px;
+  top: 50%;
+  width: 44px;
+  height: 44px;
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: contain;
+  transform: translateY(-50%);
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+.petLink:hover::before,
+.petLink:focus-visible::before {
+  opacity: 1;
+}
+
+.petLinkDog::before {
+  background-image: url("/Cachorro (1).gif");
+}
+
+.petLinkCat::before {
+  background-image: url("/Gato.gif");
 }
 
 .hasSubmenu {
