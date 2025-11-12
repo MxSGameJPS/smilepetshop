@@ -68,11 +68,17 @@
 .name {
   font-size: 14px;
   margin-bottom: 6px;
-    color: #333;
+  color: #333;
 }
 .price {
   font-weight: 600;
   color: #111;
+}
+.priceDetail {
+  display: block;
+  font-size: 12px;
+  font-weight: 400;
+  color: #555;
 }
 .qtyControls {
   display: flex;

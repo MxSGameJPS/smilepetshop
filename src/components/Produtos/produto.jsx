@@ -427,8 +427,9 @@ export default function Produto() {
     if (produto?.precoMin != null) return produto.precoMin;
     return null;
   })();
-  const precoPrincipal =
+  const precoUnitario =
     precoAtual ?? produto?.preco ?? produto?.precoMin ?? produto?.precoMax ?? 0;
+  const precoTotal = (Number(precoUnitario) || 0) * (Number(quantidade) || 1);
   const temIntervalo =
     produto?.precoMin != null &&
     produto?.precoMax != null &&
@@ -486,7 +487,7 @@ export default function Produto() {
         precoUnit:
           (mapaPrecos && variante && mapaPrecos[variante] != null
             ? Number(mapaPrecos[variante])
-            : Number(precoPrincipal)) || 0,
+            : Number(precoUnitario)) || 0,
         imagem_url: imagens[0] || produto?.imagem_url || null,
       };
       addToCart(item);
@@ -687,21 +688,43 @@ export default function Produto() {
                 )}
               </div>
               <div className={styles.precoAtual}>
-                {formatarPreco(precoPrincipal)}
+                {formatarPreco(precoTotal)}
               </div>
             </div>
 
             <div className={styles.acoesRow}>
-              <input
-                type="number"
-                min={1}
-                value={quantidade}
-                onChange={(e) =>
-                  setQuantidade(Math.max(1, Number(e.target.value) || 1))
-                }
-                className={styles.qtd}
-                aria-label="Quantidade"
-              />
+              <div className={styles.qtdGroup}>
+                <button
+                  type="button"
+                  className={styles.qtdBtn}
+                  aria-label="Diminuir quantidade"
+                  onClick={() =>
+                    setQuantidade((prev) => Math.max(1, Number(prev) - 1))
+                  }
+                >
+                  -
+                </button>
+                <input
+                  type="number"
+                  min={1}
+                  value={quantidade}
+                  onChange={(e) =>
+                    setQuantidade(Math.max(1, Number(e.target.value) || 1))
+                  }
+                  className={styles.qtd}
+                  aria-label="Quantidade"
+                />
+                <button
+                  type="button"
+                  className={styles.qtdBtn}
+                  aria-label="Aumentar quantidade"
+                  onClick={() =>
+                    setQuantidade((prev) => Math.max(1, Number(prev) + 1))
+                  }
+                >
+                  +
+                </button>
+              </div>
               <button
                 type="button"
                 className={styles.btnComprar}

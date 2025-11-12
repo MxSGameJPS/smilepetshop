@@ -99,65 +99,80 @@ export default function CarrinhoModal() {
           {items.length === 0 ? (
             <div className={styles.empty}>Seu carrinho está vazio.</div>
           ) : (
-            items.map((it) => (
-              <div className={styles.item} key={`${it.id}-${it.variante}`}>
-                <img
-                  src={it.imagem_url || ""}
-                  alt={it.nome || ""}
-                  className={styles.thumb}
-                />
-                <div className={styles.meta}>
-                  <div className={styles.name}>{it.nome}</div>
-                  <div className={styles.price}>
-                    {it.precoUnit
-                      ? `R$ ${Number(it.precoUnit).toFixed(2)}`
-                      : "-"}
-                  </div>
-                  <div
-                    style={{
-                      marginTop: 8,
-                      display: "flex",
-                      alignItems: "center",
-                      gap: 8,
-                      color: "#333",
-                    }}
-                  >
-                    <div className={styles.qtyControls}>
-                      <button
-                        className={styles.qtyBtn}
-                        onClick={() => dec(it)}
-                        aria-label="Diminuir"
-                      >
-                        −
-                      </button>
-                      <div style={{ minWidth: 28, textAlign: "center" }}>
-                        {it.quantidade}
+            items.map((it) => {
+              const quantidadeNum = Number(it.quantidade) || 0;
+              const precoUnitario = Number(it.precoUnit) || 0;
+              const totalItem = quantidadeNum * precoUnitario;
+
+              return (
+                <div className={styles.item} key={`${it.id}-${it.variante}`}>
+                  <img
+                    src={it.imagem_url || ""}
+                    alt={it.nome || ""}
+                    className={styles.thumb}
+                  />
+                  <div className={styles.meta}>
+                    <div className={styles.name}>{it.nome}</div>
+                    <div className={styles.price}>
+                      {it.precoUnit != null ? (
+                        <>
+                          R$ {totalItem.toFixed(2)}
+                          {quantidadeNum > 1 && (
+                            <span className={styles.priceDetail}>
+                              {quantidadeNum} x R$ {precoUnitario.toFixed(2)}
+                            </span>
+                          )}
+                        </>
+                      ) : (
+                        "-"
+                      )}
+                    </div>
+                    <div
+                      style={{
+                        marginTop: 8,
+                        display: "flex",
+                        alignItems: "center",
+                        gap: 8,
+                        color: "#333",
+                      }}
+                    >
+                      <div className={styles.qtyControls}>
+                        <button
+                          className={styles.qtyBtn}
+                          onClick={() => dec(it)}
+                          aria-label="Diminuir"
+                        >
+                          −
+                        </button>
+                        <div style={{ minWidth: 28, textAlign: "center" }}>
+                          {it.quantidade}
+                        </div>
+                        <button
+                          className={styles.qtyBtn}
+                          onClick={() => inc(it)}
+                          aria-label="Aumentar"
+                        >
+                          +
+                        </button>
                       </div>
                       <button
-                        className={styles.qtyBtn}
-                        onClick={() => inc(it)}
-                        aria-label="Aumentar"
+                        style={{
+                          marginLeft: 8,
+                          background: "transparent",
+                          border: 0,
+                          color: "#c00",
+                          cursor: "pointer",
+                        }}
+                        onClick={() => remove(it)}
+                        aria-label="Remover"
                       >
-                        +
+                        🗑
                       </button>
                     </div>
-                    <button
-                      style={{
-                        marginLeft: 8,
-                        background: "transparent",
-                        border: 0,
-                        color: "#c00",
-                        cursor: "pointer",
-                      }}
-                      onClick={() => remove(it)}
-                      aria-label="Remover"
-                    >
-                      🗑
-                    </button>
                   </div>
                 </div>
-              </div>
-            ))
+              );
+            })
           )}
         </div>
 
