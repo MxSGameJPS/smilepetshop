@@ -247,9 +247,20 @@ export default function Produto() {
         const sid = String(
           id || produto?.id || produto?.SKU || produto?.codigo || ""
         );
-        const filtrados = arr.filter(
-          (p) => String(p.id || p.SKU || p.codigo || p.id) !== sid
-        );
+        const filtrados = arr.filter((p) => {
+          const sidLocal = String(p?.id ?? p?.SKU ?? p?.codigo ?? "");
+          const isParent =
+            (Object.prototype.hasOwnProperty.call(p, "produto_pai_id") &&
+              p.produto_pai_id === null) ||
+            (p &&
+              p.produto &&
+              Object.prototype.hasOwnProperty.call(
+                p.produto,
+                "produto_pai_id"
+              ) &&
+              p.produto.produto_pai_id === null);
+          return isParent && sidLocal !== sid;
+        });
         setRelacionados(filtrados.slice(0, 4));
         setLoadingRelacionados(false);
       })

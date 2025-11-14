@@ -54,6 +54,39 @@
   max-width: 1920px;
   margin: 0 auto;
   background: #fc6100;
+
+  /* Efeito de piscar para o link de Ofertas */
+  .ofertasBlink {
+    animation: ofertasBlinkAnim 0.8s linear infinite;
+  }
+
+  @keyframes ofertasBlinkAnim {
+    0% {
+      background: #fc6100;
+      color: #ffffff;
+      box-shadow: none;
+    }
+    25% {
+      background: #ffffff;
+      color: #fc6100;
+      box-shadow: 0 0 6px rgba(252, 97, 0, 0.6);
+    }
+    50% {
+      background: #fc6100;
+      color: #ffffff;
+      box-shadow: none;
+    }
+    75% {
+      background: #ffffff;
+      color: #fc6100;
+      box-shadow: 0 0 6px rgba(252, 97, 0, 0.6);
+    }
+    100% {
+      background: #fc6100;
+      color: #ffffff;
+      box-shadow: none;
+    }
+  }
   border-bottom: 1px solid #f2f2f2;
   display: block;
   /* ensure header is visible and stays on top of content */

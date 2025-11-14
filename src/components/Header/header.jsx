@@ -41,6 +41,7 @@ export default function Header() {
   // submenu state
   const [openCachorro, setOpenCachorro] = useState(false);
   const [openGato, setOpenGato] = useState(false);
+  const [blinkOfertas, setBlinkOfertas] = useState(false);
   const [categories, setCategories] = useState(null);
   const [products, setProducts] = useState(null);
   const [brands, setBrands] = useState([]);
@@ -71,7 +72,7 @@ export default function Header() {
     Ração: ["Ração para Gatos"],
     "Ração Úmida": ["Ração Úmida para Gatos"],
     Petiscos: ["Petiscos Cat"],
-    "Tapetes Higienicos": ["Higiene e Cuidados para Gatos"],
+    "Areias": ["Higiene e Cuidados para Gatos"],
   };
 
   const [activeSubSpecies, setActiveSubSpecies] = useState("");
@@ -816,7 +817,20 @@ export default function Header() {
                   )}
                 </li>
                 <li>
-                  <a href="/ofertas" className={styles.ofertas}>
+                  <a
+                    href="/ofertas"
+                    className={`${styles.ofertas} ${
+                      blinkOfertas ? styles.ofertasBlink : ""
+                    }`}
+                    onClick={(e) => {
+                      e.preventDefault();
+                      // start blinking and navigate to ofertas
+                      setBlinkOfertas(true);
+                      // stop blinking after a while to avoid permanent animation
+                      setTimeout(() => setBlinkOfertas(false), 6000);
+                      navigate("/ofertas");
+                    }}
+                  >
                     OFERTAS IMPERDÍVEIS
                   </a>
                 </li>

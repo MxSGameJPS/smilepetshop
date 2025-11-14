@@ -65,7 +65,21 @@ export default function Carrinho() {
           ...p,
           id: p.id || p._id || p.uid || p.slug,
         }));
-        if (ativo) setSugestoes(normalizados.slice(0, 4));
+
+        // mostrar apenas produtos 'pai' (produto_pai_id === null)
+        const pais = normalizados.filter((p) => {
+          const topLevel =
+            Object.prototype.hasOwnProperty.call(p, "produto_pai_id") &&
+            p.produto_pai_id === null;
+          const nested =
+            p &&
+            p.produto &&
+            Object.prototype.hasOwnProperty.call(p.produto, "produto_pai_id") &&
+            p.produto.produto_pai_id === null;
+          return Boolean(topLevel || nested);
+        });
+
+        if (ativo) setSugestoes(pais.slice(0, 4));
       } catch (err) {
         if (ativo) {
           console.warn("Falha ao buscar produtos para 'Compre também'", err);
