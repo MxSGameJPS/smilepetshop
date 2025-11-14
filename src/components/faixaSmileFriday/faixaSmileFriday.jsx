@@ -47,14 +47,20 @@ function MiniOfferCard({ product, onNavigate }) {
   }, [promoFim]);
 
   const goToProduct = useCallback(() => {
-    if (!id) return;
+    if (!id) return false;
     onNavigate(`/produtos/${id}`);
+    return true;
   }, [id, onNavigate]);
+
+  const goToOffers = useCallback(() => {
+    onNavigate("/ofertas");
+  }, [onNavigate]);
 
   const handleKeyDown = (event) => {
     if (event.key === "Enter" || event.key === " ") {
       event.preventDefault();
-      goToProduct();
+      const navigated = goToProduct();
+      if (!navigated) goToOffers();
     }
   };
 
@@ -62,13 +68,15 @@ function MiniOfferCard({ product, onNavigate }) {
     <article
       className={styles.card}
       onClick={(event) => {
-        event.stopPropagation();
-        goToProduct();
+        // se houver id, navegar para o produto e impedir bubbling
+        const navigated = goToProduct();
+        if (navigated) event.stopPropagation();
+        else goToOffers();
       }}
       onKeyDown={handleKeyDown}
       tabIndex={0}
       role="button"
-      aria-label={`Ver detalhes de ${nome}`}
+      aria-label={id ? `Ver detalhes de ${nome}` : `Ver ofertas`}
     >
       <div className={styles.cardHeader}>SMILE FRIDAY</div>
       <div className={styles.cardHero}>
@@ -214,7 +222,14 @@ export default function FaixaSmileFriday() {
 
   return (
     <section className={styles.banner} aria-label="Smile Friday">
-      <div className={styles.content}>
+      <div
+        className={styles.content}
+        onClick={(e) => {
+          // se o clique não veio de dentro de um card, navegar para /ofertas
+          const card = e.target.closest && e.target.closest('article[role="button"]');
+          if (!card) handleNavigate("/ofertas");
+        }}
+      >
         <header className={styles.header}>
           <h2 className={styles.title}>Smile Friday</h2>
           <p className={styles.subtitle}>Ofertas imperdíveis para o seu pet</p>
@@ -223,7 +238,12 @@ export default function FaixaSmileFriday() {
         <div
           className={styles.carousel}
           role="presentation"
-          onClick={() => handleNavigate("/ofertas")}
+          onClick={(e) => {
+            // se o clique não veio de dentro de um card (article[role="button"]),
+            // considerar que o usuário clicou no background e navegar para /ofertas
+            const card = e.target.closest && e.target.closest('article[role="button"]');
+            if (!card) handleNavigate("/ofertas");
+          }}
         >
           <div className={styles.carouselTrack}>
             {duplicatedList.map((product, index) => (
