@@ -3,6 +3,10 @@
   background: #f9f9fb;
   min-height: calc(100vh - 120px);
   margin-top: 170px;
+
+  @media (max-width: 760px) {
+    padding: 16px;
+  }
 }
 .container {
   max-width: 1200px;
@@ -11,6 +15,11 @@
   grid-template-columns: 1fr 380px;
   gap: 28px;
   align-items: start;
+
+  @media (max-width: 760px) {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
 }
 .left {
   background: transparent;
@@ -20,6 +29,11 @@
   font-weight: 900;
   color: #073b4c;
   margin-bottom: 18px;
+
+  @media (max-width: 760px) {
+    font-size: 1.5rem;
+    margin-bottom: 12px;
+  }
 }
 .itemsList {
   border: 1px solid rgba(0, 0, 0, 0.12);
@@ -27,6 +41,10 @@
   color: #000;
   flex-direction: column;
   gap: 18px;
+
+  @media (max-width: 760px) {
+    gap: 12px;
+  }
 }
 .empty {
   padding: 24px;
@@ -34,6 +52,11 @@
   border-radius: 12px;
   box-shadow: 0 2px 8px rgba(7, 59, 76, 0.04);
   color: #666;
+
+  @media (max-width: 760px) {
+    font-size: 0.9rem;
+    padding: 16px;
+  }
 }
 .itemRow {
   display: grid;
@@ -44,6 +67,11 @@
   padding: 12px 16px;
   border-radius: 12px;
   border: 1px solid #eee;
+
+  @media (max-width: 760px) {
+    grid-template-columns: 1fr 60px 90px 40px;
+    padding: 10px 12px;
+  }
 }
 .itemMain {
   display: flex;
@@ -51,6 +79,10 @@
   background: transparent;
   color: #000;
   align-items: center;
+
+  @media (max-width: 760px) {
+    gap: 10px;
+  }
 }
 .thumb {
   width: 72px;
@@ -58,6 +90,11 @@
   object-fit: contain;
   border-radius: 8px;
   background: #fff;
+
+  @media (max-width: 760px) {
+    width: 60px;
+    height: 60px;
+  }
 }
 .itemInfo {
   display: flex;
@@ -67,11 +104,19 @@
   font-weight: 700;
   color: #073b4c;
   text-decoration: none;
+
+  @media (max-width: 760px) {
+    font-size: 0.85rem;
+  }
 }
 .itemUnit {
   color: #073b4c;
   font-weight: 700;
   margin-top: 6px;
+
+  @media (max-width: 760px) {
+    font-size: 0.8rem;
+  }
 }
 .itemControls {
   display: flex;
@@ -87,6 +132,11 @@
   border-radius: 12px;
   border: 1px solid #eee;
   background: #fff;
+
+  @media (max-width: 760px) {
+    gap: 6px;
+    padding: 4px 8px;
+  }
 }
 .qtyBtn {
   display: inline-flex;
@@ -102,6 +152,12 @@
   font-weight: 700;
   cursor: pointer;
   border-radius: 6px;
+
+  @media (max-width: 760px) {
+    width: 24px;
+    height: 24px;
+    font-size: 16px;
+  }
 }
 .qtyBtn:focus {
   outline: none;
@@ -112,6 +168,11 @@
   text-align: center;
   font-weight: 700;
   color: #073b4c;
+
+  @media (max-width: 760px) {
+    min-width: 24px;
+    font-size: 0.9rem;
+  }
 }
 .qtySelect {
   width: 80px;
@@ -126,6 +187,11 @@
   background-repeat: no-repeat;
   background-position: right 10px center;
   background-size: 12px 8px;
+
+  @media (max-width: 760px) {
+    width: 70px;
+    padding: 6px 8px;
+  }
 }
 
 .qtySelect:focus {
@@ -150,11 +216,20 @@
   border: none;
   cursor: pointer;
   font-size: 1.1rem;
+
+  @media (max-width: 760px) {
+    font-size: 1rem;
+  }
 }
 .couponRow {
   display: flex;
   gap: 12px;
   margin-top: 20px;
+
+  @media (max-width: 760px) {
+    gap: 8px;
+    flex-direction: column;
+  }
 }
 .couponInput {
   flex: 1;
@@ -163,13 +238,16 @@
   border: 1px solid #fc6100;
   background: transparent;
   color: #000;
+
+  @media (max-width: 760px) {
+    padding: 10px 12px;
+  }
 }
 .couponBtn {
   background: #fc6100;
   color: #fff;
   border: none;
   border: 1px solid rgba(0, 0, 0, 0.12);
-
   border-radius: 999px;
   cursor: pointer;
 }
@@ -186,12 +264,21 @@
   border-radius: 10px;
   border: 1px solid #eee;
   box-shadow: 0 2px 8px rgba(7, 59, 76, 0.04);
+
+  @media (max-width: 760px) {
+    padding: 16px;
+  }
 }
 .summaryTitle {
   font-size: 1.4rem;
   margin: 0 0 12px 0;
   font-weight: 800;
   color: #073b4c;
+
+  @media (max-width: 760px) {
+    font-size: 1.2rem;
+    margin-bottom: 10px;
+  }
 }
 .rowBetween {
   display: flex;
@@ -199,6 +286,10 @@
   align-items: center;
   margin: 12px 0;
   color: #073b4c;
+
+  @media (max-width: 760px) {
+    margin: 10px 0;
+  }
 }
 .colRight {
   display: flex;
@@ -214,11 +305,19 @@
 }
 .shippingSection {
   margin-top: 8px;
+
+  @media (max-width: 760px) {
+    margin-top: 6px;
+  }
 }
 .shippingTitle {
   font-weight: 700;
   margin-bottom: 6px;
   color: #073b4c;
+
+  @media (max-width: 760px) {
+    font-size: 1rem;
+  }
 }
 .shippingOption {
   display: block;
@@ -228,6 +327,10 @@
   font-size: 0.85rem;
   color: #888;
   margin-top: 8px;
+
+  @media (max-width: 760px) {
+    font-size: 0.8rem;
+  }
 }
 .calcLink {
   display: inline-block;
@@ -239,22 +342,38 @@
   border: none;
   border-top: 1px solid #eee;
   margin: 12px 0;
+
+  @media (max-width: 760px) {
+    margin: 10px 0;
+  }
 }
 .rowBetweenTotal {
   display: flex;
   justify-content: space-between;
   align-items: center;
   margin: 14px 0;
+
+  @media (max-width: 760px) {
+    margin: 12px 0;
+  }
 }
 .totalLabel {
   font-weight: 900;
   font-size: 1.05rem;
   color: #073b4c;
+
+  @media (max-width: 760px) {
+    font-size: 1rem;
+  }
 }
 .totalValue {
   font-weight: 900;
   font-size: 1.05rem;
   color: #073b4c;
+
+  @media (max-width: 760px) {
+    font-size: 1rem;
+  }
 }
 .checkoutBtn {
   width: 100%;
@@ -265,6 +384,11 @@
   border-radius: 10px;
   cursor: pointer;
   margin-top: 12px;
+
+  @media (max-width: 760px) {
+    padding: 10px 14px;
+    margin-top: 10px;
+  }
 }
 
 @media (max-width: 900px) {
@@ -281,6 +405,12 @@
   display: flex;
   gap: 8px;
   margin-top: 8px;
+
+  @media (max-width: 760px) {
+    flex-direction: column;
+    gap: 6px;
+    margin-top: 6px;
+  }
 }
 .cepInput {
   flex: 1;
@@ -289,6 +419,10 @@
   border: 1px solid #fc6100;
   background: transparent;
   color: #000;
+
+  @media (max-width: 760px) {
+    padding: 8px 10px;
+  }
 }
 .cepBtn {
   background: #fc6100;
@@ -297,11 +431,19 @@
   padding: 10px 14px;
   border-radius: 10px;
   cursor: pointer;
+
+  @media (max-width: 760px) {
+    padding: 8px 12px;
+  }
 }
 .shippingMsg {
   margin-top: 8px;
   color: #073b4c;
   font-weight: 700;
+
+  @media (max-width: 760px) {
+    font-size: 0.9rem;
+  }
 }
 
 .compreTambemSection {
@@ -311,12 +453,21 @@
   display: flex;
   flex-direction: column;
   gap: 24px;
+
+  @media (max-width: 760px) {
+    padding: 24px 0 12px 0;
+    gap: 16px;
+  }
 }
 
 .compreTambemTitle {
   font-size: 1.8rem;
   font-weight: 900;
   color: #073b4c;
+
+  @media (max-width: 760px) {
+    font-size: 1.5rem;
+  }
 }
 
 .compreTambemMensagem {
@@ -328,6 +479,10 @@
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
   gap: 20px;
+
+  @media (max-width: 760px) {
+    gap: 16px;
+  }
 }
 
 .compreTambemCard {
@@ -340,6 +495,11 @@
   flex-direction: column;
   align-items: center;
   gap: 14px;
+
+  @media (max-width: 760px) {
+    padding: 14px;
+    gap: 12px;
+  }
 }
 
 .compreTambemLink {
@@ -354,23 +514,40 @@
   text-decoration: none;
   color: #073b4c;
   text-align: center;
+
+  @media (max-width: 760px) {
+    gap: 10px;
+  }
 }
 
 .compreTambemImg {
   width: 140px;
   height: 140px;
   object-fit: contain;
+
+  @media (max-width: 760px) {
+    width: 120px;
+    height: 120px;
+  }
 }
 
 .compreTambemNome {
   font-weight: 700;
   font-size: 1rem;
+
+  @media (max-width: 760px) {
+    font-size: 0.9rem;
+  }
 }
 
 .compreTambemPreco {
   font-weight: 900;
   color: #fc6100;
   font-size: 1.1rem;
+
+  @media (max-width: 760px) {
+    font-size: 1rem;
+  }
 }
 
 .compreTambemBtn {
@@ -382,6 +559,11 @@
   font-weight: 700;
   cursor: pointer;
   transition: background 0.2s ease;
+
+  @media (max-width: 760px) {
+    padding: 8px 20px;
+    font-size: 0.9rem;
+  }
 }
 
 .compreTambemBtn:hover {
@@ -406,21 +588,37 @@
   padding: 20px;
   box-shadow: 0 8px 28px rgba(7, 59, 76, 0.18);
   color: #073b4c;
+
+  @media (max-width: 760px) {
+    padding: 16px;
+  }
 }
 .removeTitle {
   font-weight: 800;
   font-size: 1.05rem;
   margin-bottom: 8px;
+
+  @media (max-width: 760px) {
+    font-size: 1rem;
+  }
 }
 .removeMessage {
   color: #334;
   margin-bottom: 18px;
   line-height: 1.4;
+
+  @media (max-width: 760px) {
+    font-size: 0.9rem;
+  }
 }
 .removeActions {
   display: flex;
   justify-content: flex-end;
   gap: 12px;
+
+  @media (max-width: 760px) {
+    gap: 8px;
+  }
 }
 .removeCancelBtn {
   background: #f0f0f0;
@@ -429,6 +627,10 @@
   padding: 8px 14px;
   border-radius: 8px;
   cursor: pointer;
+
+  @media (max-width: 760px) {
+    padding: 6px 12px;
+  }
 }
 .removeConfirmBtn {
   background: #fc6100;
@@ -437,6 +639,10 @@
   padding: 8px 14px;
   border-radius: 8px;
   cursor: pointer;
+
+  @media (max-width: 760px) {
+    padding: 6px 12px;
+  }
 }
 
 /* High-specificity input overrides to counter global/user-agent styles (e.g. gray autofill) */
