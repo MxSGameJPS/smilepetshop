@@ -1,14 +1,14 @@
 import styles from "./marcas.module.css";
 
 const marcas = [
-  { nome: "ALPO", img: "/Marcas/ALPO.webp" },
-  { nome: "Catchow", img: "/Marcas/catchow.avif" },
+  { nome: "ALPO", img: "/Marcas/ALPO.png" },
+  { nome: "Catchow", img: "/Marcas/catchow.png" },
   { nome: "Dog Chow", img: "/Marcas/dogchow.png" },
   { nome: "Fancy Feast", img: "/Marcas/Fancy-Feast.png" },
   { nome: "Foster", img: "/Marcas/Foster.png" },
   { nome: "Friskies", img: "/Marcas/friskies.png" },
   { nome: "One", img: "/Marcas/one.png" },
-  { nome: "Proplan", img: "/Marcas/proplan.webp" },
+  { nome: "Proplan", img: "/Marcas/proplan.png" },
   { nome: "Purina", img: "/Marcas/purina.png" },
   { nome: "Qualiday", img: "/Marcas/qualiday.png" },
   { nome: "Prolife", img: "/Marcas/prolife.png" },

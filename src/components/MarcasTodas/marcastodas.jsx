@@ -4,13 +4,13 @@ import styles from "./marcastodas.module.css";
 const marcas = [
   {
     nome: "Alpo",
-    img: "/Marcas/ALPO.webp",
+    img: "/Marcas/ALPO.png",
     texto:
       "Alpo é referência em nutrição para cães, oferecendo alimentos saborosos e balanceados para todas as fases da vida do seu pet.",
   },
   {
     nome: "Cat Chow",
-    img: "/Marcas/catchow.avif",
+    img: "/Marcas/catchow.png",
     texto:
       "Cat Chow é especialista em nutrição felina, com fórmulas que cuidam da saúde e do bem-estar dos gatos.",
   },
@@ -46,7 +46,7 @@ const marcas = [
   },
   {
     nome: "Pro Plan",
-    img: "/Marcas/proplan.webp",
+    img: "/Marcas/proplan.png",
     texto:
       "Pro Plan é a linha super premium da Purina, desenvolvida por veterinários para máxima performance e saúde.",
   },
