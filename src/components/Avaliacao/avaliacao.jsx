@@ -4,27 +4,26 @@ import { FaStar } from "react-icons/fa";
 const avaliacoes = [
   {
     nota: 4.5,
-    tempo: "3 dias atrás",
-    titulo: "Experiência Superiosa",
+    tempo: "7 dias atrás",
+    titulo: "Experiência Superior",
     texto:
-      "O serviço desta empresa foi simplesmente maravilhoso! Com certeza usarei os produtos deles novamente!",
-    autor: "Narrador Navid",
+      "Veio bem embaladinho e os gatos adoraram esse sachê, uma deles é bem fresquinha pra comer e comeu bem, mesmo eu misturando com bastante água. Recomendo!",
   },
   {
     nota: 5,
-    tempo: "3 dias atrás",
+    tempo: "2 dias atrás",
     titulo: "Altamente recomendado",
     texto:
-      "Recomendo esta empresa sem sombra de dúvidas. Bom trabalho, pessoal!",
+      "Maravilhoso produto recomendo 🐈🐾🥰.",
     autor: "Emma Carter",
   },
   {
     nota: 5,
-    tempo: "3 dias atrás",
+    tempo: "13 dias atrás",
     titulo: "Tão bom quanto o esperado",
     texto:
-      "Experimentei muitos outros serviços, mas este foi o melhor e atendeu completamente às minhas expectativas.",
-    autor: "Pedro Jones",
+      "É uma boa ração, macia, o meu cachorrinho idoso gosta muito, melhorou o bafinho dele. Recomendo. Vendedor super atencioso. Chegou antes do prazo. Obrigada.",
+    
   },
 ];
 
@@ -42,11 +41,14 @@ export default function Avaliacao() {
             ))}
         </div>
         <div className={styles.baseado}>
-          Baseado em <a href="#">20.921 avaliações</a>
+          Baseado em <a href="https://lista.mercadolivre.com.br/pagina/smilepet/#global_position=1" target="_blank" rel="noopener noreferrer">12 Mil avaliações</a>
         </div>
         <div className={styles.trustpilot}>
           {/* <FaStar className={styles.starFull} /> */}
+          <a href='https://lista.mercadolivre.com.br/pagina/smilepet/#global_position=1' target="_blank" rel="noopener noreferrer">
           <img className={styles.imagemLogoML} src="/Mercado-Livre-logo.png" alt="Mercado Livre" />
+          
+          </a>
         </div>
       </div>
       <div className={styles.avaliacoesGrid}>

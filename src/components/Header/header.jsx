@@ -6,6 +6,7 @@ import {
   FaInstagramSquare,
 } from "react-icons/fa";
 import { useState, useEffect, useMemo } from "react";
+import HeaderMobile from "../HeaderMobile/headerMobile";
 import { useNavigate } from "react-router-dom";
 import { getCartCount } from "../../lib/cart";
 import { getUser, clearUser, broadcastUserUpdate } from "../../lib/auth";
@@ -14,6 +15,32 @@ import { AiFillTikTok } from "react-icons/ai";
 export default function Header() {
   const [cartCount, setCartCount] = useState(() => getCartCount());
   const navigate = useNavigate();
+  const [isMobile, setIsMobile] = useState(() =>
+    typeof window !== "undefined"
+      ? window.matchMedia("(max-width:760px)").matches
+      : false
+  );
+
+  useEffect(() => {
+    const mq = window.matchMedia("(max-width:760px)");
+    const onChange = (ev) => setIsMobile(ev.matches);
+    try {
+      mq.addEventListener?.("change", onChange);
+      // fallback
+      if (!mq.addEventListener) mq.addListener(onChange);
+    } catch {
+      /* ignore */
+    }
+    setIsMobile(mq.matches);
+    return () => {
+      try {
+        mq.removeEventListener?.("change", onChange);
+        if (!mq.removeEventListener) mq.removeListener(onChange);
+      } catch {
+        /* ignore */
+      }
+    };
+  }, []);
 
   // helper: try to extract the actual user object from many possible shapes
   function normalizeUser(payload) {
@@ -72,7 +99,7 @@ export default function Header() {
     Ração: ["Ração para Gatos"],
     "Ração Úmida": ["Ração Úmida para Gatos"],
     Petiscos: ["Petiscos Cat"],
-    "Areias": ["Higiene e Cuidados para Gatos"],
+    Areias: ["Higiene e Cuidados para Gatos"],
   };
 
   const [activeSubSpecies, setActiveSubSpecies] = useState("");
@@ -518,335 +545,347 @@ export default function Header() {
 
   return (
     <>
-      <header className={styles.header}>
-        {/* Top bar: logo | centered search | right actions */}
-        <div className={styles.headerTop}>
-          <div className={styles.headerContent}>
-            <div className={styles.logoArea}>
-              <a href="/">
-                <img
-                  src="/logo.gif"
-                  alt="Logo SmilePet"
-                  className={styles.logo}
-                />
-              </a>
-              {/* <span className={styles.brand}>SmilePet</span> */}
-            </div>
-
-            <div className={styles.searchCenter}>
-              <form
-                className={styles.searchBox}
-                onSubmit={(e) => {
-                  handleSearchSubmit(e);
-                }}
-              >
-                <button
-                  type="submit"
-                  className={styles.searchSubmit}
-                  aria-label="Buscar produtos"
-                >
-                  <FaSearch className={styles.searchIcon} />
-                </button>
-                <input
-                  type="text"
-                  placeholder="Pesquisar produtos..."
-                  className={styles.searchInput}
-                  value={searchTerm}
-                  onChange={(e) => {
-                    setSearchTerm(e.target.value);
-                    setSuggestionsOpen(true);
-                    void ensureDataFetched();
-                  }}
-                  onFocus={() => {
-                    setSuggestionsOpen(true);
-                    void ensureDataFetched();
-                  }}
-                  onBlur={() => {
-                    setTimeout(() => setSuggestionsOpen(false), 120);
-                  }}
-                />
-              </form>
-              {suggestionsOpen && searchTerm.trim() ? (
-                <div className={styles.searchDropdown}>
-                  {!products ? (
-                    <div className={styles.searchNoResults}>
-                      Carregando sugestões...
-                    </div>
-                  ) : suggestionResults.length > 0 ? (
-                    <>
-                      <div className={styles.searchSuggestionsHeader}>
-                        Produtos sugeridos
-                      </div>
-                      <ul className={styles.searchSuggestionsList}>
-                        {suggestionResults.map((item) => (
-                          <li key={item.raw?.id || item.name}>
-                            <button
-                              type="button"
-                              onMouseDown={(e) => {
-                                e.preventDefault();
-                                handleSuggestionClick(item);
-                              }}
-                            >
-                              <div className={styles.searchSuggestionContent}>
-                                <img
-                                  src={item.image}
-                                  alt={item.name}
-                                  className={styles.searchSuggestionThumb}
-                                />
-                                <div className={styles.searchSuggestionInfo}>
-                                  <span className={styles.searchSuggestionName}>
-                                    {item.name}
-                                  </span>
-                                  {item.formattedPrice ? (
-                                    <span
-                                      className={styles.searchSuggestionPrice}
-                                    >
-                                      {item.formattedPrice}
-                                    </span>
-                                  ) : null}
-                                </div>
-                              </div>
-                            </button>
-                          </li>
-                        ))}
-                      </ul>
-                    </>
-                  ) : (
-                    <div className={styles.searchNoResults}>
-                      Nenhum produto encontrado
-                    </div>
-                  )}
-                </div>
-              ) : null}
-            </div>
-
-            <div className={styles.socialMediaIcons}>
-              <AiFillTikTok />
-              <FaInstagramSquare />
-            </div>
-
-            <div className={styles.headerRight}>
-              {(() => {
-                // tolerate different shapes returned by API
-                const displayName =
-                  user?.nome || user?.name || user?.firstName || user?.email;
-                if (displayName) {
-                  return (
-                    <div className={styles.userArea}>
-                      <button
-                        className={styles.userNameBtn}
-                        onClick={() => navigate("/perfil")}
-                        type="button"
-                        title={`Ver perfil de ${displayName}`}
-                      >
-                        Olá, {displayName}
-                      </button>
-                      <button
-                        className={styles.logoutBtn}
-                        onClick={handleLogout}
-                        type="button"
-                      >
-                        Sair
-                      </button>
-                    </div>
-                  );
-                }
-                return (
-                  <a href="/usuario" className={styles.loginLink}>
-                    Entre ou cadastre-se
-                  </a>
-                );
-              })()}
-              <div className={styles.iconGroup}>
-                <button className={styles.iconBtn} aria-label="Favoritos">
-                  <FaHeart
-                    className={styles.icon}
-                    focusable="false"
-                    aria-hidden="true"
+      {isMobile ? <HeaderMobile /> : null}
+      {!isMobile && (
+        <header className={styles.header}>
+          {/* Top bar: logo | centered search | right actions */}
+          <div className={styles.headerTop}>
+            <div className={styles.headerContent}>
+              <div className={styles.logoArea}>
+                <a href="/">
+                  <img
+                    src="/logo.gif"
+                    alt="Logo SmilePet"
+                    className={styles.logo}
                   />
-                </button>
-                <div className={styles.cartIconArea}>
+                </a>
+                {/* <span className={styles.brand}>SmilePet</span> */}
+              </div>
+
+              <div className={styles.searchCenter}>
+                <form
+                  className={styles.searchBox}
+                  onSubmit={(e) => {
+                    handleSearchSubmit(e);
+                  }}
+                >
                   <button
-                    className={styles.iconBtn}
-                    aria-label="Sacola de compras"
-                    type="button"
-                    onClick={() => navigate("/carrinho")}
+                    type="submit"
+                    className={styles.searchSubmit}
+                    aria-label="Buscar produtos"
                   >
-                    <FaShoppingBag
+                    <FaSearch className={styles.searchIcon} />
+                  </button>
+                  <input
+                    type="text"
+                    placeholder="Pesquisar produtos..."
+                    className={styles.searchInput}
+                    value={searchTerm}
+                    onChange={(e) => {
+                      setSearchTerm(e.target.value);
+                      setSuggestionsOpen(true);
+                      void ensureDataFetched();
+                    }}
+                    onFocus={() => {
+                      setSuggestionsOpen(true);
+                      void ensureDataFetched();
+                    }}
+                    onBlur={() => {
+                      setTimeout(() => setSuggestionsOpen(false), 120);
+                    }}
+                  />
+                </form>
+                {suggestionsOpen && searchTerm.trim() ? (
+                  <div className={styles.searchDropdown}>
+                    {!products ? (
+                      <div className={styles.searchNoResults}>
+                        Carregando sugestões...
+                      </div>
+                    ) : suggestionResults.length > 0 ? (
+                      <>
+                        <div className={styles.searchSuggestionsHeader}>
+                          Produtos sugeridos
+                        </div>
+                        <ul className={styles.searchSuggestionsList}>
+                          {suggestionResults.map((item) => (
+                            <li key={item.raw?.id || item.name}>
+                              <button
+                                type="button"
+                                onMouseDown={(e) => {
+                                  e.preventDefault();
+                                  handleSuggestionClick(item);
+                                }}
+                              >
+                                <div className={styles.searchSuggestionContent}>
+                                  <img
+                                    src={item.image}
+                                    alt={item.name}
+                                    className={styles.searchSuggestionThumb}
+                                  />
+                                  <div className={styles.searchSuggestionInfo}>
+                                    <span
+                                      className={styles.searchSuggestionName}
+                                    >
+                                      {item.name}
+                                    </span>
+                                    {item.formattedPrice ? (
+                                      <span
+                                        className={styles.searchSuggestionPrice}
+                                      >
+                                        {item.formattedPrice}
+                                      </span>
+                                    ) : null}
+                                  </div>
+                                </div>
+                              </button>
+                            </li>
+                          ))}
+                        </ul>
+                      </>
+                    ) : (
+                      <div className={styles.searchNoResults}>
+                        Nenhum produto encontrado
+                      </div>
+                    )}
+                  </div>
+                ) : null}
+              </div>
+
+              <div className={styles.socialMediaIcons}>
+                <AiFillTikTok />
+                <FaInstagramSquare />
+              </div>
+
+              <div className={styles.headerRight}>
+                {(() => {
+                  // tolerate different shapes returned by API
+                  const displayName =
+                    user?.nome || user?.name || user?.firstName || user?.email;
+                  if (displayName) {
+                    return (
+                      <div className={styles.userArea}>
+                        <button
+                          className={styles.userNameBtn}
+                          onClick={() => navigate("/perfil")}
+                          type="button"
+                          title={`Ver perfil de ${displayName}`}
+                        >
+                          Olá, {displayName}
+                        </button>
+                        <button
+                          className={styles.logoutBtn}
+                          onClick={handleLogout}
+                          type="button"
+                        >
+                          Sair
+                        </button>
+                      </div>
+                    );
+                  }
+                  return (
+                    <a href="/usuario" className={styles.loginLink}>
+                      Entre ou cadastre-se
+                    </a>
+                  );
+                })()}
+                <div className={styles.iconGroup}>
+                  <button className={styles.iconBtn} aria-label="Favoritos">
+                    <FaHeart
                       className={styles.icon}
                       focusable="false"
                       aria-hidden="true"
                     />
                   </button>
-                  <span className={styles.cartCount}>{cartCount}</span>
+                  <div className={styles.cartIconArea}>
+                    <button
+                      className={styles.iconBtn}
+                      aria-label="Sacola de compras"
+                      type="button"
+                      onClick={() => navigate("/carrinho")}
+                    >
+                      <FaShoppingBag
+                        className={styles.icon}
+                        focusable="false"
+                        aria-hidden="true"
+                      />
+                    </button>
+                    <span className={styles.cartCount}>{cartCount}</span>
+                  </div>
                 </div>
               </div>
             </div>
           </div>
-        </div>
 
-        {/* Bottom bar: main navigation (keeps existing nav/submenu behavior) */}
-        <div className={styles.headerBottom}>
-          <div className={styles.headerNav}>
-            <nav className={styles.nav}>
-              <ul className={styles.navList}>
-                <li
-                  className={styles.hasSubmenu}
-                  onMouseEnter={() => setOpenCachorro(true)}
-                  onMouseLeave={() => {
-                    setOpenCachorro(false);
-                  }}
-                >
-                  <a
-                    href="/produtos?pet=Cachorro"
-                    className={`${styles.petLink} ${styles.petLinkDog}`}
-                    onClick={(e) => {
-                      e.preventDefault();
-                      handlePetNavigation("Cachorro");
-                      setShowOverlay(true);
+          {/* Bottom bar: main navigation (keeps existing nav/submenu behavior) */}
+          <div className={styles.headerBottom}>
+            <div className={styles.headerNav}>
+              <nav className={styles.nav}>
+                <ul className={styles.navList}>
+                  <li
+                    className={styles.hasSubmenu}
+                    onMouseEnter={() => setOpenCachorro(true)}
+                    onMouseLeave={() => {
+                      setOpenCachorro(false);
                     }}
                   >
-                    Cachorro
-                  </a>
-                  {openCachorro && (
-                    <div className={styles.submenu} role="menu">
-                      <div className={styles.submenuLeft}>
-                        {Object.keys(submenuCategoryMapCachorro).map(
-                          (label) => (
+                    <a
+                      href="/produtos?pet=Cachorro"
+                      className={`${styles.petLink} ${styles.petLinkDog}`}
+                      onClick={(e) => {
+                        e.preventDefault();
+                        handlePetNavigation("Cachorro");
+                        setShowOverlay(true);
+                      }}
+                    >
+                      Cachorro
+                    </a>
+                    {openCachorro && (
+                      <div className={styles.submenu} role="menu">
+                        <div className={styles.submenuLeft}>
+                          {Object.keys(submenuCategoryMapCachorro).map(
+                            (label) => (
+                              <div
+                                key={label}
+                                className={styles.submenuItem}
+                                onMouseEnter={() =>
+                                  handleHoverSubItem(label, "cachorro")
+                                }
+                                onClick={() => {
+                                  void handleCategoryNavigate(
+                                    label,
+                                    "cachorro"
+                                  );
+                                }}
+                              >
+                                {label}
+                              </div>
+                            )
+                          )}
+                        </div>
+                        <div className={styles.submenuRight}>
+                          <div className={styles.submenuBrandsTitle}>
+                            Marcas
+                          </div>
+                          {loadingBrands ? (
+                            <div className={styles.submenuLoading}>
+                              Carregando...
+                            </div>
+                          ) : brands.length === 0 ? (
+                            <div className={styles.submenuEmpty}>
+                              Passe o mouse sobre uma categoria
+                            </div>
+                          ) : (
+                            <ul className={styles.brandsList}>
+                              {brands.map((b) => (
+                                <li
+                                  key={b}
+                                  onClick={() => void handleBrandClick(b)}
+                                >
+                                  {b}
+                                </li>
+                              ))}
+                            </ul>
+                          )}
+                        </div>
+                      </div>
+                    )}
+                  </li>
+                  <li
+                    className={styles.hasSubmenu}
+                    onMouseEnter={() => setOpenGato(true)}
+                    onMouseLeave={() => {
+                      setOpenGato(false);
+                    }}
+                  >
+                    <a
+                      href="/produtos?pet=Gato"
+                      className={`${styles.petLink} ${styles.petLinkCat}`}
+                      onClick={(e) => {
+                        e.preventDefault();
+                        handlePetNavigation("Gato");
+                        setShowOverlay(true);
+                      }}
+                    >
+                      Gato
+                    </a>
+                    {openGato && (
+                      <div className={styles.submenu} role="menu">
+                        <div className={styles.submenuLeft}>
+                          {Object.keys(submenuCategoryMapGato).map((label) => (
                             <div
                               key={label}
                               className={styles.submenuItem}
                               onMouseEnter={() =>
-                                handleHoverSubItem(label, "cachorro")
+                                handleHoverSubItem(label, "gato")
                               }
                               onClick={() => {
-                                void handleCategoryNavigate(label, "cachorro");
+                                void handleCategoryNavigate(label, "gato");
                               }}
                             >
                               {label}
                             </div>
-                          )
-                        )}
+                          ))}
+                        </div>
+                        <div className={styles.submenuRight}>
+                          <div className={styles.submenuBrandsTitle}>
+                            Marcas
+                          </div>
+                          {loadingBrands ? (
+                            <div className={styles.submenuLoading}>
+                              Carregando...
+                            </div>
+                          ) : brands.length === 0 ? (
+                            <div className={styles.submenuEmpty}>
+                              Passe o mouse sobre uma categoria
+                            </div>
+                          ) : (
+                            <ul className={styles.brandsList}>
+                              {brands.map((b) => (
+                                <li
+                                  key={b}
+                                  onClick={() => void handleBrandClick(b)}
+                                >
+                                  {b}
+                                </li>
+                              ))}
+                            </ul>
+                          )}
+                        </div>
                       </div>
-                      <div className={styles.submenuRight}>
-                        <div className={styles.submenuBrandsTitle}>Marcas</div>
-                        {loadingBrands ? (
-                          <div className={styles.submenuLoading}>
-                            Carregando...
-                          </div>
-                        ) : brands.length === 0 ? (
-                          <div className={styles.submenuEmpty}>
-                            Passe o mouse sobre uma categoria
-                          </div>
-                        ) : (
-                          <ul className={styles.brandsList}>
-                            {brands.map((b) => (
-                              <li
-                                key={b}
-                                onClick={() => void handleBrandClick(b)}
-                              >
-                                {b}
-                              </li>
-                            ))}
-                          </ul>
-                        )}
-                      </div>
-                    </div>
-                  )}
-                </li>
-                <li
-                  className={styles.hasSubmenu}
-                  onMouseEnter={() => setOpenGato(true)}
-                  onMouseLeave={() => {
-                    setOpenGato(false);
-                  }}
-                >
-                  <a
-                    href="/produtos?pet=Gato"
-                    className={`${styles.petLink} ${styles.petLinkCat}`}
-                    onClick={(e) => {
-                      e.preventDefault();
-                      handlePetNavigation("Gato");
-                      setShowOverlay(true);
-                    }}
-                  >
-                    Gato
-                  </a>
-                  {openGato && (
-                    <div className={styles.submenu} role="menu">
-                      <div className={styles.submenuLeft}>
-                        {Object.keys(submenuCategoryMapGato).map((label) => (
-                          <div
-                            key={label}
-                            className={styles.submenuItem}
-                            onMouseEnter={() =>
-                              handleHoverSubItem(label, "gato")
-                            }
-                            onClick={() => {
-                              void handleCategoryNavigate(label, "gato");
-                            }}
-                          >
-                            {label}
-                          </div>
-                        ))}
-                      </div>
-                      <div className={styles.submenuRight}>
-                        <div className={styles.submenuBrandsTitle}>Marcas</div>
-                        {loadingBrands ? (
-                          <div className={styles.submenuLoading}>
-                            Carregando...
-                          </div>
-                        ) : brands.length === 0 ? (
-                          <div className={styles.submenuEmpty}>
-                            Passe o mouse sobre uma categoria
-                          </div>
-                        ) : (
-                          <ul className={styles.brandsList}>
-                            {brands.map((b) => (
-                              <li
-                                key={b}
-                                onClick={() => void handleBrandClick(b)}
-                              >
-                                {b}
-                              </li>
-                            ))}
-                          </ul>
-                        )}
-                      </div>
-                    </div>
-                  )}
-                </li>
-                <li>
-                  <a
-                    href="/ofertas"
-                    className={`${styles.ofertas} ${
-                      blinkOfertas ? styles.ofertasBlink : ""
-                    }`}
-                    onClick={(e) => {
-                      e.preventDefault();
-                      // start blinking and navigate to ofertas
-                      setBlinkOfertas(true);
-                      // stop blinking after a while to avoid permanent animation
-                      setTimeout(() => setBlinkOfertas(false), 6000);
-                      navigate("/ofertas");
-                    }}
-                  >
-                    OFERTAS IMPERDÍVEIS
-                  </a>
-                </li>
-                <li>
-                  <a href="/atacado">Compre no Atacado</a>
-                </li>
-                {/* <li>
+                    )}
+                  </li>
+                  <li>
+                    <a
+                      href="/ofertas"
+                      className={`${styles.ofertas} ${
+                        blinkOfertas ? styles.ofertasBlink : ""
+                      }`}
+                      onClick={(e) => {
+                        e.preventDefault();
+                        // start blinking and navigate to ofertas
+                        setBlinkOfertas(true);
+                        // stop blinking after a while to avoid permanent animation
+                        setTimeout(() => setBlinkOfertas(false), 6000);
+                        navigate("/ofertas");
+                      }}
+                    >
+                      OFERTAS IMPERDÍVEIS
+                    </a>
+                  </li>
+                  <li>
+                    <a href="/atacado">Compre no Atacado</a>
+                  </li>
+                  {/* <li>
                 <a href="/smileclub" className={styles.smileClub}>
                   SmileClub
                 </a>
               </li> */}
-              </ul>
-            </nav>
+                </ul>
+              </nav>
+            </div>
           </div>
-        </div>
-      </header>
+        </header>
+      )}
       {showOverlay && <div className={styles.menuOverlay} />}
     </>
   );

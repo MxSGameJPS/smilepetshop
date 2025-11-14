@@ -1,0 +1,147 @@
+.headerMobile {
+  width: 100%;
+  max-width: 420px;
+  background: #fc6100;
+  color: #073b4c;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 1100;
+  padding: 8px 12px;
+  box-shadow: 0 2px 8px rgba(7, 59, 76, 0.06);
+  display: flex;
+  flex-direction: column;
+  text-align: center;
+}
+.topRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  gap: 8px;
+}
+.bars {
+  background: transparent;
+  border: none;
+  color: #fff;
+  font-size: 1.4rem;
+  width: 50px;
+}
+.logoLink {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.logo {
+  height: 44px;
+  width: auto;
+}
+.cartBtn {
+  background: transparent;
+  border: none;
+  color: #fff;
+  position: relative;
+  font-size: 1.3rem;
+}
+.cartCount {
+  position: absolute;
+  top: 1px;
+  right: 5px;
+  background: #ffd600;
+  color: #073b4c;
+  font-weight: 700;
+  border-radius: 50%;
+  width: 15px;
+  height: 15px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.9rem;
+}
+.searchRow {
+  margin-top: 8px;
+  text-align: center;
+}
+.searchForm {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: #fff;
+  border-radius: 20px;
+  padding: 6px 8px;
+  max-width: 380px;
+}
+.searchBtn {
+  background: transparent;
+  border: none;
+  color: #073b4c;
+  font-size: 1rem;
+}
+.searchInput {
+  border: none;
+  outline: none;
+  width: 100%;
+  max-width: 280px;
+  font-size: 0.95rem;
+  background: transparent;
+  color: #073b4c;
+}
+.drawerBackdrop {
+  position: fixed;
+  top: 64px;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.45);
+  z-index: 1098;
+}
+.drawer {
+  position: fixed;
+  top: 64px;
+  left: -100%;
+  width: calc(100% - 32px);
+  max-width: 220px;
+  background: #fff;
+  z-index: 1099;
+  border-radius: 12px;
+  box-shadow: 0 12px 32px rgba(7, 59, 76, 0.18);
+  padding: 12px;
+  transition: left 0.28s cubic-bezier(0.22, 1, 0.36, 1);
+  text-align: left;
+}
+.drawer.open {
+  left: 8px;
+}
+.drawerHeader {
+  display: flex;
+  justify-content: flex-end;
+}
+.closeBtn {
+  background: transparent;
+  border: none;
+  font-size: 1.2rem;
+  color: #073b4c;
+}
+.drawerNav ul {
+  list-style: none;
+  padding: 8px 0;
+  margin: 8px 0 0 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.drawerNav button {
+  background: transparent;
+  border: none;
+  text-align: left;
+  padding: 12px 8px;
+  font-size: 1rem;
+  color: #073b4c;
+}
+
+/* small-screen only guard (this component is intended for mobile) */
+@media (min-width: 761px) {
+  .headerMobile {
+    display: none;
+  }
+}

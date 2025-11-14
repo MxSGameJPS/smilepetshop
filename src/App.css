@@ -12,7 +12,6 @@
 }
 .mainContent {
   flex: 1 1 auto;
-
 }
 
 .logo {
@@ -49,4 +48,58 @@
 
 .read-the-docs {
   color: #888;
+}
+
+/* Responsive adjustments for Home (<= 760px) */
+@media (max-width: 760px) {
+  :root {
+    font-size: 14px;
+  }
+
+  .homeWrapper {
+    padding: 0 12px;
+  }
+
+  /* headings smaller on mobile */
+  .homeWrapper h1,
+  .homeWrapper h2,
+  .homeWrapper h3 {
+    font-size: clamp(1rem, 2.4vw, 1.25rem);
+    line-height: 1.2;
+  }
+
+  /* reduce large section paddings */
+  .homeWrapper section,
+  .homeWrapper .produtosSection,
+  .homeWrapper .destaquesSection {
+    padding: 12px 0 !important;
+    margin: 0 !important;
+  }
+
+  /* imgs fluid by default to avoid overflow */
+  .homeWrapper img {
+    max-width: 100%;
+    height: auto;
+    display: block;
+  }
+
+  /* reduce gaps inside grid areas that might come from CSS modules */
+  .homeWrapper [class*="Grid"],
+  .homeWrapper [class*="grid"],
+  .homeWrapper [class*="cards"] {
+    gap: 12px !important;
+    padding: 6px !important;
+  }
+
+  /* make containers single-column where possible */
+  .homeWrapper .produtosSection,
+  .homeWrapper .produtosGrid,
+  .homeWrapper .produtosContainer {
+    padding: 6px !important;
+  }
+
+  /* footer and header spacing adjustments (if present) */
+  header {
+    padding: 8px 12px !important;
+  }
 }

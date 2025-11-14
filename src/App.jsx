@@ -29,6 +29,8 @@ import Atacado from "./components/Atacado/atacado";
 import LoginAtacado from "./components/Atacado/loginAtacado/loginAtacado";
 import CadastroAtacado from "./components/Atacado/cadastroAtacado/cadastroAtacado";
 import FaixaSmileFriday from "./components/faixaSmileFriday/faixaSmileFriday";
+import WhatsAppFloating from "./components/WhatsAppFloating/WhatsAppFloating";
+import ScrollToTop from "./components/ScrollToTop/ScrollToTop";
 import Usuario from "./components/Usuario/usuario";
 import LoginUsuario from "./components/Usuario/login/loginUsuario";
 import CadastroUsuario from "./components/Usuario/cadastro/cadastroUsuario";
@@ -42,8 +44,8 @@ import FaixaCorrida from "./components/faixacorrida/faixaCorrida";
 
 function Home() {
   return (
-    <>
-    <FaixaCorrida />
+    <div className="homeWrapper">
+      <FaixaCorrida />
       <Banner />
       <Faixa />
       <FaixaSmileFriday />
@@ -52,7 +54,9 @@ function Home() {
       <BannerMeio />
       <Avaliacao />
       <Marcas />
-    </>
+      <WhatsAppFloating />
+      <ScrollToTop />
+    </div>
   );
 }
 

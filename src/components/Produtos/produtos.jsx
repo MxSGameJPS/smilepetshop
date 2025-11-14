@@ -339,6 +339,17 @@ export default function Produtos() {
     return marcaOk && categoriaOk && priceOk && petOk && ofertaOk && searchOk;
   });
 
+  // paginação incremental: mostrar aos poucos
+  const PAGE_SIZE = 15;
+  const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
+
+  // resetar visíveis quando o conjunto filtrado mudar (novos filtros / pesquisa)
+  // usamos apenas o tamanho do array como dependência para evitar executar
+  // a cada render (produtosFiltrados é um novo array por render).
+  useEffect(() => {
+    setVisibleCount(PAGE_SIZE);
+  }, [produtosFiltrados.length]);
+
   // navigation handled inside ProductCard via useNavigate when opening a product
 
   return (
@@ -585,34 +596,52 @@ export default function Produtos() {
                   )}
                 </div>
               ) : (
-                produtosFiltrados.map((p) => {
-                  const image =
-                    p.imagem_url && p.imagem_url.trim()
-                      ? p.imagem_url
-                      : "/imgCards/RacaoSeca.png";
-                  const price = p.precoMin || p.preco || null;
-                  const priceOld = p.precoMax || null;
-                  return (
-                    <ProductCard
-                      key={p.id}
-                      image={image}
-                      title={p.nome}
-                      priceOld={priceOld}
-                      price={price}
-                      promocao={p.promocao}
-                      productId={p.id}
-                      onAdd={() =>
-                        addToCart({
-                          id: p.id,
-                          nome: p.nome,
-                          quantidade: 1,
-                          precoUnit: price,
-                          imagem_url: image,
-                        })
-                      }
-                    />
-                  );
-                })
+                <>
+                  {produtosFiltrados.slice(0, visibleCount).map((p) => {
+                    const image =
+                      p.imagem_url && p.imagem_url.trim()
+                        ? p.imagem_url
+                        : "/imgCards/RacaoSeca.png";
+                    const price = p.precoMin || p.preco || null;
+                    const priceOld = p.precoMax || null;
+                    return (
+                      <ProductCard
+                        key={p.id}
+                        image={image}
+                        title={p.nome}
+                        priceOld={priceOld}
+                        price={price}
+                        promocao={p.promocao}
+                        productId={p.id}
+                        onAdd={() =>
+                          addToCart({
+                            id: p.id,
+                            nome: p.nome,
+                            quantidade: 1,
+                            precoUnit: price,
+                            imagem_url: image,
+                          })
+                        }
+                      />
+                    );
+                  })}
+
+                  {produtosFiltrados.length > visibleCount && (
+                    <div className={styles.verMaisWrapper}>
+                      <button
+                        type="button"
+                        className={styles.verMaisBtn}
+                        onClick={() =>
+                          setVisibleCount((v) =>
+                            Math.min(v + PAGE_SIZE, produtosFiltrados.length)
+                          )
+                        }
+                      >
+                        Ver mais
+                      </button>
+                    </div>
+                  )}
+                </>
               )}
             </>
           )}

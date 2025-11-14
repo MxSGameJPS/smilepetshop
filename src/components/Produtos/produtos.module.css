@@ -418,3 +418,23 @@
     gap: 18px;
   }
 }
+
+/* Ver mais button */
+.verMaisWrapper {
+  grid-column: 1 / -1;
+  display: flex;
+  justify-content: center;
+  padding: 18px 0 40px;
+}
+.verMaisBtn {
+  background: #fc6100;
+  color: #fff;
+  border: none;
+  padding: 12px 20px;
+  border-radius: 10px;
+  font-weight: 700;
+  cursor: pointer;
+}
+.verMaisBtn:hover {
+  background: #ff7f3f;
+}
