@@ -6,6 +6,11 @@
   flex-direction: column;
   align-items: center;
   margin-top: 170px;
+
+  @media (max-width: 760px) {
+    margin-top: 100px;
+    padding: 24px 12px 0 12px;
+  }
 }
 .title {
   font-family: "Baloo 2", cursive;
@@ -15,12 +20,21 @@
   color: #09344a;
   position: relative;
   text-align: center;
+
+  @media (max-width: 760px) {
+    font-size: 2rem;
+    margin-bottom: 24px;
+  }
 }
 .titleHighlight {
   color: #ffe600;
   font-size: 2.4rem;
   font-weight: 700;
   margin-left: 8px;
+
+  @media (max-width: 760px) {
+    font-size: 2rem;
+  }
 }
 .menu {
   width: 100%;
@@ -34,14 +48,26 @@
   margin: 0 0 8px 0;
   font-size: 1.08rem;
   color: #09344a;
+
+  @media (max-width: 760px) {
+    font-size: 1rem;
+  }
 }
 .menu li {
   margin-bottom: 4px;
+
+  @media (max-width: 760px) {
+    margin-bottom: 6px;
+  }
 }
 .block {
   max-width: 900px;
   width: 100%;
   margin-bottom: 32px;
+
+  @media (max-width: 760px) {
+    margin-bottom: 24px;
+  }
 }
 .heading {
   font-family: "Baloo 2", cursive;
@@ -49,9 +75,17 @@
   font-weight: 700;
   color: #09344a;
   margin-bottom: 12px;
+
+  @media (max-width: 760px) {
+    font-size: 1.1rem;
+  }
 }
 .questionBlock {
   margin-bottom: 12px;
+
+  @media (max-width: 760px) {
+    margin-bottom: 10px;
+  }
 }
 .question {
   width: 100%;
@@ -68,6 +102,11 @@
   justify-content: space-between;
   align-items: center;
   transition: background 0.2s;
+
+  @media (max-width: 760px) {
+    font-size: 1rem;
+    padding: 10px 14px;
+  }
 }
 .question:hover {
   background: #f7f8f8;
@@ -76,6 +115,10 @@
   font-size: 1.2rem;
   font-weight: bold;
   margin-left: 12px;
+
+  @media (max-width: 760px) {
+    font-size: 1rem;
+  }
 }
 .answer {
   background: #fff;
@@ -85,20 +128,10 @@
   color: #09344a;
   margin-top: 4px;
   border-radius: 0 8px 8px 0;
-}
-@media (max-width: 900px) {
-  .faqSection {
-    padding: 32px 0 0 0;
-  }
-  .title {
-    font-size: 1.5rem;
-    margin-bottom: 18px;
-  }
-  .block {
-    max-width: 98vw;
-    margin-bottom: 18px;
-  }
-  .heading {
-    font-size: 1.08rem;
+
+  @media (max-width: 760px) {
+    font-size: 0.95rem;
+    padding: 10px 14px;
   }
 }
+

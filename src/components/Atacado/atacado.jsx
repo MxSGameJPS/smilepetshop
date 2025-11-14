@@ -7,7 +7,7 @@ export default function Atacado() {
       <div className={styles.cardAtacado}>
         <h1 className={styles.titulo}>Compre no Atacado</h1>
         <div className={styles.info}>
-          <p style={{ fontSize: 18, marginTop: 12 }}>
+          <p style={{ fontSize: 18, marginTop: 12, color: "#222" }}>
             Essa novidade está chegando em breve! 🎉
           </p>
           <p style={{ marginTop: 8, color: "#555" }}>

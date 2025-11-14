@@ -5,6 +5,10 @@
   align-items: center;
   justify-content: center;
   background: linear-gradient(135deg, #fff 60%, #ffe5d1 100%);
+
+  @media (max-width: 760px) {
+    padding: 20px 0;
+  }
 }
 
 /* Card centralizado transparente com borda laranja */
@@ -19,6 +23,11 @@
   display: flex;
   flex-direction: column;
   align-items: center;
+
+  @media (max-width: 760px) {
+    padding: 30px 20px 20px 20px;
+    margin: 0 16px;
+  }
 }
 
 .titulo {
@@ -27,6 +36,10 @@
   color: #fc6100;
   margin-bottom: 12px;
   text-align: center;
+
+  @media (max-width: 760px) {
+    font-size: 1.5rem;
+  }
 }
 
 .subtitulo {
@@ -35,6 +48,10 @@
   color: #222;
   margin-bottom: 18px;
   text-align: center;
+
+  @media (max-width: 760px) {
+    font-size: 1rem;
+  }
 }
 
 .info {
@@ -42,6 +59,10 @@
   color: #444;
   margin-bottom: 28px;
   text-align: center;
+
+  @media (max-width: 760px) {
+    font-size: 0.9rem;
+  }
 }
 
 .botoes {
@@ -61,6 +82,11 @@
   cursor: pointer;
   box-shadow: 0 2px 8px rgba(252, 97, 0, 0.08);
   transition: background 0.2s;
+
+  @media (max-width: 760px) {
+    padding: 10px 20px;
+    font-size: 0.9rem;
+  }
 }
 .btnLaranja:hover {
   background: #e25500;
@@ -77,6 +103,11 @@
   cursor: pointer;
   box-shadow: 0 2px 8px rgba(0, 116, 217, 0.08);
   transition: background 0.2s;
+
+  @media (max-width: 760px) {
+    padding: 10px 20px;
+    font-size: 0.9rem;
+  }
 }
 .btnAzul:hover {
   background: #005fa3;

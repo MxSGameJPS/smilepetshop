@@ -5,11 +5,20 @@
   flex-direction: column;
   align-items: center;
   margin-top: 170px;
+
+  @media (max-width: 760px) {
+    margin-top: 100px;
+    padding: 22px 0 0 0;
+  }
 }
 
 .headerArea {
   text-align: center;
   margin-bottom: 32px;
+
+  @media (max-width: 760px) {
+    margin-bottom: 24px;
+  }
 }
 .title {
   font-family: "Baloo 2", cursive;
@@ -18,17 +27,31 @@
   margin-bottom: 12px;
   color: #09344a;
   position: relative;
+
+  @media (max-width: 760px) {
+    font-size: 2rem;
+  }
 }
 .titleHighlight {
   color: #ffe600;
   font-size: 2.8rem;
   font-weight: 700;
   margin-left: 8px;
+
+  @media (max-width: 760px) {
+    font-size: 2rem;
+  }
 }
 .subtitle {
   font-size: 1.08rem;
   color: #09344a;
   margin-bottom: 24px;
+
+  @media (max-width: 760px) {
+    font-size: 0.9rem;
+    margin-bottom: 16px;
+    padding: 0 12px;
+  }
 }
 .infoRow {
   display: flex;
@@ -37,11 +60,24 @@
   margin-bottom: 24px;
   font-size: 1.08rem;
   color: #09344a;
+
+  @media (max-width: 760px) {
+    flex-direction: column;
+    align-items: center;
+    gap: 24px;
+    font-size: 0.9rem;
+  }
 }
 .infoCol {
   border-right: 1px solid #e0e0e0;
   padding-right: 32px;
   min-width: 220px;
+
+  @media (max-width: 760px) {
+    border-right: none;
+    padding-right: 0;
+    text-align: center;
+  } 
 }
 .infoCol:last-child {
   border-right: none;
@@ -73,7 +109,16 @@
   gap: 48px;
   max-width: 1200px;
   width: 100%;
-  margin: 0 auto 48px auto;
+  margin: 0 auto 48px auto; 
+
+@media (max-width: 760px) {
+    flex-direction: column;
+    padding: 32px 10px;
+    gap: 24px;
+    max-width: 400px;
+    margin: 0 auto;
+    align-items: center;
+  }
 }
 .formText {
   flex: 1;
@@ -85,6 +130,11 @@
   display: flex;
   flex-direction: column;
   justify-content: center;
+
+  @media (max-width: 900px) {
+    font-size: 1.1rem;
+    min-width: 0;
+  }
 }
 .arrow {
   width: 80px;
@@ -92,6 +142,16 @@
   background: url('data:image/svg+xml;utf8,<svg width="80" height="40" viewBox="0 0 80 40" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M10 10C30 40 50 0 70 30" stroke="black" stroke-width="5" stroke-linecap="round"/></svg>')
     no-repeat center center;
   margin-top: 24px;
+
+  @media (max-width: 900px) {
+    width: 60px;
+    height: 30px;
+    margin-top: 16px;
+  }
+
+  @media (max-width: 760px) {
+    display: none;
+  }
 }
 .form {
   flex: 2;
@@ -99,6 +159,12 @@
   flex-direction: column;
   gap: 16px;
   min-width: 320px;
+
+  @media (max-width: 760px) {
+    min-width: 0;
+    width: 80%;
+    align-items: center;
+  }
 }
 .input {
   padding: 12px 18px;
@@ -108,6 +174,11 @@
   outline: none;
   background: transparent;
   color: #09344a;
+
+  @media (max-width: 760px) {
+    font-size: 0.9rem;
+    width: 100%;
+  }
 }
 .textarea {
   padding: 12px 18px;
@@ -119,6 +190,11 @@
   resize: vertical;
   background: transparent;
   color: #09344a;
+
+  @media (max-width: 760px) {
+    font-size: 0.9rem;
+    width: 100%;
+  }
 }
 .submitBtn {
   background: #09344a;
@@ -131,21 +207,13 @@
   cursor: pointer;
   margin-top: 8px;
   transition: background 0.2s;
+
+  @media (max-width: 760px) {
+    font-size: 0.9rem;
+    width: 100%;
+  }
 }
 .submitBtn:hover {
   background: #0b4666;
 }
-@media (max-width: 900px) {
-  .formArea {
-    flex-direction: column;
-    padding: 32px 16px;
-    gap: 24px;
-  }
-  .formText {
-    font-size: 1.1rem;
-    min-width: 0;
-  }
-  .form {
-    min-width: 0;
-  }
-}
+
