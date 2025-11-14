@@ -17,6 +17,12 @@
   margin: 0 auto;
   padding: 32px 0 0 0;
   text-align: center;
+
+
+  @media (max-width: 760px) {
+    padding: 16px 0 0 0;
+    max-width: 400px;
+  }
 }
 .titulo {
   font-size: 2rem;
@@ -24,12 +30,21 @@
   font-family: "Montserrat", Arial, sans-serif;
   font-weight: 700;
   margin-bottom: 16px;
+
+  @media (max-width: 760px) {
+    font-size: 1.5rem;
+  }
 }
 .categorias {
   display: flex;
   align-items: center;
   gap: 16px;
   margin-bottom: 24px;
+
+  @media (max-width: 760px) {
+    gap: 12px;
+    margin-bottom: 16px;
+  }
 }
 .categoriaBtn {
   background: #fc6100;
@@ -41,6 +56,12 @@
   padding: 6px 18px;
   cursor: pointer;
   font-family: "Montserrat", Arial, sans-serif;
+
+
+  @media (max-width: 760px) {
+    font-size: 0.9rem;
+    padding: 5px 14px;
+  }
 }
 .verTudo {
   color: #073b4c;
@@ -51,6 +72,10 @@
   display: flex;
   align-items: center;
   justify-content: center;
+
+  @media (max-width: 760px) {
+    font-size: 0.9rem;
+  }
 }
 
 .cardsGrid {
@@ -61,6 +86,12 @@
   margin-top: 24px;
   overflow: hidden;
   padding: 12px 0;
+
+  @media (max-width: 760px) {
+    gap: 2px;
+    margin-top: 16px;
+    padding: 8px 0;
+  }
 }
 
 .carouselRow {
@@ -77,6 +108,10 @@
   animation-duration: var(--duration, 32s);
   animation-iteration-count: infinite;
   will-change: transform;
+
+  @media (max-width: 760px) {
+    gap: 16px;
+  }
 }
 
 .carouselRow:hover .track {
@@ -106,27 +141,4 @@
   }
 }
 
-@media (max-width: 900px) {
-  .cardsGrid {
-    gap: 24px;
-  }
 
-  .track {
-    gap: 16px;
-  }
-}
-
-@media (max-width: 600px) {
-  .destaquesSection {
-    padding: 24px 16px 0;
-  }
-
-  .categorias {
-    flex-wrap: wrap;
-    justify-content: center;
-  }
-
-  .verTudo {
-    margin-left: 0;
-  }
-}

@@ -6,6 +6,12 @@
   align-items: stretch;
   margin: 32px auto;
   max-width: 1400px;
+
+  @media (max-width: 760px) {
+    gap: 24px;
+    align-items: center;
+    flex-wrap: wrap;
+  }
 }
 
 .card {
@@ -18,6 +24,10 @@
   flex-direction: column;
   cursor: pointer;
   transition: transform 0.25s ease, box-shadow 0.25s ease;
+
+  @media (max-width: 760px) {
+    width: 180px;
+  }
 }
 
 .card:hover,
@@ -33,6 +43,10 @@
   border-top-left-radius: 24px;
   border-top-right-radius: 24px;
   transition: transform 0.3s, box-shadow 0.3s;
+
+  @media (max-width: 760px) {
+    height: 140px;
+  }
 }
 .card:hover .cardImg {
   transform: scale(1.07);

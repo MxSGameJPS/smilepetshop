@@ -6,6 +6,13 @@
   max-width: 1400px;
   margin: 0 auto;
   text-align: center;
+
+  @media (max-width: 760px) {
+    padding: 24px 16px 16px 16px;
+    max-width: 400px;
+    flex-direction: column;
+    align-items: center;
+  }
 }
 
 .avaliacaoHeader {
@@ -13,6 +20,10 @@
   margin-bottom: 24px;
   margin-right: 0;
   text-align: center;
+
+  @media (max-width: 760px) {
+    margin-bottom: 16px;
+  }
 }
 .titulo {
   font-size: 2rem;
@@ -21,26 +32,47 @@
   font-weight: 700;
   margin-bottom: 8px;
   text-align: left;
+
+  @media (max-width: 760px) {
+    font-size: 1.5rem;
+    text-align: center;
+  }
 }
 .stars {
   display: flex;
   align-items: center;
   gap: 2px;
   margin-bottom: 4px;
+
+  @media (max-width: 760px) {
+    justify-content: center;
+  }
 }
 .starFull {
   color: #009ac3;
   font-size: 1.7rem;
+
+  @media (max-width: 760px) {
+    font-size: 1.5rem;
+  }
 }
 .starHalf {
   color: #009ac3;
   font-size: 1.7rem;
   opacity: 0.5;
+
+  @media (max-width: 760px) {
+    font-size: 1.5rem;
+  }
 }
 .baseado {
   color: #222;
   font-size: 1rem;
   margin-bottom: 4px;
+
+  @media (max-width: 760px) {
+    font-size: 0.95rem;
+  }
 }
 .baseado a {
   color: #073b4c;
@@ -55,11 +87,20 @@
   align-items: center;
   gap: 6px;
   margin-bottom: 8px;
+
+  @media (max-width: 760px) {
+    font-size: 1rem;
+    justify-content: center;
+  }
 }
 
 .imagemLogoML {
   width: 200px;
   height: auto;
+
+  @media (max-width: 760px) {
+    width: 150px;
+  }
 }
 
 .avaliacoesGrid {
@@ -67,6 +108,13 @@
   gap: 24px;
   margin-left: 40px;
   margin-top: 16px;
+
+  @media (max-width: 760px) {
+    flex-direction: column;
+    margin-left: 0;
+    gap: 16px;
+    margin-top: 8px;
+  }
 }
 .avaliacaoCard {
   border-radius: 16px;
@@ -77,26 +125,47 @@
   gap: 8px;
   position: relative;
   text-align: left;
+
+  @media (max-width: 760px) {
+    width: 100%;
+    padding: 20px 16px 16px 16px;
+  }
 }
 .tempo {
   color: #6c7a89;
   font-size: 0.95rem;
   margin-bottom: 4px;
+
+  @media (max-width: 760px) {
+    font-size: 0.9rem;
+  }
 }
 .cardTitulo {
   color: #222;
   font-size: 1.1rem;
   font-weight: 700;
   margin-bottom: 4px;
+
+  @media (max-width: 760px) {
+    font-size: 1rem;
+  }
 }
 .cardTexto {
   color: #222;
   font-size: 1rem;
   margin-bottom: 4px;
+
+  @media (max-width: 760px) {
+    font-size: 0.95rem;
+  }
 }
 .autor {
   color: #073b4c;
   font-size: 0.95rem;
   font-weight: 600;
   margin-top: 8px;
+
+  @media (max-width: 760px) {
+    font-size: 0.9rem;
+  }
 }

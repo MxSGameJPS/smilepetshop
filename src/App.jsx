@@ -1,5 +1,5 @@
-import Produtos from "./components/Produtos/produtos";
-import Produto from "./components/Produtos/produto";
+import Produtos from "./components/Produtos/produtos.jsx";
+import Produto from "./components/Produtos/produto.jsx";
 import MarcasTodas from "./components/MarcasTodas/marcastodas";
 import "./App.css";
 import {

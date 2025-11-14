@@ -1,6 +1,5 @@
 .headerMobile {
   width: 100%;
-  max-width: 420px;
   background: #fc6100;
   color: #073b4c;
   position: fixed;
@@ -13,6 +12,7 @@
   display: flex;
   flex-direction: column;
   text-align: center;
+  box-sizing: border-box;
 }
 .topRow {
   display: flex;

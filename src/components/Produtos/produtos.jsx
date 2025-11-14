@@ -3,6 +3,7 @@ import styles from "./produtos.module.css";
 import ProductCard from "../ProductCard/ProductCard";
 import { addToCart } from "../../lib/cart";
 import { useLocation, useNavigate } from "react-router-dom";
+import ProdutosMobileFilter from "./ProdutosMobileFilter/ProdutosMobileFilter.jsx";
 
 const MARCA_CLEAR = "__NONE__";
 
@@ -343,6 +344,32 @@ export default function Produtos() {
   const PAGE_SIZE = 15;
   const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
 
+  // detectar mobile (<=760px) para renderizar o filtro móvel
+  const [isMobile, setIsMobile] = useState(false);
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const mq = window.matchMedia("(max-width:760px)");
+    const onChange = (e) => setIsMobile(e.matches);
+    setIsMobile(mq.matches);
+    if (mq.addEventListener) mq.addEventListener("change", onChange);
+    else mq.addListener(onChange);
+    return () => {
+      if (mq.removeEventListener) mq.removeEventListener("change", onChange);
+      else mq.removeListener(onChange);
+    };
+  }, []);
+
+  const handleClearFilters = () => {
+    setFiltroMarca(MARCA_CLEAR);
+    setFiltroCategoria("");
+    setSelectedCategorias([]);
+    setFiltroPet("");
+    setFiltroOfertas(false);
+    setPrecoMin(priceRangeMin);
+    setPrecoMax(priceRangeMax);
+    navigate("/produtos");
+  };
+
   // resetar visíveis quando o conjunto filtrado mudar (novos filtros / pesquisa)
   // usamos apenas o tamanho do array como dependência para evitar executar
   // a cada render (produtosFiltrados é um novo array por render).
@@ -386,43 +413,34 @@ export default function Produtos() {
             </div>
             {openGrupo.preco && (
               <div className={styles.precoFaixa}>
-                <div className={styles.precoInputs}>
-                  <label className={styles.precoLabelInput}>
-                    Mínimo
-                    <input
-                      type="number"
-                      min={priceRangeMin}
-                      max={priceRangeMax}
-                      value={precoMin}
-                      onChange={(e) =>
-                        setPrecoMin(
-                          Math.max(
-                            Number(e.target.value) || priceRangeMin,
-                            priceRangeMin
-                          )
-                        )
-                      }
-                      className={styles.precoNumber}
-                    />
-                  </label>
-                  <label className={styles.precoLabelInput}>
-                    Máximo
-                    <input
-                      type="number"
-                      min={priceRangeMin}
-                      max={priceRangeMax}
-                      value={precoMax}
-                      onChange={(e) =>
-                        setPrecoMax(
-                          Math.min(
-                            Number(e.target.value) || priceRangeMax,
-                            priceRangeMax
-                          )
-                        )
-                      }
-                      className={styles.precoNumber}
-                    />
-                  </label>
+                <div className={styles.filtroPreco}>
+                  <input
+                    type="range"
+                    min={priceRangeMin}
+                    max={priceRangeMax}
+                    step={1}
+                    value={precoMin}
+                    onChange={(e) => {
+                      const v = Number(e.target.value || priceRangeMin);
+                      // ensure min does not surpass max - 1
+                      const next = Math.min(v, precoMax - 1);
+                      setPrecoMin(next);
+                    }}
+                  />
+
+                  <input
+                    type="range"
+                    min={priceRangeMin}
+                    max={priceRangeMax}
+                    step={1}
+                    value={precoMax}
+                    onChange={(e) => {
+                      const v = Number(e.target.value || priceRangeMax);
+                      // ensure max does not go below min + 1
+                      const next = Math.max(v, precoMin + 1);
+                      setPrecoMax(next);
+                    }}
+                  />
                 </div>
                 <span className={styles.precoLabel}>
                   {formatCurrency(precoMin)} – {formatCurrency(precoMax)}
@@ -572,6 +590,24 @@ export default function Produtos() {
           </div>
           <div className={styles.divisor}></div>
         </aside>
+        {isMobile && (
+          <ProdutosMobileFilter
+            priceRangeMin={priceRangeMin}
+            priceRangeMax={priceRangeMax}
+            precoMin={precoMin}
+            precoMax={precoMax}
+            setPrecoMin={setPrecoMin}
+            setPrecoMax={setPrecoMax}
+            filtroPet={filtroPet}
+            toggleFiltroPetPorNome={toggleFiltroPetPorNome}
+            filtroOfertas={filtroOfertas}
+            setFiltroOfertas={setFiltroOfertas}
+            marcas={marcas}
+            filtroMarca={filtroMarca}
+            toggleMarca={toggleMarca}
+            onClear={handleClearFilters}
+          />
+        )}
         <div className={styles.produtosGrid}>
           {loading ? (
             <div className={styles.noResultsMessage}>Carregando...</div>

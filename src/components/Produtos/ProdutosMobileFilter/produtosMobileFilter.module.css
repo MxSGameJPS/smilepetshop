@@ -1,0 +1,149 @@
+.mobileFilterWrapper {
+  position: relative;
+}
+
+.fabButton {
+  position: fixed;
+  right: 16px;
+  bottom: 90px;
+  background: #fc6100;
+  color: white;
+  border: none;
+  padding: 24px 15px;
+  border-radius: 9999px;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.12);
+  z-index: 1200;
+}
+
+.overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.4);
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  z-index: 1250;
+}
+
+.panel {
+  width: 100%;
+  max-width: 520px;
+  background: #fff;
+  border-top-left-radius: 12px;
+  border-top-right-radius: 12px;
+  padding: 12px;
+  box-shadow: 0 -8px 30px rgba(0, 0, 0, 0.12);
+}
+
+.panelHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+  color: #fc6100;
+}
+
+.closeBtn {
+  background: transparent;
+  border: none;
+  font-size: 18px;
+}
+
+.panelBody {
+  max-height: 60vh;
+  overflow: auto;
+  padding: 8px 0;
+}
+
+.section {
+  margin-bottom: 12px;
+}
+
+.sectionTitle {
+  display: block;
+  font-weight: 600;
+  margin-bottom: 6px;
+  color: #333;
+}
+
+.rangeRow input[type="range"] {
+  width: 100%;
+  margin: 6px 0;
+}
+
+.rangeLabel {
+  font-size: 14px;
+  color: #333;
+}
+
+.petRow {
+  display: flex;
+  gap: 8px;
+}
+
+.petBtn {
+  flex: 1;
+  padding: 8px 10px;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+  background: #fff;
+  color: #333;
+}
+
+.petBtn.active {
+  background: #fc6100;
+  color: #fff;
+  border-color: #fc6100;
+}
+
+.active {
+  background: #fc6100;
+  color: #fff;
+  border-color: #fc6100;
+}
+
+.checkboxLabel {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #333;
+}
+
+.select {
+  width: 100%;
+  padding: 8px;
+  border-radius: 6px;
+  border: 1px solid #ddd;
+    background: #fc6100;
+}
+
+.panelFooter {
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end;
+  margin-top: 8px;
+}
+
+.clearBtn {
+  background: transparent;
+  border: 1px solid #ccc;
+  padding: 8px 12px;
+  border-radius: 6px;
+  color: #333;
+}
+
+.applyBtn {
+  background: #fc6100;
+  color: #fff;
+  border: none;
+  padding: 8px 12px;
+  border-radius: 6px;
+}
+
+/* Esconder componente em telas maiores por segurança (será renderizado só em mobile via JS)
+   mantém a regra de aparição apenas para <=760px */
+@media (min-width: 761px) {
+  .mobileFilterWrapper {
+    display: none;
+  }
+}

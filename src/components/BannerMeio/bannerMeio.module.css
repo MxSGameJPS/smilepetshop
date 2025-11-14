@@ -6,6 +6,11 @@
   align-items: center;
   margin: 32px auto;
   max-width: 1400px;
+
+  @media (max-width: 760px) {
+    margin: 16px auto;
+    max-width: 400px;
+  }
 }
 
 .bannerMeioImg {
@@ -14,4 +19,9 @@
   border-radius: 32px;
   box-shadow: 0 2px 16px rgba(7, 59, 76, 0.1);
   object-fit: cover;
+
+  @media (max-width: 760px) {
+    border-radius: 16px;
+    max-width: 400px;
+  }
 }

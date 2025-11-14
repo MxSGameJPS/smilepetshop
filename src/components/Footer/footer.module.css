@@ -5,6 +5,12 @@
   color: #09344a;
   width: 100%;
   max-width: 1920px;
+
+  @media (max-width: 760px) {
+    padding: 24px 16px 0 16px;
+    text-align: center;
+    max-width: 400px;
+  }
 }
 
 .columnsContainer {
@@ -16,6 +22,11 @@
   width: 100%;
   max-width: 1400px;
   margin: 0 auto;
+  
+  @media (max-width: 760px) {
+    gap: 20px;
+    justify-content: center;
+  }
 }
 
 .columns {
@@ -23,26 +34,49 @@
   gap: 64px;
   flex: 2;
   min-width: 0;
+
+  @media (max-width: 760px) {
+    gap: 32px;
+    flex-direction: column;
+    align-items: center;
+  }
 }
 
 .column {
   min-width: 140px;
+
+  @media (max-width: 760px) {
+    align-items: center;
+    text-align: center;
+  }
 }
 .column h4 {
   font-size: 1.08rem;
   font-weight: 700;
   margin-bottom: 10px;
+
+  @media (max-width: 760px) {
+    font-size: 1rem;
+  }
 }
 .column ul {
   list-style: none;
   padding: 0;
   margin: 0;
   text-align: left;
+
+  @media (max-width: 760px) {
+    text-align: center;
+  }
 }
 .column li {
   font-size: 1rem;
   margin-bottom: 7px;
   color: #09344a;
+
+  @media (max-width: 760px) {
+    font-size: 0.95rem;
+  }
 }
 .column a {
   color: #09344a;
@@ -57,22 +91,42 @@
   display: flex;
   flex-direction: column;
   align-items: flex-end;
+
+  @media (max-width: 760px) {
+    margin-left: 0;
+    align-items: center;
+    text-align: center;
+    max-width: 100px;
+
+  }
 }
 .newsletterContainer h4 {
   font-size: 1.08rem;
   font-weight: 700;
   margin-bottom: 8px;
+
+  @media (max-width: 760px) {
+    font-size: 1rem;
+  }
 }
 .newsletterContainer p {
   font-size: 0.98rem;
   margin-bottom: 16px;
   color: #09344a;
+
+  @media (max-width: 760px) {
+    font-size: 0.95rem;
+  }
 }
 
 .newsletterForm {
   display: flex;
   width: 100%;
   max-width: 350px;
+
+  @media (max-width: 760px) {
+    max-width: 100%;
+  }
 }
 
 .inputEmail {
@@ -84,6 +138,10 @@
   font-size: 1rem;
   outline: none;
   min-width: 0;
+
+  @media (max-width: 760px) {
+    font-size: 0.95rem;
+  }
 }
 
 .subscribeBtn {
@@ -101,6 +159,12 @@
   transition: background 0.2s;
   min-width: 140px;
   justify-content: center;
+
+  @media (max-width: 760px) {
+    font-size: 0.95rem;
+    padding: 0 20px;
+    min-width: 120px;
+  }
 }
 .subscribeBtn:hover {
   background: #0b4666;
@@ -116,6 +180,11 @@
   text-align: left;
   max-width: 1400px;
   margin: 40px auto 0 auto;
+
+  @media (max-width: 760px) {
+    align-items: center;
+    text-align: center;
+  }
 }
 
 .socialIcons {
@@ -127,6 +196,11 @@
   max-width: 1400px;
   align-items: flex-start;
   text-align: left;
+
+  @media (max-width: 760px) {
+    justify-content: center;
+    gap: 24px;
+  }
 }
 .socialIcons a {
   color: #09344a;
@@ -144,24 +218,12 @@
   justify-content: flex-start;
   margin-bottom: 24px;
   width: 65%;
-}
-@media (max-width: 900px) {
-  .columnsContainer {
+
+  @media (max-width: 760px) {
     flex-direction: column;
     align-items: center;
-    gap: 32px;
-  }
-  .columns {
-    gap: 32px;
-    flex-wrap: wrap;
-    justify-content: center;
-  }
-  .newsletterContainer {
-    margin-left: 0;
-    align-items: center;
-    max-width: 100%;
-  }
-  .newsletterForm {
-    max-width: 100%;
+    gap: 12px;
+    width: 100%;
   }
 }
+

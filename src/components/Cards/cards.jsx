@@ -21,7 +21,7 @@ const cardsData = [
   {
     title: "Higiene",
     img: "/ImagensRacoes/5.png",
-    description: "Ver produtos de Higiene e Cuidados",
+    description: "Ver Higiene ",
   },
 ];
 

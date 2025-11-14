@@ -3,18 +3,31 @@
   max-width: 1400px;
   margin: 0 auto 30px auto;
   padding: 32px 0 0 0;
+
+  @media (max-width: 760px) {
+    padding: 16px 0 0 0;
+    max-width: 400px;
+  }
 }
 .header {
   display: flex;
   align-items: center;
   justify-content: space-between;
   margin-bottom: 24px;
+
+  @media (max-width: 760px) {
+    margin-bottom: 16px;
+  }
 }
 .titulo {
   font-size: 1.6rem;
   color: #073b4c;
   font-family: "Montserrat", Arial, sans-serif;
   font-weight: 700;
+
+  @media (max-width: 760px) {
+    font-size: 1.25rem;
+  }
 }
 .verTudo {
   color: #073b4c;
@@ -23,12 +36,22 @@
   font-size: 1rem;
   display: flex;
   align-items: center;
+
+  @media (max-width: 760px) {
+    font-size: 0.9rem;
+  }
 }
 .grid {
   display: flex;
   gap: 32px;
   justify-content: flex-start;
   flex-wrap: nowrap;
+
+  @media (max-width: 760px) {
+    gap: 16px;
+    overflow-x: auto;
+    padding-bottom: 8px;
+  }
 }
 .card {
   border-radius: 24px;
@@ -37,11 +60,21 @@
   display: flex;
   align-items: center;
   justify-content: center;
+
+  @media (max-width: 760px) {
+    width: 120px;
+    height: 90px;
+  }
 }
 .logo {
   max-width: 90px;
   max-height: 70px;
   object-fit: contain;
+
+  @media (max-width: 760px) {
+    max-width: 72px;
+    max-height: 56px;
+  }
 }
 
 /* Marquee / infinite scroll for brands */
@@ -50,6 +83,10 @@
   width: 100%;
   box-sizing: border-box;
   padding: 8px 0;
+
+  @media (max-width: 760px) {
+    padding: 4px 0;
+  }
 }
 
 .marqueeTrack {
@@ -58,6 +95,11 @@
   align-items: center;
   /* duplicated content so a full loop is 50% translation */
   animation: marquee 22s linear infinite;
+
+  @media (max-width: 760px) {
+    gap: 18px;
+    animation-duration: 20s;
+  }
 }
 
 .marquee:hover .marqueeTrack {
@@ -80,15 +122,11 @@
   display: flex;
   align-items: center;
   justify-content: center;
+
+  @media (max-width: 760px) {
+    width: 120px;
+    height: 90px;
+  }
 }
 
-@media (max-width: 700px) {
-  .marqueeTrack {
-    gap: 18px;
-    animation-duration: 20s;
-  }
-  .logo {
-    max-width: 72px;
-    max-height: 56px;
-  }
-}
+
