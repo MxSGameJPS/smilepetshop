@@ -51,6 +51,8 @@
 }
 .header {
   width: 100%;
+  max-width: 1920px;
+  margin: 0 auto;
   background: #fc6100;
   border-bottom: 1px solid #f2f2f2;
   display: block;
@@ -86,7 +88,7 @@
   display: grid;
   grid-template-columns: auto 1fr auto auto;
   align-items: center;
-  column-gap: 24px;
+  column-gap: 2px;
   max-width: 1400px;
   padding: 20px 58px;
 }

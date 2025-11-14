@@ -38,13 +38,15 @@ import Header from "./components/Header/header";
 import CarrinhoModal from "./components/carrinhoModal/carrinhoModal";
 import BlingCallback from "./components/Bling/callback";
 import AdmPage from "./components/Administracao/admPage";
+import FaixaCorrida from "./components/faixacorrida/faixaCorrida";
 
 function Home() {
   return (
     <>
-      <FaixaSmileFriday />
+    <FaixaCorrida />
       <Banner />
       <Faixa />
+      <FaixaSmileFriday />
       <Cards />
       <Destaques />
       <BannerMeio />

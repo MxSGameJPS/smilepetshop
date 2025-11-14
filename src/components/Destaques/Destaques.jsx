@@ -1,5 +1,5 @@
 import styles from "./destaques.module.css";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import ProductCard from "../ProductCard/ProductCard";
 import { addToCart } from "../../lib/cart";
 
@@ -8,9 +8,8 @@ export default function Destaques() {
   const [filteredProdutos, setFilteredProdutos] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [carouselIndex, setCarouselIndex] = useState(0);
   const [activePetFilter, setActivePetFilter] = useState("");
-  const CARDS_PER_PAGE = 10; // duas fileiras de 5 cards
+  const fallbackImage = "/imgCards/RacaoSeca.png";
 
   useEffect(() => {
     fetch("https://apismilepet.vercel.app/api/produtos")
@@ -42,9 +41,6 @@ export default function Destaques() {
       });
   }, []);
 
-  if (loading) return <div className={styles.loading}>Carregando...</div>;
-  if (error) return <div className={styles.error}>{error}</div>;
-
   const normalize = (val) =>
     val == null
       ? ""
@@ -56,7 +52,6 @@ export default function Destaques() {
 
   const applyPetFilter = (pet) => {
     setActivePetFilter(pet);
-    setCarouselIndex(0);
     if (!pet) {
       setFilteredProdutos(produtos);
       return;
@@ -84,6 +79,52 @@ export default function Destaques() {
 
   const produtosVisiveis = filteredProdutos;
 
+  const { topLoop, bottomLoop, topDuration, bottomDuration } = useMemo(() => {
+    if (!Array.isArray(produtosVisiveis) || produtosVisiveis.length === 0) {
+      return {
+        topLoop: [],
+        bottomLoop: [],
+        topDuration: "30s",
+        bottomDuration: "30s",
+      };
+    }
+
+    const topBase = produtosVisiveis.filter((_, idx) => idx % 2 === 0);
+    const bottomRaw = produtosVisiveis.filter((_, idx) => idx % 2 === 1);
+    const bottomBase = bottomRaw.length > 0 ? bottomRaw : topBase;
+
+    const extendRow = (list) => {
+      if (!Array.isArray(list) || list.length === 0) return [];
+      const minCopies = list.length < 6 ? Math.ceil(12 / list.length) : 2;
+      const extended = [];
+      for (let i = 0; i < minCopies; i += 1) {
+        extended.push(...list);
+      }
+      return extended;
+    };
+
+    const durationFor = (count) => {
+      const base = count > 0 ? count * 4 : 24;
+      const clamped = Math.max(24, Math.min(base, 60));
+      return `${clamped}s`;
+    };
+
+    return {
+      topLoop: extendRow(topBase),
+      bottomLoop: extendRow(bottomBase),
+      topDuration: durationFor(topBase.length || bottomBase.length),
+      bottomDuration: durationFor(bottomBase.length || topBase.length),
+    };
+  }, [produtosVisiveis]);
+
+  const resolveImage = (produto) =>
+    produto?.imagem_url && produto.imagem_url.trim()
+      ? produto.imagem_url
+      : fallbackImage;
+
+  if (loading) return <div className={styles.loading}>Carregando...</div>;
+  if (error) return <div className={styles.error}>{error}</div>;
+
   return (
     <section className={styles.destaquesSection}>
       <h2 className={styles.titulo}>Experimente, ame</h2>
@@ -110,109 +151,77 @@ export default function Destaques() {
       </div>
       <div className={styles.cardsGrid}>
         {Array.isArray(produtosVisiveis) && produtosVisiveis.length > 0 ? (
-          (() => {
-            const visible = produtosVisiveis.slice(
-              carouselIndex,
-              carouselIndex + CARDS_PER_PAGE
-            );
-            const firstRow = visible.slice(0, 5);
-            const secondRow = visible.slice(5, 10);
-            return (
-              <>
-                <div className={styles.cardsRow}>
-                  {firstRow.map((produto) => (
+          <>
+            <div className={styles.carouselRow}>
+              <div
+                className={styles.track}
+                style={{ "--duration": topDuration }}
+              >
+                {topLoop.map((produto, index) => (
+                  <div
+                    className={styles.cardWrapper}
+                    key={`${produto?.id ?? "sem-id"}-top-${index}`}
+                  >
                     <ProductCard
-                      key={produto.id}
-                      image={
-                        produto.imagem_url && produto.imagem_url.trim()
-                          ? produto.imagem_url
-                          : "/imgCards/RacaoSeca.png"
-                      }
-                      title={produto.nome}
-                      price={produto.preco}
-                      priceOld={produto.precoOld}
-                      promocao={produto.promocao}
-                      priceSubscriber={produto.precoAssinante}
-                      productId={produto.id}
+                      image={resolveImage(produto)}
+                      title={produto?.nome}
+                      price={produto?.preco}
+                      priceOld={produto?.precoOld}
+                      promocao={produto?.promocao}
+                      priceSubscriber={produto?.precoAssinante}
+                      productId={produto?.id}
                       onAdd={() =>
                         addToCart({
-                          id: produto.id,
-                          nome: produto.nome,
+                          id: produto?.id,
+                          nome: produto?.nome,
                           quantidade: 1,
-                          precoUnit: produto.preco,
-                          imagem_url:
-                            produto.imagem_url && produto.imagem_url.trim()
-                              ? produto.imagem_url
-                              : "/imgCards/RacaoSeca.png",
+                          precoUnit: produto?.preco,
+                          imagem_url: resolveImage(produto),
                         })
                       }
                     />
-                  ))}
-                </div>
-                <div className={styles.cardsRow}>
-                  {secondRow.map((produto) => (
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div className={`${styles.carouselRow} ${styles.bottomRow}`}>
+              <div
+                className={`${styles.track} ${styles.reverse}`}
+                style={{ "--duration": bottomDuration }}
+              >
+                {bottomLoop.map((produto, index) => (
+                  <div
+                    className={styles.cardWrapper}
+                    key={`${produto?.id ?? "sem-id"}-bottom-${index}`}
+                  >
                     <ProductCard
-                      key={produto.id}
-                      image={
-                        produto.imagem_url && produto.imagem_url.trim()
-                          ? produto.imagem_url
-                          : "/imgCards/RacaoSeca.png"
-                      }
-                      title={produto.nome}
-                      price={produto.preco}
-                      priceOld={produto.precoOld}
-                      promocao={produto.promocao}
-                      priceSubscriber={produto.precoAssinante}
-                      productId={produto.id}
+                      image={resolveImage(produto)}
+                      title={produto?.nome}
+                      price={produto?.preco}
+                      priceOld={produto?.precoOld}
+                      promocao={produto?.promocao}
+                      priceSubscriber={produto?.precoAssinante}
+                      productId={produto?.id}
                       onAdd={() =>
                         addToCart({
-                          id: produto.id,
-                          nome: produto.nome,
+                          id: produto?.id,
+                          nome: produto?.nome,
                           quantidade: 1,
-                          precoUnit: produto.preco,
-                          imagem_url:
-                            produto.imagem_url && produto.imagem_url.trim()
-                              ? produto.imagem_url
-                              : "/imgCards/RacaoSeca.png",
+                          precoUnit: produto?.preco,
+                          imagem_url: resolveImage(produto),
                         })
                       }
                     />
-                  ))}
-                </div>
-              </>
-            );
-          })()
+                  </div>
+                ))}
+              </div>
+            </div>
+          </>
         ) : (
           <div className={styles.loading}>Nenhum produto encontrado.</div>
         )}
       </div>
-      {produtosVisiveis.length > CARDS_PER_PAGE && (
-        <div className={styles.carouselNav}>
-          <button
-            className={styles.carouselBtn}
-            onClick={() =>
-              setCarouselIndex((i) => Math.max(i - CARDS_PER_PAGE, 0))
-            }
-            disabled={carouselIndex === 0}
-          >
-            ◀
-          </button>
-          <button
-            className={styles.carouselBtn}
-            onClick={() =>
-              setCarouselIndex((i) =>
-                Math.min(
-                  i + CARDS_PER_PAGE,
-                  produtosVisiveis.length - CARDS_PER_PAGE
-                )
-              )
-            }
-            disabled={carouselIndex + CARDS_PER_PAGE >= produtosVisiveis.length}
-          >
-            ▶
-          </button>
-        </div>
-      )}
     </section>
   );
 }

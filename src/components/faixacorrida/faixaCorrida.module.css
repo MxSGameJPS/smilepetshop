@@ -1,0 +1,65 @@
+/* Faixa laranja/preto em degrade, animação marquee infinita */
+.faixaSmileFriday {
+  width: 100vw;
+  min-width: 100vw;
+  background: linear-gradient(90deg, #fc6100 0%, #111 100%);
+  overflow: hidden;
+  height: 54px;
+  display: flex;
+  align-items: center;
+  position: relative;
+  z-index: 2;
+  margin-top: 160px;
+
+}
+
+.marqueeWrapper {
+  width: 100vw;
+  overflow: hidden;
+  height: 54px;
+  display: flex;
+  align-items: center;
+}
+
+.marqueeContent {
+  display: flex;
+  align-items: center;
+  gap: 48px;
+  font-size: 1.35rem;
+  font-weight: 900;
+  color: #fff;
+  white-space: nowrap;
+  animation: marquee 160s linear infinite;
+}
+
+@keyframes marquee {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-50%);
+  }
+}
+
+.frase {
+  color: #fff;
+  padding: 0 12px;
+  border-radius: 8px;
+  font-weight: 900;
+  letter-spacing: 1px;
+}
+.oferta {
+  color: #ffffff;
+  padding: 0 12px;
+  border-radius: 8px;
+  font-weight: 900;
+  margin: 0 8px;
+}
+.icone {
+  color: #fc6100;
+  font-size: 1.5em;
+  margin: 0 8px;
+  vertical-align: middle;
+  display: inline-flex;
+  align-items: center;
+}

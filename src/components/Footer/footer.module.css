@@ -3,7 +3,8 @@
   padding: 40px 0 0 0;
   font-family: inherit;
   color: #09344a;
-  width: 100vw;
+  width: 100%;
+  max-width: 1920px;
 }
 
 .columnsContainer {
