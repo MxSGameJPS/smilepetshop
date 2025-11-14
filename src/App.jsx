@@ -29,6 +29,7 @@ import Atacado from "./components/Atacado/atacado";
 import LoginAtacado from "./components/Atacado/loginAtacado/loginAtacado";
 import CadastroAtacado from "./components/Atacado/cadastroAtacado/cadastroAtacado";
 import FaixaSmileFriday from "./components/faixaSmileFriday/faixaSmileFriday";
+import HomeTemporaria from "./components/homeTemporaria/homeTemporaria.jsx";
 import WhatsAppFloating from "./components/WhatsAppFloating/WhatsAppFloating";
 import ScrollToTop from "./components/ScrollToTop/ScrollToTop";
 import Usuario from "./components/Usuario/usuario";
@@ -66,10 +67,24 @@ function HeaderConditional() {
   // hide the global header on the ofertas page and on adm area
   if (
     location &&
-    (location.pathname === "/ofertas" || location.pathname.startsWith("/adm"))
+    (location.pathname === "/ofertas" ||
+      location.pathname.startsWith("/adm") ||
+      location.pathname === "/")
   )
     return null;
   return <Header />;
+}
+
+function FooterConditional() {
+  const location = useLocation();
+  if (location && location.pathname === "/") return null;
+  return <Footer />;
+}
+
+function CarrinhoModalConditional() {
+  const location = useLocation();
+  if (location && location.pathname === "/") return null;
+  return <CarrinhoModal />;
 }
 
 function App() {
@@ -79,13 +94,15 @@ function App() {
       <div className="appContent">
         <main className="mainContent">
           <Routes>
-            <Route path="/" element={<Home />} />
+            <Route path="/" element={<HomeTemporaria />} />
+            <Route path="/home" element={<Home />} />
             <Route path="/contato" element={<Contato />} />
             <Route path="/envio" element={<Envio />} />
             <Route path="/devolucoes" element={<Devolucoes />} />
             <Route path="/faq" element={<Faq />} />
             <Route path="/marcas" element={<MarcasTodas />} />
             <Route path="/ofertas" element={<Ofertas />} />
+            <Route path="/embreve" element={<HomeTemporaria />} />
             <Route path="/produtos" element={<Produtos />} />
             <Route path="/produtos/:id" element={<Produto />} />
             <Route path="/carrinho" element={<Carrinho />} />
@@ -105,8 +122,8 @@ function App() {
           </Routes>
         </main>
       </div>
-      <Footer />
-      <CarrinhoModal />
+      <FooterConditional />
+      <CarrinhoModalConditional />
     </Router>
   );
 }
