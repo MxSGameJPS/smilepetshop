@@ -226,7 +226,8 @@ export default function FaixaSmileFriday() {
         className={styles.content}
         onClick={(e) => {
           // se o clique não veio de dentro de um card, navegar para /ofertas
-          const card = e.target.closest && e.target.closest('article[role="button"]');
+          const card =
+            e.target.closest && e.target.closest('article[role="button"]');
           if (!card) handleNavigate("/ofertas");
         }}
       >
@@ -241,7 +242,8 @@ export default function FaixaSmileFriday() {
           onClick={(e) => {
             // se o clique não veio de dentro de um card (article[role="button"]),
             // considerar que o usuário clicou no background e navegar para /ofertas
-            const card = e.target.closest && e.target.closest('article[role="button"]');
+            const card =
+              e.target.closest && e.target.closest('article[role="button"]');
             if (!card) handleNavigate("/ofertas");
           }}
         >
