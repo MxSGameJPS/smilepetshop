@@ -39,6 +39,8 @@ export default function Checkout() {
   const [form, setForm] = useState(() => ({ ...EMPTY_FORM }));
   const [step, setStep] = useState("personal");
   const [cartItems, setCartItems] = useState(() => getCart() || []);
+  const [shippingNumeric, setShippingNumeric] = useState(0);
+  const [shippingLabel, setShippingLabel] = useState("");
 
   // helper: map various user shapes to our form fields (shared)
   const mapUserToForm = (u) => ({
@@ -301,7 +303,20 @@ export default function Checkout() {
 
   // subscribe to cart changes (custom events and storage fallback)
   useEffect(() => {
-    const reload = () => setCartItems(getCart() || []);
+    const reload = () => {
+      setCartItems(getCart() || []);
+      // sincronizar frete salvo pelo carrinho
+      try {
+        const s = localStorage.getItem("smilepet_shipping");
+        const sl = localStorage.getItem("smilepet_shipping_label");
+        const n = s != null ? Number(s) : NaN;
+        setShippingNumeric(Number.isFinite(n) ? n : 0);
+        setShippingLabel(sl || "");
+      } catch {
+        setShippingNumeric(0);
+        setShippingLabel("");
+      }
+    };
 
     // common custom event names (project used a custom event to broadcast cart updates)
     window.addEventListener("smilepet_cart_update", reload);
@@ -310,9 +325,21 @@ export default function Checkout() {
 
     // storage event (cross-tab) - when localStorage smilepet_cart changes
     const onStorage = (e) => {
-      if (e.key === "smilepet_cart") reload();
+      if (
+        e.key === "smilepet_cart" ||
+        e.key === "smilepet_shipping" ||
+        e.key === "smilepet_shipping_label"
+      )
+        reload();
     };
     window.addEventListener("storage", onStorage);
+
+    // sincronizar imediatamente ao montar
+    try {
+      reload();
+    } catch {
+      /* ignore */
+    }
 
     return () => {
       window.removeEventListener("smilepet_cart_update", reload);
@@ -897,7 +924,7 @@ export default function Checkout() {
                           <div className={styles.itemName}>{name}</div>
                           {(it.variant || it.variante) && (
                             <div className={styles.itemVariant}>
-                              {it.variant || it.variante}
+                              {/* {it.variant || it.variante} */}
                             </div>
                           )}
                         </div>
@@ -916,9 +943,17 @@ export default function Checkout() {
                   </div>
                 )}
               </div>
+              <div className={styles.summaryRow}>
+                <span>Frete</span>
+                <span>
+                  {shippingLabel ? shippingLabel : formatPrice(shippingNumeric)}
+                </span>
+              </div>
               <div className={styles.summaryTotal}>
                 <span>Total</span>
-                <span>{formatPrice(summaryTotal)}</span>
+                <span>
+                  {formatPrice(summaryTotal + (Number(shippingNumeric) || 0))}
+                </span>
               </div>
             </div>
           </aside>

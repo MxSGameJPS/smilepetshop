@@ -35,6 +35,16 @@
   font-size: 1.05rem;
   color: #073b4c;
 }
+
+.summaryRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 0;
+  border-bottom: 1px dashed #f0f0f0;
+  color: #073b4c;
+}
+
 .boxContent {
   color: #666;
   font-size: 0.95rem;

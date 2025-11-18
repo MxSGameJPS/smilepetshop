@@ -26,6 +26,7 @@ export default function Carrinho() {
   const [shippingCost, setShippingCost] = useState(0);
   const [shippingMsg, setShippingMsg] = useState("");
   const [shippingLoading, setShippingLoading] = useState(false);
+  const [shippingLabel, setShippingLabel] = useState("");
   const [sugestoes, setSugestoes] = useState([]);
   const [carregandoSugestoes, setCarregandoSugestoes] = useState(true);
   const [erroSugestoes, setErroSugestoes] = useState("");
@@ -149,6 +150,7 @@ export default function Carrinho() {
 
     setShippingLoading(true);
     setShippingMsg("Calculando frete...");
+    setShippingLabel("");
 
     try {
       const productsPayload = cart.map((it, idx) => {
@@ -189,6 +191,12 @@ export default function Carrinho() {
       }
 
       const options = await res.json();
+      // normalizar formato: backend pode retornar { ok: true, result: [...] }
+      const optionsData = Array.isArray(options)
+        ? options
+        : Array.isArray(options?.result)
+        ? options.result
+        : options;
       // escolher a opção de menor custo quando possível
       const priceKeys = [
         "price",
@@ -198,47 +206,158 @@ export default function Carrinho() {
         "total",
         "cost",
         "preco",
+        "shipping_price",
+        "shipping",
+        "fare",
+        "valor_frete",
       ];
-      const extractPrice = (opt) => {
-        if (!opt || typeof opt !== "object") return NaN;
-        for (const k of priceKeys) {
-          const v = opt[k];
-          if (typeof v === "number") return v;
-          if (typeof v === "string") {
-            const n = Number(
-              String(v)
-                .replace(/[^0-9.,-]/g, "")
-                .replace(/,/g, ".")
-            );
-            if (!Number.isNaN(n)) return n;
+
+      const toNumber = (v) => {
+        if (v === null || v === undefined) return NaN;
+        if (typeof v === "number") return v;
+        if (typeof v === "string") {
+          const n = Number(
+            String(v)
+              .replace(/[^0-9.,-]/g, "")
+              .replace(/,/g, ".")
+          );
+          return Number.isNaN(n) ? NaN : n;
+        }
+        return NaN;
+      };
+
+      const deepFindNumber = (obj, depth = 3) => {
+        if (depth < 0 || obj == null) return NaN;
+        const n = toNumber(obj);
+        if (!Number.isNaN(n)) return n;
+        if (typeof obj === "object") {
+          if (Array.isArray(obj)) {
+            for (const el of obj) {
+              const found = deepFindNumber(el, depth - 1);
+              if (!Number.isNaN(found)) return found;
+            }
+          } else {
+            for (const key of Object.keys(obj)) {
+              const found = deepFindNumber(obj[key], depth - 1);
+              if (!Number.isNaN(found)) return found;
+            }
           }
         }
-        // tentar campos aninhados
-        if (opt?.price?.amount) return Number(opt.price.amount);
-        if (opt?.value?.amount) return Number(opt.value.amount);
+        return NaN;
+      };
+
+      const extractPrice = (opt) => {
+        if (!opt) return NaN;
+        // checar chaves diretas preferenciais
+        for (const k of priceKeys) {
+          if (Object.prototype.hasOwnProperty.call(opt, k)) {
+            const candidate = opt[k];
+            const n = toNumber(candidate);
+            if (!Number.isNaN(n)) return n;
+            // se candidate for objeto/array, procurar dentro
+            const deep = deepFindNumber(candidate, 2);
+            if (!Number.isNaN(deep)) return deep;
+          }
+        }
+
+        // checar campos comuns aninhados
+        const nestedCandidates = [
+          opt.price,
+          opt.value,
+          opt.total,
+          opt.cost,
+          opt.shipping,
+        ];
+        for (const c of nestedCandidates) {
+          const n = deepFindNumber(c, 3);
+          if (!Number.isNaN(n)) return n;
+        }
+
+        // varredura recursiva rápida para qualquer número em até 3 níveis
+        const any = deepFindNumber(opt, 3);
+        if (!Number.isNaN(any)) return any;
         return NaN;
       };
 
       let chosen = NaN;
-      if (Array.isArray(options) && options.length) {
-        const prices = options.map((o) => ({ opt: o, p: extractPrice(o) }));
-        const valid = prices.filter((x) => Number.isFinite(x.p));
-        if (valid.length) {
-          valid.sort((a, b) => a.p - b.p);
-          chosen = valid[0].p;
-          setShippingCost(chosen);
-          setShippingMsg(`Frete calculado: ${moeda(chosen)}`);
+      if (Array.isArray(optionsData) && optionsData.length) {
+        // Preferir a opção com name === 'PAC' quando presente
+        const pacOption = optionsData.find((o) => {
+          try {
+            return String(o?.name || "").toLowerCase() === "pac";
+          } catch {
+            return false;
+          }
+        });
+
+        if (pacOption) {
+          // Priorizar campo `price` diretamente quando disponível
+          let p = NaN;
+          let raw = undefined;
+          if (Object.prototype.hasOwnProperty.call(pacOption, "price")) {
+            raw = pacOption.price;
+            const n = toNumber(raw);
+            if (Number.isFinite(n)) p = n;
+            else if (raw && typeof raw === "object") {
+              const deep = deepFindNumber(raw, 2);
+              if (Number.isFinite(deep)) p = deep;
+            }
+          }
+          // fallback para outras chaves já tratadas por extractPrice
+          if (!Number.isFinite(p)) p = extractPrice(pacOption);
+
+          // definir label (mostrar o campo `price` cru quando não for numérico)
+          if (raw !== undefined) {
+            const parsed = toNumber(raw);
+            if (Number.isFinite(parsed)) {
+              setShippingLabel(moeda(parsed));
+            } else {
+              setShippingLabel(String(raw));
+            }
+          } else if (Number.isFinite(p)) {
+            setShippingLabel(moeda(p));
+          }
+
+          if (Number.isFinite(p)) {
+            chosen = p;
+            setShippingCost(chosen);
+            setShippingMsg(`Frete calculado: ${moeda(chosen)}`);
+          } else {
+            // PAC existe mas não tem preço detectável
+            setShippingMsg(
+              "Opções de frete recebidas (PAC sem preço). Verifique na finalização."
+            );
+          }
         } else {
-          // não há preço detectável — mostrar resumo da primeira opção
-          setShippingMsg(
-            "Opções de frete recebidas. Verifique na finalização."
-          );
+          // fallback: escolher a opção de menor custo
+          const prices = optionsData.map((o) => ({
+            opt: o,
+            p: extractPrice(o),
+          }));
+          const valid = prices.filter((x) => Number.isFinite(x.p));
+          if (valid.length) {
+            valid.sort((a, b) => a.p - b.p);
+            chosen = valid[0].p;
+            setShippingCost(chosen);
+            setShippingLabel(moeda(chosen));
+            setShippingMsg(`Frete calculado: ${moeda(chosen)}`);
+          } else {
+            // não há preço detectável — mostrar resumo da primeira opção
+            setShippingMsg(
+              "Opções de frete recebidas. Verifique na finalização."
+            );
+          }
         }
-      } else if (options && typeof options === "object") {
-        const p = extractPrice(options);
+      } else if (
+        optionsData &&
+        typeof optionsData === "object" &&
+        !Array.isArray(optionsData)
+      ) {
+        const p = extractPrice(optionsData);
         if (Number.isFinite(p)) {
           chosen = p;
           setShippingCost(chosen);
+          setShippingLabel(moeda(chosen));
           setShippingMsg(`Frete calculado: ${moeda(chosen)}`);
         } else {
           setShippingMsg(
@@ -254,6 +373,27 @@ export default function Carrinho() {
           localStorage.setItem("smilepet_shipping", String(chosen));
         } catch (err) {
           console.warn("Could not persist shipping to localStorage", err);
+        }
+        try {
+          // notify other components in same tab to refresh
+          window.dispatchEvent(new Event("smilepet_cart_update"));
+        } catch {
+          /* ignore */
+        }
+      } else if (shippingLabel) {
+        // persistir label bruta caso não exista valor numérico
+        try {
+          localStorage.setItem(
+            "smilepet_shipping_label",
+            String(shippingLabel)
+          );
+        } catch (err) {
+          console.warn("Could not persist shipping label to localStorage", err);
+        }
+        try {
+          window.dispatchEvent(new Event("smilepet_cart_update"));
+        } catch {
+          /* ignore */
         }
       }
     } catch (err) {
@@ -413,7 +553,7 @@ export default function Carrinho() {
             <hr className={styles.sep} />
             <div className={styles.rowBetween}>
               <span>Frete</span>
-              <span>{moeda(shippingCost)}</span>
+              <span>{shippingLabel ? shippingLabel : moeda(shippingCost)}</span>
             </div>
             <hr className={styles.sep} />
             <div className={styles.rowBetweenTotal}>
