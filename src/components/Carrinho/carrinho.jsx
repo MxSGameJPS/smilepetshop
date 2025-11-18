@@ -25,6 +25,7 @@ export default function Carrinho() {
   const [cep, setCep] = useState("");
   const [shippingCost, setShippingCost] = useState(0);
   const [shippingMsg, setShippingMsg] = useState("");
+  const [shippingLoading, setShippingLoading] = useState(false);
   const [sugestoes, setSugestoes] = useState([]);
   const [carregandoSugestoes, setCarregandoSugestoes] = useState(true);
   const [erroSugestoes, setErroSugestoes] = useState("");
@@ -131,25 +132,139 @@ export default function Carrinho() {
     setTimeout(() => setCouponMsg(""), 2500);
   };
 
-  const calculateShipping = (e) => {
-    e.preventDefault();
+  const calculateShipping = async (e) => {
+    e && e.preventDefault();
     const digits = (cep || "").replace(/\D/g, "");
     if (digits.length !== 8) {
       setShippingMsg("CEP inválido. Digite 8 dígitos.");
       setTimeout(() => setShippingMsg(""), 3000);
       return;
     }
-    // Simular cálculo de frete: exemplo fixo baseado no CEP
-    const simulated = 12.5; // R$ 12,50 como exemplo
-    setShippingCost(simulated);
-    setShippingMsg(`Frete calculado: ${moeda(simulated)}`);
-    try {
-      localStorage.setItem("smilepet_shipping", String(simulated));
-    } catch (err) {
-      // ignore localStorage failures
-      console.warn("Could not persist shipping to localStorage", err);
+
+    if (!cart || !cart.length) {
+      setShippingMsg("Carrinho vazio. Adicione produtos para calcular frete.");
+      setTimeout(() => setShippingMsg(""), 3000);
+      return;
     }
-    setTimeout(() => setShippingMsg(""), 4000);
+
+    setShippingLoading(true);
+    setShippingMsg("Calculando frete...");
+
+    try {
+      const productsPayload = cart.map((it, idx) => {
+        return {
+          id: String(it.id || it.sku || `sku-${idx}`),
+          width: Number(it.width) || 10,
+          height: Number(it.height) || 10,
+          length: Number(it.length) || 10,
+          weight: Number(it.weight) || 0.3,
+          insurance_value: Number(it.precoUnit) || 0,
+          quantity: Number(it.quantidade) || 1,
+        };
+      });
+
+      const payload = {
+        to: { postal_code: digits },
+        products: productsPayload,
+      };
+
+      const res = await fetch(
+        "https://apismilepet.vercel.app/api/melhorenvio/quote",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+        }
+      );
+
+      if (!res.ok) {
+        let errBody = {};
+        try {
+          errBody = await res.json();
+        } catch {
+          // ignore
+        }
+        const msg = errBody.message || `Erro na cotação (HTTP ${res.status})`;
+        throw new Error(msg);
+      }
+
+      const options = await res.json();
+      // escolher a opção de menor custo quando possível
+      const priceKeys = [
+        "price",
+        "value",
+        "valor",
+        "amount",
+        "total",
+        "cost",
+        "preco",
+      ];
+      const extractPrice = (opt) => {
+        if (!opt || typeof opt !== "object") return NaN;
+        for (const k of priceKeys) {
+          const v = opt[k];
+          if (typeof v === "number") return v;
+          if (typeof v === "string") {
+            const n = Number(
+              String(v)
+                .replace(/[^0-9.,-]/g, "")
+                .replace(/,/g, ".")
+            );
+            if (!Number.isNaN(n)) return n;
+          }
+        }
+        // tentar campos aninhados
+        if (opt?.price?.amount) return Number(opt.price.amount);
+        if (opt?.value?.amount) return Number(opt.value.amount);
+        return NaN;
+      };
+
+      let chosen = NaN;
+      if (Array.isArray(options) && options.length) {
+        const prices = options.map((o) => ({ opt: o, p: extractPrice(o) }));
+        const valid = prices.filter((x) => Number.isFinite(x.p));
+        if (valid.length) {
+          valid.sort((a, b) => a.p - b.p);
+          chosen = valid[0].p;
+          setShippingCost(chosen);
+          setShippingMsg(`Frete calculado: ${moeda(chosen)}`);
+        } else {
+          // não há preço detectável — mostrar resumo da primeira opção
+          setShippingMsg(
+            "Opções de frete recebidas. Verifique na finalização."
+          );
+        }
+      } else if (options && typeof options === "object") {
+        const p = extractPrice(options);
+        if (Number.isFinite(p)) {
+          chosen = p;
+          setShippingCost(chosen);
+          setShippingMsg(`Frete calculado: ${moeda(chosen)}`);
+        } else {
+          setShippingMsg(
+            "Opções de frete recebidas. Verifique na finalização."
+          );
+        }
+      } else {
+        setShippingMsg("Nenhuma opção de frete disponível.");
+      }
+
+      if (Number.isFinite(chosen)) {
+        try {
+          localStorage.setItem("smilepet_shipping", String(chosen));
+        } catch (err) {
+          console.warn("Could not persist shipping to localStorage", err);
+        }
+      }
+    } catch (err) {
+      console.error("Erro ao calcular frete:", err);
+      setShippingMsg(err.message || "Erro ao calcular frete");
+      setShippingCost(0);
+    } finally {
+      setShippingLoading(false);
+      // limpar mensagem após algum tempo
+      setTimeout(() => setShippingMsg(""), 6000);
+    }
   };
 
   return (
@@ -278,8 +393,12 @@ export default function Carrinho() {
                   onChange={(e) => setCep(e.target.value)}
                   className={styles.cepInput}
                 />
-                <button className={styles.cepBtn} onClick={calculateShipping}>
-                  Calcular frete
+                <button
+                  className={styles.cepBtn}
+                  onClick={calculateShipping}
+                  disabled={shippingLoading}
+                >
+                  {shippingLoading ? "Calculando..." : "Calcular frete"}
                 </button>
               </div>
               {shippingMsg && (
