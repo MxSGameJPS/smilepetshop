@@ -23,14 +23,6 @@ const EMPTY_FORM = {
   email: "",
   shipDifferent: false,
   notes: "",
-  paymentMethod: "",
-  cardNumber: "",
-  installments: 1,
-  cardName: "",
-  cardMonth: "",
-  cardYear: "",
-  cardCvv: "",
-  cardCpf: "",
 };
 
 export default function Checkout() {
@@ -435,65 +427,51 @@ export default function Checkout() {
     setStep("payment");
   };
 
-  const handlePaymentMethod = (method) =>
-    setForm((f) => ({ ...f, paymentMethod: method }));
-  const handleCardChange = (e) =>
-    setForm((f) => ({ ...f, [e.target.name]: e.target.value }));
 
-  const performPayment = async () => {
-    alert("Compra finalizada");
-    try {
-      await handleSubmit({ preventDefault: () => {} });
-    } catch (e) {
-      void e;
-    }
-  };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    const ENDPOINT =
-      "https://apismilepet.vercel.app/api/checkout/billing/create";
+  const handleFinalizeCheckout = async () => {
+    // URL da API que criamos no passo 1
+    // Se você salvou em pages/api/checkout/payment.js, a URL é essa:
+    const ENDPOINT_MP = "https://apismilepet.vercel.app/api/checkout/payment";
+
+    // (Opcional) Você pode manter sua chamada original para "billing/create" antes
+    // para salvar o pedido no seu banco de dados como "Pendente"
+
     try {
+      // Prepara o payload com TUDO que o backend precisa
       const payload = {
-        first_name: form.firstName,
-        last_name: form.lastName,
-        cpf: form.cpf,
-        company: form.company,
-        address1: form.address1,
-        numero: form.numero,
-        address2: form.address2,
-        city: form.city,
-        state: form.state,
-        postal: form.postal,
-        phone: form.phone,
-        email: form.email,
-        ship_different: !!form.shipDifferent,
-        notes: form.notes,
+        user: {
+          firstName: form.firstName,
+          lastName: form.lastName,
+          email: form.email,
+          cpf: form.cpf,
+          phone: form.phone,
+          address1: form.address1,
+          numero: form.numero,
+          postal: form.postal,
+        },
+        items: cartItems, // Envia os itens do carrinho
+        shippingCost: shippingNumeric, // Envia o custo do frete
+        // external_reference: "ID_DO_SEU_PEDIDO_AQUI" // Se você salvou o pedido antes
       };
 
-      const resp = await fetch(ENDPOINT, {
+      const resp = await fetch(ENDPOINT_MP, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
       });
-      const data = await resp.json().catch(() => ({}));
-      if (!resp.ok) {
-        console.error("Erro ao enviar checkout:", data);
-        alert("Erro ao enviar dados. Tente novamente mais tarde.");
-        return;
+
+      const data = await resp.json();
+
+      if (data.url) {
+        // AQUI ACONTECE A MÁGICA: Redireciona o usuário para o Mercado Pago
+        window.location.href = data.url;
+      } else {
+        alert("Erro ao gerar link de pagamento.");
       }
-      try {
-        localStorage.setItem("smilepet_checkout_billing", JSON.stringify(form));
-        if (typeof form.email === "string" && form.email.trim()) {
-          localStorage.setItem(EMAIL_STORAGE_KEY, form.email.trim());
-        }
-      } catch (err) {
-        console.warn("localStorage save failed", err);
-      }
-      navigate("/pedido", { replace: true });
     } catch (err) {
       console.error(err);
-      alert("Erro de conexão. Verifique se o servidor de API está rodando.");
+      alert("Erro de conexão ao criar pagamento.");
     }
   };
 
@@ -505,7 +483,7 @@ export default function Checkout() {
             <h1 className={styles.title}>Dados pessoais</h1>
 
             {step === "personal" ? (
-              <form className={styles.form} onSubmit={handleSubmit}>
+              <form className={styles.form}>
                 <div className={styles.row2}>
                   <label className={styles.field}>
                     <span>Primeiro nome *</span>
@@ -742,130 +720,6 @@ export default function Checkout() {
                 <div className={styles.box}>
                   <h3>Pagamento</h3>
                   <div className={styles.boxContent}>
-                    <div className={styles.field}>
-                      <span>Método de pagamento</span>
-                      <div className={styles.payMethods}>
-                        <button
-                          type="button"
-                          className={`${styles.payBtn} ${
-                            form.paymentMethod === "PIX" ? styles.active : ""
-                          }`}
-                          onClick={() => handlePaymentMethod("PIX")}
-                        >
-                          PIX
-                        </button>
-                        <button
-                          type="button"
-                          className={`${styles.payBtn} ${
-                            form.paymentMethod === "BOLETO" ? styles.active : ""
-                          }`}
-                          onClick={() => handlePaymentMethod("BOLETO")}
-                        >
-                          BOLETO
-                        </button>
-                        <button
-                          type="button"
-                          className={`${styles.payBtn} ${
-                            form.paymentMethod === "CARD" ? styles.active : ""
-                          }`}
-                          onClick={() => handlePaymentMethod("CARD")}
-                        >
-                          CARTÃO DE CRÉDITO
-                        </button>
-                      </div>
-                    </div>
-
-                    {form.paymentMethod === "CARD" && (
-                      <div>
-                        <label className={styles.field}>
-                          <span>Número do cartão</span>
-                          <input
-                            name="cardNumber"
-                            value={form.cardNumber}
-                            onChange={handleCardChange}
-                          />
-                        </label>
-                        <label className={styles.field}>
-                          <span>Parcelas</span>
-                          <select
-                            name="installments"
-                            value={form.installments}
-                            onChange={handleCardChange}
-                          >
-                            {[1, 2, 3, 4, 5].map((n) => (
-                              <option key={n} value={n}>
-                                {n}x
-                              </option>
-                            ))}
-                          </select>
-                        </label>
-                        <label className={styles.field}>
-                          <span>Nome impresso no cartão</span>
-                          <input
-                            name="cardName"
-                            value={form.cardName}
-                            onChange={handleCardChange}
-                          />
-                        </label>
-                        <div className={styles.row2}>
-                          <label className={styles.field}>
-                            <span>Mes</span>
-                            <select
-                              name="cardMonth"
-                              value={form.cardMonth}
-                              onChange={handleCardChange}
-                            >
-                              {Array.from({ length: 12 }, (_, i) => i + 1).map(
-                                (m) => (
-                                  <option
-                                    key={m}
-                                    value={String(m).padStart(2, "0")}
-                                  >
-                                    {String(m).padStart(2, "0")}
-                                  </option>
-                                )
-                              )}
-                            </select>
-                          </label>
-                          <label className={styles.field}>
-                            <span>Ano</span>
-                            <select
-                              name="cardYear"
-                              value={form.cardYear}
-                              onChange={handleCardChange}
-                            >
-                              {Array.from(
-                                { length: 11 },
-                                (_, i) => new Date().getFullYear() + i
-                              ).map((y) => (
-                                <option key={y} value={y}>
-                                  {y}
-                                </option>
-                              ))}
-                            </select>
-                          </label>
-                        </div>
-                        <div className={styles.row2}>
-                          <label className={styles.field}>
-                            <span>Codigo de segurança</span>
-                            <input
-                              name="cardCvv"
-                              value={form.cardCvv}
-                              onChange={handleCardChange}
-                            />
-                          </label>
-                          <label className={styles.field}>
-                            <span>CPF do Titular</span>
-                            <input
-                              name="cardCpf"
-                              value={form.cardCpf}
-                              onChange={handleCardChange}
-                            />
-                          </label>
-                        </div>
-                      </div>
-                    )}
-
                     <div className={styles.actions}>
                       <button
                         type="button"
@@ -877,9 +731,9 @@ export default function Checkout() {
                       <button
                         type="button"
                         className={styles.submitBtn}
-                        onClick={performPayment}
+                        onClick={handleFinalizeCheckout} // Alterado aqui
                       >
-                        Efetuar pagamento
+                        Pagar com Mercado Pago
                       </button>
                     </div>
                   </div>
