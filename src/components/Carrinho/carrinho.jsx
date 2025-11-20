@@ -121,6 +121,16 @@ export default function Carrinho() {
   // Total: produtos (subtotal) - cupom + frete (sem VAT)
   const total = subtotal - couponDiscount + (Number(shippingCost) || 0);
 
+  const FRETE_GRATIS_THRESHOLD = 50;
+  const faltaParaFreteGratis = Math.max(
+    0,
+    FRETE_GRATIS_THRESHOLD - subtotal
+  );
+  const progressoFrete = Math.min(
+    100,
+    (subtotal / FRETE_GRATIS_THRESHOLD) * 100
+  );
+
   const applyCoupon = (e) => {
     e.preventDefault();
     if (!coupon) {
@@ -144,7 +154,7 @@ export default function Carrinho() {
       return;
     }
 
-    if (subtotal >= 50) {
+    if (subtotal >= FRETE_GRATIS_THRESHOLD) {
       const freeShippingOption = { name: "Frete Grátis", price: 0 };
       setShippingCost(0);
       setShippingLabel("Frete Grátis");
@@ -364,6 +374,27 @@ export default function Carrinho() {
         </div>
 
         <aside className={styles.right}>
+          <div className={styles.freteGratisCard}>
+            {subtotal < FRETE_GRATIS_THRESHOLD ? (
+              <>
+                <div className={styles.freteGratisTexto}>
+                  Falta <strong>{moeda(faltaParaFreteGratis)}</strong> para ter{" "}
+                  <strong>FRETE GRÁTIS</strong>
+                </div>
+                <div className={styles.freteGratisBarraContainer}>
+                  <div
+                    className={styles.freteGratisBarraProgresso}
+                    style={{ width: `${progressoFrete}%` }}
+                  />
+                </div>
+              </>
+            ) : (
+              <div className={styles.freteGratisParabens}>
+                🎉 Parabéns! Você ganhou <strong>FRETE GRÁTIS</strong>! 🎉
+              </div>
+            )}
+          </div>
+
           <div className={styles.summaryCard}>
             <h2 className={styles.summaryTitle}>Total do carrinho</h2>
             <div className={styles.rowBetween}>
@@ -394,7 +425,7 @@ export default function Carrinho() {
               {shippingMsg && (
                 <div
                   className={
-                    subtotal >= 50
+                    subtotal >= FRETE_GRATIS_THRESHOLD
                       ? styles.shippingMsgSuccess
                       : styles.shippingMsg
                   }
