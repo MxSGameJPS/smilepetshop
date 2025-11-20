@@ -772,8 +772,19 @@ export default function Checkout() {
                       ) || 0;
                     const price = priceRaw > 10000 ? priceRaw / 100 : priceRaw;
                     const lineTotal = qty * price;
+                    const imageUrl =
+                      it.imagem_url ||
+                      it.imagem ||
+                      it.image_url ||
+                      it.image ||
+                      it.picture;
                     return (
                       <div key={idx} className={styles.summaryItem}>
+                        <img
+                          src={imageUrl || "/imgCards/RacaoSeca.png"}
+                          alt={name}
+                          className={styles.summaryThumb}
+                        />
                         <div className={styles.itemLeft}>
                           <div className={styles.itemName}>{name}</div>
                           {(it.variant || it.variante) && (
@@ -796,6 +807,10 @@ export default function Checkout() {
                     Nenhum item selecionado
                   </div>
                 )}
+              </div>
+              <div className={styles.summaryRow}>
+                <span>Subtotal</span>
+                <span>{formatPrice(summaryTotal)}</span>
               </div>
               <div className={styles.summaryRow}>
                 <span>Frete</span>

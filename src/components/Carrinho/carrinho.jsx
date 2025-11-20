@@ -27,6 +27,8 @@ export default function Carrinho() {
   const [shippingMsg, setShippingMsg] = useState("");
   const [shippingLoading, setShippingLoading] = useState(false);
   const [shippingLabel, setShippingLabel] = useState("");
+  const [shippingOptions, setShippingOptions] = useState([]);
+  const [selectedShipping, setSelectedShipping] = useState(null);
   const [sugestoes, setSugestoes] = useState([]);
   const [carregandoSugestoes, setCarregandoSugestoes] = useState(true);
   const [erroSugestoes, setErroSugestoes] = useState("");
@@ -142,6 +144,26 @@ export default function Carrinho() {
       return;
     }
 
+    if (subtotal >= 50) {
+      const freeShippingOption = { name: "Frete Grátis", price: 0 };
+      setShippingCost(0);
+      setShippingLabel("Frete Grátis");
+      setShippingMsg("Você ganhou frete grátis!");
+      setShippingOptions([]);
+      setSelectedShipping(freeShippingOption);
+      try {
+        localStorage.setItem("smilepet_shipping", "0");
+        localStorage.setItem("smilepet_shipping_label", "Frete Grátis");
+        localStorage.setItem(
+          "smilepet_shipping_option",
+          JSON.stringify(freeShippingOption)
+        );
+      } catch (e) {
+        void e;
+      }
+      return;
+    }
+
     if (!cart || !cart.length) {
       setShippingMsg("Carrinho vazio. Adicione produtos para calcular frete.");
       setTimeout(() => setShippingMsg(""), 3000);
@@ -151,6 +173,9 @@ export default function Carrinho() {
     setShippingLoading(true);
     setShippingMsg("Calculando frete...");
     setShippingLabel("");
+    setShippingOptions([]);
+    setSelectedShipping(null);
+    setShippingCost(0);
 
     try {
       const productsPayload = cart.map((it, idx) => {
@@ -191,210 +216,21 @@ export default function Carrinho() {
       }
 
       const options = await res.json();
-      // normalizar formato: backend pode retornar { ok: true, result: [...] }
       const optionsData = Array.isArray(options)
         ? options
         : Array.isArray(options?.result)
         ? options.result
-        : options;
-      // escolher a opção de menor custo quando possível
-      const priceKeys = [
-        "price",
-        "value",
-        "valor",
-        "amount",
-        "total",
-        "cost",
-        "preco",
-        "shipping_price",
-        "shipping",
-        "fare",
-        "valor_frete",
-      ];
+        : [];
 
-      const toNumber = (v) => {
-        if (v === null || v === undefined) return NaN;
-        if (typeof v === "number") return v;
-        if (typeof v === "string") {
-          const n = Number(
-            String(v)
-              .replace(/[^0-9.,-]/g, "")
-              .replace(/,/g, ".")
-          );
-          return Number.isNaN(n) ? NaN : n;
-        }
-        return NaN;
-      };
+      const validOptions = optionsData.filter(
+        (opt) => opt.price && !opt.error
+      );
 
-      const deepFindNumber = (obj, depth = 3) => {
-        if (depth < 0 || obj == null) return NaN;
-        const n = toNumber(obj);
-        if (!Number.isNaN(n)) return n;
-        if (typeof obj === "object") {
-          if (Array.isArray(obj)) {
-            for (const el of obj) {
-              const found = deepFindNumber(el, depth - 1);
-              if (!Number.isNaN(found)) return found;
-            }
-          } else {
-            for (const key of Object.keys(obj)) {
-              const found = deepFindNumber(obj[key], depth - 1);
-              if (!Number.isNaN(found)) return found;
-            }
-          }
-        }
-        return NaN;
-      };
-
-      const extractPrice = (opt) => {
-        if (!opt) return NaN;
-        // checar chaves diretas preferenciais
-        for (const k of priceKeys) {
-          if (Object.prototype.hasOwnProperty.call(opt, k)) {
-            const candidate = opt[k];
-            const n = toNumber(candidate);
-            if (!Number.isNaN(n)) return n;
-            // se candidate for objeto/array, procurar dentro
-            const deep = deepFindNumber(candidate, 2);
-            if (!Number.isNaN(deep)) return deep;
-          }
-        }
-
-        // checar campos comuns aninhados
-        const nestedCandidates = [
-          opt.price,
-          opt.value,
-          opt.total,
-          opt.cost,
-          opt.shipping,
-        ];
-        for (const c of nestedCandidates) {
-          const n = deepFindNumber(c, 3);
-          if (!Number.isNaN(n)) return n;
-        }
-
-        // varredura recursiva rápida para qualquer número em até 3 níveis
-        const any = deepFindNumber(opt, 3);
-        if (!Number.isNaN(any)) return any;
-        return NaN;
-      };
-
-      let chosen = NaN;
-      if (Array.isArray(optionsData) && optionsData.length) {
-        // Preferir a opção com name === 'PAC' quando presente
-        const pacOption = optionsData.find((o) => {
-          try {
-            return String(o?.name || "").toLowerCase() === "pac";
-          } catch {
-            return false;
-          }
-        });
-
-        if (pacOption) {
-          // Priorizar campo `price` diretamente quando disponível
-          let p = NaN;
-          let raw = undefined;
-          if (Object.prototype.hasOwnProperty.call(pacOption, "price")) {
-            raw = pacOption.price;
-            const n = toNumber(raw);
-            if (Number.isFinite(n)) p = n;
-            else if (raw && typeof raw === "object") {
-              const deep = deepFindNumber(raw, 2);
-              if (Number.isFinite(deep)) p = deep;
-            }
-          }
-          // fallback para outras chaves já tratadas por extractPrice
-          if (!Number.isFinite(p)) p = extractPrice(pacOption);
-
-          // definir label (mostrar o campo `price` cru quando não for numérico)
-          if (raw !== undefined) {
-            const parsed = toNumber(raw);
-            if (Number.isFinite(parsed)) {
-              setShippingLabel(moeda(parsed));
-            } else {
-              setShippingLabel(String(raw));
-            }
-          } else if (Number.isFinite(p)) {
-            setShippingLabel(moeda(p));
-          }
-
-          if (Number.isFinite(p)) {
-            chosen = p;
-            setShippingCost(chosen);
-            setShippingMsg(`Frete calculado: ${moeda(chosen)}`);
-          } else {
-            // PAC existe mas não tem preço detectável
-            setShippingMsg(
-              "Opções de frete recebidas (PAC sem preço). Verifique na finalização."
-            );
-          }
-        } else {
-          // fallback: escolher a opção de menor custo
-          const prices = optionsData.map((o) => ({
-            opt: o,
-            p: extractPrice(o),
-          }));
-          const valid = prices.filter((x) => Number.isFinite(x.p));
-          if (valid.length) {
-            valid.sort((a, b) => a.p - b.p);
-            chosen = valid[0].p;
-            setShippingCost(chosen);
-            setShippingLabel(moeda(chosen));
-            setShippingMsg(`Frete calculado: ${moeda(chosen)}`);
-          } else {
-            // não há preço detectável — mostrar resumo da primeira opção
-            setShippingMsg(
-              "Opções de frete recebidas. Verifique na finalização."
-            );
-          }
-        }
-      } else if (
-        optionsData &&
-        typeof optionsData === "object" &&
-        !Array.isArray(optionsData)
-      ) {
-        const p = extractPrice(optionsData);
-        if (Number.isFinite(p)) {
-          chosen = p;
-          setShippingCost(chosen);
-          setShippingLabel(moeda(chosen));
-          setShippingMsg(`Frete calculado: ${moeda(chosen)}`);
-        } else {
-          setShippingMsg(
-            "Opções de frete recebidas. Verifique na finalização."
-          );
-        }
+      if (validOptions.length > 0) {
+        setShippingOptions(validOptions);
+        setShippingMsg("Escolha uma opção de frete abaixo.");
       } else {
-        setShippingMsg("Nenhuma opção de frete disponível.");
-      }
-
-      if (Number.isFinite(chosen)) {
-        try {
-          localStorage.setItem("smilepet_shipping", String(chosen));
-        } catch (err) {
-          console.warn("Could not persist shipping to localStorage", err);
-        }
-        try {
-          // notify other components in same tab to refresh
-          window.dispatchEvent(new Event("smilepet_cart_update"));
-        } catch {
-          /* ignore */
-        }
-      } else if (shippingLabel) {
-        // persistir label bruta caso não exista valor numérico
-        try {
-          localStorage.setItem(
-            "smilepet_shipping_label",
-            String(shippingLabel)
-          );
-        } catch (err) {
-          console.warn("Could not persist shipping label to localStorage", err);
-        }
-        try {
-          window.dispatchEvent(new Event("smilepet_cart_update"));
-        } catch {
-          /* ignore */
-        }
+        setShippingMsg("Nenhuma opção de frete disponível para este CEP.");
       }
     } catch (err) {
       console.error("Erro ao calcular frete:", err);
@@ -402,8 +238,22 @@ export default function Carrinho() {
       setShippingCost(0);
     } finally {
       setShippingLoading(false);
-      // limpar mensagem após algum tempo
       setTimeout(() => setShippingMsg(""), 6000);
+    }
+  };
+
+  const handleShippingSelection = (option) => {
+    setSelectedShipping(option);
+    const price = Number(option.price) || 0;
+    const label = moeda(price);
+    setShippingCost(price);
+    setShippingLabel(label);
+    setShippingMsg(`Frete ${option.name} selecionado.`);
+    try {
+      localStorage.setItem("smilepet_shipping", String(price));
+      localStorage.setItem("smilepet_shipping_label", label);
+    } catch (e) {
+      console.warn("Falha ao salvar frete no localStorage", e);
     }
   };
 
@@ -542,12 +392,47 @@ export default function Carrinho() {
                 </button>
               </div>
               {shippingMsg && (
-                <div className={styles.shippingMsg}>{shippingMsg}</div>
+                <div
+                  className={
+                    subtotal >= 50
+                      ? styles.shippingMsgSuccess
+                      : styles.shippingMsg
+                  }
+                >
+                  {shippingMsg}
+                </div>
               )}
-              <div className={styles.shippingInfo}>
-                As opções de envio serão atualizadas durante a finalização da
-                compra.
-              </div>
+
+              {shippingOptions.length > 0 && (
+                <div className={styles.shippingOptionsContainer}>
+                  {shippingOptions.map((option) => (
+                    <label
+                      key={option.id}
+                      className={styles.shippingOption}
+                      htmlFor={`shipping-option-${option.id}`}
+                    >
+                      <input
+                        type="radio"
+                        id={`shipping-option-${option.id}`}
+                        name="shippingOption"
+                        value={option.id}
+                        checked={selectedShipping?.id === option.id}
+                        onChange={() => handleShippingSelection(option)}
+                        className={styles.shippingRadio}
+                      />
+                      <img
+                        src={option.company.picture}
+                        alt={option.company.name}
+                        className={styles.shippingCompanyLogo}
+                      />
+                      <span className={styles.shippingName}>{option.name}</span>
+                      <span className={styles.shippingPrice}>
+                        {moeda(option.price)}
+                      </span>
+                    </label>
+                  ))}
+                </div>
+              )}
             </div>
 
             <hr className={styles.sep} />
