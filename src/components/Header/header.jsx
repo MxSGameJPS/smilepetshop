@@ -762,7 +762,7 @@ export default function Header() {
                             )
                           )}
                         </div>
-                        <div className={styles.submenuRight}>
+                        {/* <div className={styles.submenuRight}>
                           <div className={styles.submenuBrandsTitle}>
                             Marcas
                           </div>
@@ -786,7 +786,7 @@ export default function Header() {
                               ))}
                             </ul>
                           )}
-                        </div>
+                        </div> */}
                       </div>
                     )}
                   </li>
@@ -826,7 +826,7 @@ export default function Header() {
                             </div>
                           ))}
                         </div>
-                        <div className={styles.submenuRight}>
+                        {/* <div className={styles.submenuRight}>
                           <div className={styles.submenuBrandsTitle}>
                             Marcas
                           </div>
@@ -850,7 +850,7 @@ export default function Header() {
                               ))}
                             </ul>
                           )}
-                        </div>
+                        </div> */}
                       </div>
                     )}
                   </li>
