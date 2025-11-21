@@ -103,9 +103,9 @@
   display: flex;
   align-items: stretch;
   gap: 24px;
-  animation-name: scrollLeft;
+  animation-name: scrollRight;
   animation-timing-function: linear;
-  animation-duration: var(--duration, 32s);
+  animation-duration: var(--duration, 10s);
   animation-iteration-count: infinite;
   will-change: transform;
 
@@ -118,9 +118,9 @@
   animation-play-state: paused;
 }
 
-.reverse {
+/* .reverse {
   animation-direction: reverse;
-}
+} */
 
 .cardWrapper {
   flex: 0 0 auto;
@@ -132,12 +132,12 @@
   padding-bottom: 8px;
 }
 
-@keyframes scrollLeft {
+@keyframes scrollRight {
   from {
     transform: translateX(0);
   }
   to {
-    transform: translateX(-50%);
+    transform: translateX(-100%);
   }
 }
 
