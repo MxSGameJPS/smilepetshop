@@ -341,7 +341,7 @@ export default function Produtos() {
   });
 
   // paginação incremental: mostrar aos poucos
-  const PAGE_SIZE = 15;
+  const PAGE_SIZE = 30;
   const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
 
   // detectar mobile (<=760px) para renderizar o filtro móvel
