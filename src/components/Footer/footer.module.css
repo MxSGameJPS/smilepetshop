@@ -3,13 +3,18 @@
   padding: 40px 0 0 0;
   font-family: inherit;
   color: #09344a;
-  width: 100%;
-  max-width: 1920px;
+  /* make footer span the full viewport width even when it's inside a centered container */
+  width: 100vw;
+  box-sizing: border-box;
+  margin-left: calc(50% - 50vw);
+  margin-right: calc(50% - 50vw);
+  max-width: none;
+  position: relative;
 
   @media (max-width: 760px) {
     padding: 24px 16px 0 16px;
     text-align: center;
-    max-width: 400px;
+    max-width: none;
   }
 }
 
@@ -22,7 +27,7 @@
   width: 100%;
   max-width: 1400px;
   margin: 0 auto;
-  
+
   @media (max-width: 760px) {
     gap: 20px;
     justify-content: center;
@@ -97,7 +102,6 @@
     align-items: center;
     text-align: center;
     max-width: 100px;
-
   }
 }
 .newsletterContainer h4 {
@@ -226,4 +230,3 @@
     width: 100%;
   }
 }
-

@@ -95,12 +95,13 @@
   background: #fff;
   border-radius: 16px;
   box-shadow: 0 2px 12px rgba(9, 52, 74, 0.07);
-  padding: 24px 18px 18px 18px;
+  padding: 20px 14px 14px 14px;
   display: flex;
   flex-direction: column;
   align-items: center;
   position: relative;
-  min-height: 340px;
+  /* remove forced large min-height so rows compact naturally */
+  min-height: 0;
   max-width: 260px;
   margin: 0 auto;
 }
@@ -128,7 +129,6 @@
 .produtosContainer {
   display: flex;
   flex-direction: column;
-  max-width: 1900px;
   margin-top: 170px;
 
   @media (max-width: 760px) {
@@ -269,7 +269,6 @@
   margin-bottom: 0;
   display: flex;
   flex-direction: column;
-
 }
 .filtroHeader {
   display: flex;
@@ -344,10 +343,8 @@
 .produtosSection {
   display: flex;
   margin: 0 auto;
-  min-height: 100vh;
   background: #fff;
   padding: 8px 0 0 0;
-  max-width: 1600px;
   width: 100%;
 
   @media (max-width: 760px) {
@@ -401,13 +398,25 @@
 .produtosSection .produtosGrid {
   flex: 1;
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-  gap: 32px;
-  padding: 32px 48px;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  flex-wrap: wrap;
+  gap: 0px; /* ainda menor para fileiras mais próximas */
+  column-gap: 0px;
+  padding: 24px 40px;
+  max-width: 1400px;
+  margin: 0 auto;
+  justify-content: center;
+  align-items: start;
 
+  @media (max-width: 1200px) {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+  @media (max-width: 1000px) {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
   @media (max-width: 760px) {
     padding: 16px 24px;
-    gap: 20px;
+    gap: 6px;
     display: flex;
     flex-wrap: wrap;
     justify-content: center;
@@ -440,11 +449,14 @@
   background: #f7f8f8;
   border-radius: 16px;
   box-shadow: 0 2px 12px rgba(9, 52, 74, 0.07);
-  padding: 24px 18px;
+  padding: 18px 16px;
   display: flex;
   flex-direction: column;
   align-items: center;
   transition: box-shadow 0.2s;
+  /* make sure each card doesn't stretch and aligns to its content height */
+  align-self: start;
+  min-height: 0;
 }
 .produtosSection .produtoCard:hover {
   box-shadow: 0 4px 24px rgba(9, 52, 74, 0.12);
@@ -469,23 +481,30 @@
   font-weight: 600;
 }
 
-
-
 /* Ver mais button */
 .verMaisWrapper {
   grid-column: 1 / -1;
   display: flex;
   justify-content: center;
-  padding: 18px 0 40px;
+  align-items: center;
+  padding: 12px 0 24px; /* reduce vertical spacing around the button */
 }
 .verMaisBtn {
   background: #fc6100;
   color: #fff;
   border: none;
-  padding: 12px 20px;
-  border-radius: 10px;
+  display: inline-block;
+  padding: 12px 28px;
+  border-radius: 12px;
   font-weight: 700;
   cursor: pointer;
+  line-height: 1.1;
+  min-width: 140px;
+  height: auto;
+  text-align: center;
+}
+.verMaisBtn:hover {
+  background: #ff7f3f;
 }
 .verMaisBtn:hover {
   background: #ff7f3f;
