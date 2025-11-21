@@ -3,7 +3,7 @@ import styles from "./whatsappFloating.module.css";
 import { FaWhatsapp } from "react-icons/fa";
 
 export default function WhatsAppFloating({
-  phone = "5511999999999",
+  phone = "552139552133",
   message = "Olá! Preciso de ajuda.",
 }) {
   const safePhone = String(phone).replace(/[^0-9+]/g, "");

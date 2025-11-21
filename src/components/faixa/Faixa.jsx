@@ -5,6 +5,7 @@ import {
   FaStar,
   FaPhoneAlt,
   FaCommentDots,
+  FaWhatsapp,
 } from "react-icons/fa";
 
 export default function Faixa() {
@@ -36,11 +37,11 @@ export default function Faixa() {
           </div>
         </div>
         <div className={styles.item}>
-          <FaPhoneAlt className={styles.icon} />
+          <FaWhatsapp className={styles.icon} />
           <div>
-            <span>Ligue para nós das 09:00 às 16:00h</span>
+            <span>Entre em contato pelo WhatsApp</span>
             <br />
-            <span>(21)99999-9999</span>
+            <span>(21) 3955-2133</span>
           </div>
         </div>
         <div className={styles.item}>
