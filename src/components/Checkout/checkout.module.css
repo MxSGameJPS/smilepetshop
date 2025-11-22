@@ -29,11 +29,37 @@
   border-radius: 10px;
   padding: 14px;
   box-shadow: 0 2px 8px rgba(7, 59, 76, 0.04);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
 }
 .box h3 {
   margin: 0 0 8px 0;
   font-size: 1.05rem;
   color: #073b4c;
+}
+
+.shippingOption {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.shippingOption input {
+  margin: 0;
+  cursor: pointer;
+  background: transparent !important;
+  border-radius: 9999px;
+}
+
+.shippingImage {
+  width: 40px;
+  height: 40px;
+  object-fit: contain;
 }
 
 .summaryRow {

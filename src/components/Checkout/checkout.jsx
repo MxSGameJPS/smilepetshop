@@ -32,6 +32,10 @@ export default function Checkout() {
   const [step, setStep] = useState("personal");
   const [cartItems, setCartItems] = useState(() => getCart() || []);
   const [shippingNumeric, setShippingNumeric] = useState(0);
+  const [shippingOptions, setShippingOptions] = useState([]);
+  const [selectedShipping, setSelectedShipping] = useState(null);
+  const [isCalculatingShipping, setIsCalculatingShipping] = useState(false);
+
   const [shippingLabel, setShippingLabel] = useState("");
 
   // helper: map various user shapes to our form fields (shared)
@@ -425,15 +429,119 @@ export default function Checkout() {
       return;
     }
     setStep("payment");
+    try {
+      localStorage.setItem("smilepet_checkout_billing", JSON.stringify(form));
+    } catch (e) {
+      void e;
+    }
+  };
+
+  const calculateShipping = async () => {
+    if (!form.postal) {
+      alert("Por favor, informe o CEP para calcular o frete.");
+      return;
+    }
+    setIsCalculatingShipping(true);
+    try {
+      const payload = {
+        from: { postal_code: "21535-030" }, // CEP de origem fixo
+        to: { postal_code: form.postal },
+        products: cartItems.map((item) => ({
+          id: item.id,
+          weight: item.weight || 0.1, // Usar peso do item ou um padrão
+          width: item.width || 11,
+          height: item.height || 2,
+          length: item.length || 16,
+          quantity: Number(item.quantidade ?? item.quantity ?? 1),
+          insurance_value: Number(item.precoUnit ?? item.price ?? 0),
+        })),
+      };
+
+      const response = await fetch(
+        "https://apismilepet.vercel.app/api/melhorenvio/quote",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(payload),
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error("Falha ao calcular o frete.");
+      }
+
+      const data = await response.json();
+
+      if (data && data.error) {
+        console.error("Erro da API de frete:", data.error);
+        throw new Error(data.error.message || "Erro ao calcular o frete.");
+      }
+
+      let sourceArray = [];
+      if (Array.isArray(data)) {
+        sourceArray = data;
+      } else if (data && Array.isArray(data.result)) {
+        sourceArray = data.result;
+      }
+      let options = sourceArray
+        .filter((option) => option.price)
+        .map((option) => ({
+          id: option.id,
+          name: option.name,
+          price: Number(option.price),
+          label: `${option.name} - Em até ${option.delivery_time} dias úteis`,
+          picture: option.company?.picture || null,
+        }));
+
+      if (summaryTotal > 50) {
+        options.unshift({
+          id: "gratis",
+          name: "Frete Grátis",
+          price: 0,
+          label: "Frete Grátis",
+          picture: null,
+        });
+      }
+      setShippingOptions(options);
+      setStep("shipping");
+    } catch (error) {
+      console.error("Erro ao calcular frete:", error);
+      alert("Não foi possível calcular o frete. Tente novamente.");
+    } finally {
+      setIsCalculatingShipping(false);
+    }
+  };
+
+  const handleSelectShipping = (option) => {
+    setSelectedShipping(option);
+    setShippingNumeric(option.price);
+    setShippingLabel(option.label);
+    try {
+      localStorage.setItem("smilepet_shipping", String(option.price));
+      localStorage.setItem("smilepet_shipping_label", option.label);
+      localStorage.setItem("smilepet_shipping_service_name", option.name);
+      localStorage.setItem("smilepet_shipping_service_id", option.id);
+    } catch (e) {
+      console.error("Falha ao salvar frete no localStorage", e);
+    }
   };
 
   const handleFinalizeCheckout = async () => {
+    if (!selectedShipping) {
+      alert("Por favor, selecione uma opção de frete antes de continuar.");
+      return;
+    }
+
     // URL da API que criamos no passo 1
     // Se você salvou em pages/api/checkout/payment.js, a URL é essa:
     const ENDPOINT_MP = "https://apismilepet.vercel.app/api/checkout/payment";
 
     // (Opcional) Você pode manter sua chamada original para "billing/create" antes
     // para salvar o pedido no seu banco de dados como "Pendente"
+
+    goToPayment();
 
     try {
       // monta lista de itens no formato exigido pelo backend
@@ -778,7 +886,7 @@ export default function Checkout() {
                       <button
                         type="button"
                         className={styles.primaryAction}
-                        onClick={goToPayment}
+                        onClick={calculateShipping}
                       >
                         Ir para o Pagamento
                       </button>
@@ -788,7 +896,7 @@ export default function Checkout() {
               </div>
             )}
 
-            {step === "payment" && (
+            {(step === "shipping" || step === "payment") && (
               <>
                 <div className={styles.deliverySummary}>
                   <div className={styles.deliveryHeader}>
@@ -817,7 +925,65 @@ export default function Checkout() {
                     </div>
                   </div>
                 </div>
+              </>
+            )}
 
+            {step === "shipping" && (
+              <div className={styles.box}>
+                <h3>Opções de Frete</h3>
+                <div className={styles.boxContent}>
+                  {isCalculatingShipping ? (
+                    <div>Calculando frete...</div>
+                  ) : (
+                    shippingOptions.map((opt) => (
+                      <label
+                        key={opt.id}
+                        className={styles.shippingOption}
+                        style={{ backgroundColor: "transparent" }}
+                      >
+                        <input
+                          type="radio"
+                          name="shippingOption"
+                          checked={selectedShipping?.id === opt.id}
+                          onChange={() => handleSelectShipping(opt)}
+                        />
+                        {opt.picture && (
+                          <img
+                            src={opt.picture}
+                            alt={opt.name}
+                            className={styles.shippingImage}
+                            width="50"
+                            height="50"
+                          />
+                        )}
+                        <span>{opt.label}</span>
+                        <span>{formatPrice(opt.price)}</span>
+                      </label>
+                    ))
+                  )}
+                  <div className={styles.deliveryActions}>
+                    <button
+                      type="button"
+                      className={styles.backBtn}
+                      onClick={() => setStep("delivery")}
+                    >
+                      Voltar
+                    </button>
+                    <button
+                      type="button"
+                      className={styles.primaryAction}
+                      onClick={handleFinalizeCheckout}
+                      disabled={!selectedShipping}
+                    >
+                      Ir para o Pagamento
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {step === "payment" && (
+              <>
                 <div className={styles.box}>
                   <h3>Pagamento</h3>
                   <div className={styles.boxContent}>
@@ -825,7 +991,7 @@ export default function Checkout() {
                       <button
                         type="button"
                         className={styles.backBtn}
-                        onClick={() => setStep("delivery")}
+                        onClick={() => setStep("shipping")}
                       >
                         Voltar
                       </button>
