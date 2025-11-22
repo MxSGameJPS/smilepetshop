@@ -656,6 +656,7 @@ export default function Produtos() {
                             quantidade: 1,
                             precoUnit: price,
                             imagem_url: image,
+                            ncm: p?.ncm ?? p?.produto?.ncm ?? null,
                           })
                         }
                       />

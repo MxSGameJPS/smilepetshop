@@ -177,6 +177,7 @@ export default function Destaques() {
                           quantidade: 1,
                           precoUnit: produto?.preco,
                           imagem_url: resolveImage(produto),
+                          ncm: produto?.ncm ?? produto?.produto?.ncm ?? null,
                         })
                       }
                     />
@@ -210,6 +211,7 @@ export default function Destaques() {
                           quantidade: 1,
                           precoUnit: produto?.preco,
                           imagem_url: resolveImage(produto),
+                          ncm: produto?.ncm ?? produto?.produto?.ncm ?? null,
                         })
                       }
                     />

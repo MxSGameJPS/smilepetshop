@@ -500,6 +500,7 @@ export default function Produto() {
             ? Number(mapaPrecos[variante])
             : Number(precoUnitario)) || 0,
         imagem_url: imagens[0] || produto?.imagem_url || null,
+        ncm: produto?.ncm ?? produto?.produto?.ncm ?? null,
       };
       addToCart(item);
       setAddedMsg(true);

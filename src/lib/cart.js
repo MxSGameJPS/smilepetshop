@@ -38,6 +38,8 @@ export function addToCart(item) {
   if (existing) {
     existing.quantidade =
       (Number(existing.quantidade) || 0) + (Number(item.quantidade) || 0);
+    // se o item novo trouxe ncm e o existente não tem, preserve/atualize
+    if (!existing.ncm && item.ncm) existing.ncm = item.ncm;
   } else {
     cart.push({
       id: keyId,
@@ -46,6 +48,8 @@ export function addToCart(item) {
       quantidade: Number(item.quantidade) || 0,
       precoUnit: item.precoUnit != null ? Number(item.precoUnit) : null,
       imagem_url: item.imagem_url || null,
+      // salvar NCM quando disponível (necessário para NF-e)
+      ncm: item.ncm || null,
     });
   }
   saveCart(cart);

@@ -122,10 +122,7 @@ export default function Carrinho() {
   const total = subtotal - couponDiscount + (Number(shippingCost) || 0);
 
   const FRETE_GRATIS_THRESHOLD = 50;
-  const faltaParaFreteGratis = Math.max(
-    0,
-    FRETE_GRATIS_THRESHOLD - subtotal
-  );
+  const faltaParaFreteGratis = Math.max(0, FRETE_GRATIS_THRESHOLD - subtotal);
   const progressoFrete = Math.min(
     100,
     (subtotal / FRETE_GRATIS_THRESHOLD) * 100
@@ -154,25 +151,10 @@ export default function Carrinho() {
       return;
     }
 
-    if (subtotal >= FRETE_GRATIS_THRESHOLD) {
-      const freeShippingOption = { name: "Frete Grátis", price: 0 };
-      setShippingCost(0);
-      setShippingLabel("Frete Grátis");
-      setShippingMsg("Você ganhou frete grátis!");
-      setShippingOptions([]);
-      setSelectedShipping(freeShippingOption);
-      try {
-        localStorage.setItem("smilepet_shipping", "0");
-        localStorage.setItem("smilepet_shipping_label", "Frete Grátis");
-        localStorage.setItem(
-          "smilepet_shipping_option",
-          JSON.stringify(freeShippingOption)
-        );
-      } catch (e) {
-        void e;
-      }
-      return;
-    }
+    // removido branch que aplicava frete grátis antecipadamente.
+    // Agora sempre chamamos a API para obter opções (quando houver produtos),
+    // e apenas após receber as opções decidimos se aplicamos frete grátis
+    // visualmente e qual serviço devemos persistir para envio ao backend.
 
     if (!cart || !cart.length) {
       setShippingMsg("Carrinho vazio. Adicione produtos para calcular frete.");
@@ -232,15 +214,102 @@ export default function Carrinho() {
         ? options.result
         : [];
 
-      const validOptions = optionsData.filter(
-        (opt) => opt.price && !opt.error
-      );
+      const toNumber = (v) => {
+        if (v == null) return NaN;
+        if (typeof v === "number") return v;
+        const s = String(v).replace(/\s/g, "").replace(/[R$]/g, "");
+        const cleaned = s
+          .replace(/\./g, "")
+          .replace(/,/g, ".")
+          .replace(/[^0-9.\-]/g, "");
+        const n = Number(cleaned);
+        return Number.isFinite(n) ? n : NaN;
+      };
 
-      if (validOptions.length > 0) {
-        setShippingOptions(validOptions);
-        setShippingMsg("Escolha uma opção de frete abaixo.");
+      const validOptions = optionsData.filter((opt) => {
+        const p = toNumber(
+          opt.price ?? opt.preco ?? opt.valor ?? opt.total ?? opt.cost
+        );
+        return !opt.error && Number.isFinite(p);
+      });
+
+      // se atingiu o limite de frete grátis, escolher a opção mais barata e
+      // persisti-la (nome/id) para envio ao backend, mas mostrar custo 0 ao usuário
+      if (subtotal >= FRETE_GRATIS_THRESHOLD) {
+        if (validOptions.length > 0) {
+          let cheapest = validOptions[0];
+          let cheapestPrice = toNumber(cheapest.price ?? cheapest.preco ?? 0);
+          for (const opt of validOptions) {
+            const p = toNumber(opt.price ?? opt.preco ?? 0);
+            if (Number.isFinite(p) && p < cheapestPrice) {
+              cheapest = opt;
+              cheapestPrice = p;
+            }
+          }
+
+          const label = "Frete Grátis";
+          setShippingCost(0);
+          setShippingLabel(label);
+          setShippingOptions(validOptions);
+          setSelectedShipping(cheapest);
+          setShippingMsg(
+            "Frete grátis aplicado — opção mais barata selecionada para envio."
+          );
+          try {
+            localStorage.setItem("smilepet_shipping", String(0));
+            localStorage.setItem("smilepet_shipping_label", label);
+            if (cheapest.name)
+              localStorage.setItem(
+                "smilepet_shipping_service_name",
+                String(cheapest.name)
+              );
+            if (cheapest.id !== undefined && cheapest.id !== null)
+              localStorage.setItem(
+                "smilepet_shipping_service_id",
+                String(cheapest.id)
+              );
+            localStorage.setItem(
+              "smilepet_shipping_option",
+              JSON.stringify(cheapest)
+            );
+          } catch (err) {
+            void err;
+          }
+          try {
+            window.dispatchEvent(
+              new CustomEvent("smilepet_cart_update", {
+                detail: { shipping: true },
+              })
+            );
+          } catch (err) {
+            /* ignore */
+          }
+        } else {
+          setShippingMsg(
+            "Frete grátis aplicado, porém nenhuma opção de transporte foi retornada."
+          );
+          setShippingCost(0);
+          setShippingLabel("Frete Grátis");
+          try {
+            localStorage.setItem("smilepet_shipping", String(0));
+            localStorage.setItem("smilepet_shipping_label", "Frete Grátis");
+            localStorage.removeItem("smilepet_shipping_service_name");
+            localStorage.removeItem("smilepet_shipping_service_id");
+            localStorage.setItem(
+              "smilepet_shipping_option",
+              JSON.stringify({ name: "Frete Grátis", price: 0 })
+            );
+          } catch (err) {
+            void err;
+          }
+        }
       } else {
-        setShippingMsg("Nenhuma opção de frete disponível para este CEP.");
+        if (validOptions.length > 0) {
+          setShippingOptions(validOptions);
+          setShippingMsg("Escolha uma opção de frete abaixo.");
+        } else {
+          setShippingMsg("Nenhuma opção de frete disponível para este CEP.");
+        }
       }
     } catch (err) {
       console.error("Erro ao calcular frete:", err);
@@ -262,6 +331,36 @@ export default function Carrinho() {
     try {
       localStorage.setItem("smilepet_shipping", String(price));
       localStorage.setItem("smilepet_shipping_label", label);
+      // salvar também nome e id do serviço para enviar no pagamento
+      try {
+        if (option.name)
+          localStorage.setItem(
+            "smilepet_shipping_service_name",
+            String(option.name)
+          );
+        if (option.id !== undefined && option.id !== null)
+          localStorage.setItem(
+            "smilepet_shipping_service_id",
+            String(option.id)
+          );
+        // keep whole option as fallback
+        localStorage.setItem(
+          "smilepet_shipping_option",
+          JSON.stringify(option)
+        );
+      } catch (err) {
+        void err;
+      }
+      // notificar outras partes do app (same-tab) que o frete foi atualizado
+      try {
+        window.dispatchEvent(
+          new CustomEvent("smilepet_cart_update", {
+            detail: { shipping: true },
+          })
+        );
+      } catch (err) {
+        // ignore
+      }
     } catch (e) {
       console.warn("Falha ao salvar frete no localStorage", e);
     }

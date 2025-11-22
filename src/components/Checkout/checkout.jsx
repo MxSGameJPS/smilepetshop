@@ -427,8 +427,6 @@ export default function Checkout() {
     setStep("payment");
   };
 
-
-
   const handleFinalizeCheckout = async () => {
     // URL da API que criamos no passo 1
     // Se você salvou em pages/api/checkout/payment.js, a URL é essa:
@@ -438,6 +436,107 @@ export default function Checkout() {
     // para salvar o pedido no seu banco de dados como "Pendente"
 
     try {
+      // monta lista de itens no formato exigido pelo backend
+      const normalizedItems = (cartItems || []).map((it) => ({
+        id: it.id ?? it.productId ?? it.sku ?? null,
+        nome: it.nome ?? it.title ?? it.name ?? "",
+        variante: it.variante ?? it.variant ?? null,
+        quantidade: Number(it.quantidade ?? it.quantity ?? it.qty ?? 1) || 1,
+        precoUnit:
+          Number(it.precoUnit ?? it.preco ?? it.price ?? it.unit_price ?? 0) ||
+          0,
+        imagem_url:
+          it.imagem_url || it.imagem || it.image_url || it.image || null,
+        ncm: it.ncm || null,
+      }));
+
+      // Se algum item não tiver NCM, tentar buscar do catálogo remoto
+      const missingNcm = normalizedItems.some((it) => !it.ncm);
+      if (missingNcm) {
+        try {
+          const res = await fetch(
+            "https://apismilepet.vercel.app/api/produtos",
+            {
+              cache: "no-store",
+            }
+          );
+          if (res.ok) {
+            const data = await res.json().catch(() => null);
+            let lista = [];
+            if (Array.isArray(data)) lista = data;
+            else if (Array.isArray(data?.data)) lista = data.data;
+            else if (Array.isArray(data?.produtos)) lista = data.produtos;
+
+            const mapById = new Map();
+            lista.forEach((p) => {
+              const pid = p.id ?? p._id ?? p.uid ?? p.sku ?? null;
+              if (pid) mapById.set(String(pid), p);
+            });
+
+            normalizedItems.forEach((it) => {
+              if (!it.ncm && it.id) {
+                const found = mapById.get(String(it.id));
+                if (found && (found.ncm || found.produto?.ncm))
+                  it.ncm = found.ncm || found.produto.ncm || null;
+              }
+            });
+          }
+        } catch (err) {
+          // se a busca falhar, seguimos sem ncm — backend pode rejeitar, então avisamos
+          console.debug("Falha ao buscar catálogo para NCM:", err);
+        }
+      }
+
+      // buscar dados de frete salvos no localStorage (serviço e id são obrigatórios pelo backend)
+      let savedShippingCost = Number(shippingNumeric || 0) || 0;
+      try {
+        const raw = localStorage.getItem("smilepet_shipping");
+        if (raw != null) {
+          const num = Number(raw);
+          if (Number.isFinite(num)) savedShippingCost = num;
+        }
+      } catch {
+        /* ignore */
+      }
+
+      const shippingServiceName =
+        (function () {
+          try {
+            return (
+              localStorage.getItem("smilepet_shipping_service_name") ||
+              JSON.parse(
+                localStorage.getItem("smilepet_shipping_option") || "null"
+              )?.name ||
+              null
+            );
+          } catch {
+            return null;
+          }
+        })() || null;
+
+      const shippingServiceId =
+        (function () {
+          try {
+            return (
+              localStorage.getItem("smilepet_shipping_service_id") ||
+              JSON.parse(
+                localStorage.getItem("smilepet_shipping_option") || "null"
+              )?.id ||
+              null
+            );
+          } catch {
+            return null;
+          }
+        })() || null;
+
+      if (!shippingServiceName) {
+        // aviso leve ao usuário — backend exige nome do serviço
+        const proceed = window.confirm(
+          "Não foi possível recuperar o serviço de frete selecionado. Deseja continuar e enviar o pedido sem o nome do serviço?"
+        );
+        if (!proceed) return;
+      }
+
       // Prepara o payload com TUDO que o backend precisa
       const payload = {
         user: {
@@ -449,10 +548,13 @@ export default function Checkout() {
           address1: form.address1,
           numero: form.numero,
           postal: form.postal,
+          city: form.city || null,
+          state: form.state || null,
         },
-        items: cartItems, // Envia os itens do carrinho
-        shippingCost: shippingNumeric, // Envia o custo do frete
-        // external_reference: "ID_DO_SEU_PEDIDO_AQUI" // Se você salvou o pedido antes
+        items: normalizedItems,
+        shippingCost: Number(savedShippingCost) || 0,
+        shippingServiceName: shippingServiceName || null,
+        shippingServiceId: shippingServiceId || null,
       };
 
       const resp = await fetch(ENDPOINT_MP, {
@@ -464,7 +566,6 @@ export default function Checkout() {
       const data = await resp.json();
 
       if (data.url) {
-        // AQUI ACONTECE A MÁGICA: Redireciona o usuário para o Mercado Pago
         window.location.href = data.url;
       } else {
         alert("Erro ao gerar link de pagamento.");
