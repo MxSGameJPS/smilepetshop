@@ -12,7 +12,6 @@
   @media (max-width: 760px) {
     max-height: 80px;
     margin: 0px auto 0px auto;
-    max-width: 430px;
     width: 100%;
   }
 }
@@ -51,7 +50,6 @@
 
   @media (max-width: 760px) {
     margin: 0px auto 0px auto;
-    max-width: 430px;
 
   }
 }
@@ -66,7 +64,6 @@
   @media (max-width: 760px) {
     max-height: 280px;
     margin: 0px auto 0px auto;
-    max-width: 430px;
     
   }
 }

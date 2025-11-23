@@ -94,33 +94,29 @@
   }
 }
 
-.carouselRow {
+.carouselRowWrapper {
+  position: relative;
   width: 100%;
-  overflow: hidden;
-}
-
-.track {
   display: flex;
-  align-items: stretch;
+  align-items: center;
+  gap: 12px;
+}
+
+.scrollContainer {
+  display: flex;
   gap: 24px;
-  animation-name: scrollRight;
-  animation-timing-function: linear;
-  animation-duration: var(--duration, 10s);
-  animation-iteration-count: infinite;
-  will-change: transform;
-
-  @media (max-width: 760px) {
-    gap: 16px;
-  }
+  overflow-x: auto;
+  scroll-behavior: smooth;
+  padding: 12px 4px;
+  width: 100%;
+  /* Hide scrollbar for cleaner look */
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE/Edge */
 }
 
-.carouselRow:hover .track {
-  animation-play-state: paused;
+.scrollContainer::-webkit-scrollbar {
+  display: none; /* Chrome/Safari */
 }
-
-/* .reverse {
-  animation-direction: reverse;
-} */
 
 .cardWrapper {
   flex: 0 0 auto;
@@ -128,16 +124,39 @@
   align-items: stretch;
 }
 
-.bottomRow {
-  padding-bottom: 8px;
+.navBtn {
+  background: #fff;
+  border: 1px solid #eee;
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 24px; /* Larger font for text arrows */
+  font-weight: bold;
+  color: #073b4c;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  transition: all 0.2s;
+  flex-shrink: 0;
+  z-index: 10;
+  line-height: 1;
 }
 
-@keyframes scrollRight {
-  from {
-    transform: translateX(0);
+.navBtn:hover {
+  background: #fc6100;
+  color: #fff;
+  border-color: #fc6100;
+  transform: scale(1.1);
+}
+
+@media (max-width: 760px) {
+  .scrollContainer {
+    gap: 16px;
   }
-  to {
-    transform: translateX(-100%);
+  .navBtn {
+    display: none; /* Hide buttons on mobile, use touch scroll */
   }
 }
 

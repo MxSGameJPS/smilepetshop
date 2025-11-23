@@ -1,7 +1,8 @@
 import styles from "./destaques.module.css";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import ProductCard from "../ProductCard/ProductCard";
 import { addToCart } from "../../lib/cart";
+import { FaChevronLeft, FaChevronRight } from "react-icons/fa";
 
 export default function Destaques() {
   const [produtos, setProdutos] = useState([]);
@@ -10,6 +11,9 @@ export default function Destaques() {
   const [error, setError] = useState(null);
   const [activePetFilter, setActivePetFilter] = useState("");
   const fallbackImage = "/imgCards/RacaoSeca.png";
+
+  const topRowRef = useRef(null);
+  const bottomRowRef = useRef(null);
 
   useEffect(() => {
     fetch("https://apismilepet.vercel.app/api/produtos")
@@ -79,48 +83,26 @@ export default function Destaques() {
 
   const produtosVisiveis = filteredProdutos;
 
-  const { topLoop, bottomLoop, topDuration, bottomDuration } = useMemo(() => {
-    if (!Array.isArray(produtosVisiveis) || produtosVisiveis.length === 0) {
-      return {
-        topLoop: [],
-        bottomLoop: [],
-        topDuration: "30s",
-        bottomDuration: "30s",
-      };
-    }
-
-    const topBase = produtosVisiveis.filter((_, idx) => idx % 2 === 0);
-    const bottomRaw = produtosVisiveis.filter((_, idx) => idx % 2 === 1);
-    const bottomBase = bottomRaw.length > 0 ? bottomRaw : topBase;
-
-    const extendRow = (list) => {
-      if (!Array.isArray(list) || list.length === 0) return [];
-      const minCopies = list.length < 6 ? Math.ceil(12 / list.length) : 2;
-      const extended = [];
-      for (let i = 0; i < minCopies; i += 1) {
-        extended.push(...list);
-      }
-      return extended;
-    };
-
-    const durationFor = (count) => {
-      const base = count > 0 ? count * 4 : 24;
-      const clamped = Math.max(24, Math.min(base, 60));
-      return `${clamped}s`;
-    };
-
-    return {
-      topLoop: extendRow(topBase),
-      bottomLoop: extendRow(bottomBase),
-      topDuration: durationFor(topBase.length || bottomBase.length),
-      bottomDuration: durationFor(bottomBase.length || topBase.length),
-    };
-  }, [produtosVisiveis]);
+  // Split products into two rows
+  const topRowProducts = produtosVisiveis.filter((_, idx) => idx % 2 === 0);
+  const bottomRowProducts = produtosVisiveis.filter((_, idx) => idx % 2 === 1);
+  // If bottom row is empty (e.g. only 1 product), just use top row or handle gracefully
+  // If we want to fill space, we can just show what we have.
 
   const resolveImage = (produto) =>
     produto?.imagem_url && produto.imagem_url.trim()
       ? produto.imagem_url
       : fallbackImage;
+
+  const scroll = (ref, direction) => {
+    if (ref.current) {
+      const scrollAmount = 300; // Adjust scroll amount as needed
+      ref.current.scrollBy({
+        left: direction === "left" ? -scrollAmount : scrollAmount,
+        behavior: "smooth",
+      });
+    }
+  };
 
   if (loading) return <div className={styles.loading}>Carregando...</div>;
   if (error) return <div className={styles.error}>{error}</div>;
@@ -152,16 +134,18 @@ export default function Destaques() {
       <div className={styles.cardsGrid}>
         {Array.isArray(produtosVisiveis) && produtosVisiveis.length > 0 ? (
           <>
-            <div className={styles.carouselRow}>
-              <div
-                className={styles.track}
-                style={{ "--duration": topDuration }}
+            {/* Top Row */}
+            <div className={styles.carouselRowWrapper}>
+              <button
+                className={`${styles.navBtn} ${styles.prev}`}
+                onClick={() => scroll(topRowRef, "left")}
+                aria-label="Rolar para esquerda"
               >
-                {topLoop.map((produto, index) => (
-                  <div
-                    className={styles.cardWrapper}
-                    key={`${produto?.id ?? "sem-id"}-top-${index}`}
-                  >
+                &lt;
+              </button>
+              <div className={styles.scrollContainer} ref={topRowRef}>
+                {topRowProducts.map((produto) => (
+                  <div className={styles.cardWrapper} key={produto.id}>
                     <ProductCard
                       image={resolveImage(produto)}
                       title={produto?.nome}
@@ -184,41 +168,59 @@ export default function Destaques() {
                   </div>
                 ))}
               </div>
+              <button
+                className={`${styles.navBtn} ${styles.next}`}
+                onClick={() => scroll(topRowRef, "right")}
+                aria-label="Rolar para direita"
+              >
+                &gt;
+              </button>
             </div>
 
-            <div className={`${styles.carouselRow} ${styles.bottomRow}`}>
-              <div
-                className={`${styles.track} ${styles.reverse}`}
-                style={{ "--duration": bottomDuration }}
-              >
-                {bottomLoop.map((produto, index) => (
-                  <div
-                    className={styles.cardWrapper}
-                    key={`${produto?.id ?? "sem-id"}-bottom-${index}`}
-                  >
-                    <ProductCard
-                      image={resolveImage(produto)}
-                      title={produto?.nome}
-                      price={produto?.preco}
-                      priceOld={produto?.precoOld}
-                      promocao={produto?.promocao}
-                      priceSubscriber={produto?.precoAssinante}
-                      productId={produto?.id}
-                      onAdd={() =>
-                        addToCart({
-                          id: produto?.id,
-                          nome: produto?.nome,
-                          quantidade: 1,
-                          precoUnit: produto?.preco,
-                          imagem_url: resolveImage(produto),
-                          ncm: produto?.ncm ?? produto?.produto?.ncm ?? null,
-                        })
-                      }
-                    />
-                  </div>
-                ))}
+            {/* Bottom Row */}
+            {bottomRowProducts.length > 0 && (
+              <div className={styles.carouselRowWrapper}>
+                <button
+                  className={`${styles.navBtn} ${styles.prev}`}
+                  onClick={() => scroll(bottomRowRef, "left")}
+                  aria-label="Rolar para esquerda"
+                >
+                  &lt;
+                </button>
+                <div className={styles.scrollContainer} ref={bottomRowRef}>
+                  {bottomRowProducts.map((produto) => (
+                    <div className={styles.cardWrapper} key={produto.id}>
+                      <ProductCard
+                        image={resolveImage(produto)}
+                        title={produto?.nome}
+                        price={produto?.preco}
+                        priceOld={produto?.precoOld}
+                        promocao={produto?.promocao}
+                        priceSubscriber={produto?.precoAssinante}
+                        productId={produto?.id}
+                        onAdd={() =>
+                          addToCart({
+                            id: produto?.id,
+                            nome: produto?.nome,
+                            quantidade: 1,
+                            precoUnit: produto?.preco,
+                            imagem_url: resolveImage(produto),
+                            ncm: produto?.ncm ?? produto?.produto?.ncm ?? null,
+                          })
+                        }
+                      />
+                    </div>
+                  ))}
+                </div>
+                <button
+                  className={`${styles.navBtn} ${styles.next}`}
+                  onClick={() => scroll(bottomRowRef, "right")}
+                  aria-label="Rolar para direita"
+                >
+                  &gt;
+                </button>
               </div>
-            </div>
+            )}
           </>
         ) : (
           <div className={styles.loading}>Nenhum produto encontrado.</div>

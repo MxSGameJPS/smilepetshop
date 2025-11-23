@@ -2,6 +2,7 @@
   margin: 0 auto;
   padding: 0;
   text-align: center;
+  overflow-x: hidden;
 }
 
 /* layout helpers to keep footer at bottom */
