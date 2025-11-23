@@ -5,9 +5,11 @@
   background: #ff7a00; /* laranja */
   color: #fff;
   display: flex;
-  justify-content: space-between;
+  justify-content: space-around;
   align-items: center;
   padding: 12px 20px;
+  width: 100%; 
+  min-width: 1900px;
 }
 .welcome {
   font-weight: 600;
