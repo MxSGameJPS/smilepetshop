@@ -5,6 +5,7 @@ import HeaderAdm from "./HeaderADM/headerAdm";
 import PaginaClientes from "./PaginaClientes/paginaCliente";
 import PaginaProdutos from "./PaginaProdutos/paginaProduto";
 import PaginaVendas from "./PaginaVendas/paginaVendas";
+import VendaDetalhes from "./PaginaVendas/VendaDetalhes/vendaDetalhes";
 import AdmHome from "./AdmHome/admHome";
 import ProdutoAdm from "./PaginaProdutos/Produtos/produtoAdm";
 import CadastroProduto from "./PaginaProdutos/Cadastro de Produto/cadastroProduto";
@@ -56,6 +57,7 @@ export default function AdmPage() {
           <Route path="produtos/:id" element={<ProdutoAdm />} />
           <Route path="produtos/:id/editar" element={<ProdutoAdm />} />
           <Route path="vendas" element={<PaginaVendas />} />
+          <Route path="vendas/:id" element={<VendaDetalhes />} />
         </Routes>
       </div>
     </div>

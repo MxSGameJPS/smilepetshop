@@ -1,0 +1,91 @@
+.container {
+  padding: 20px;
+}
+
+.title {
+  font-size: 24px;
+  color: #073b4c;
+  margin-bottom: 20px;
+  font-weight: 700;
+}
+
+.dateGroup {
+  margin-bottom: 30px;
+}
+
+.dateHeader {
+  font-size: 18px;
+  color: #fc6100;
+  margin-bottom: 15px;
+  font-weight: 600;
+  border-bottom: 1px solid #eee;
+  padding-bottom: 8px;
+}
+
+.cardsGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 20px;
+}
+
+.card {
+  background: #fff;
+  border-radius: 8px;
+  padding: 20px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  cursor: pointer;
+  transition: transform 0.2s, box-shadow 0.2s;
+  border: 1px solid #f0f0f0;
+}
+
+.card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  border-color: #fc6100;
+}
+
+.cardHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.orderId {
+  font-size: 14px;
+  color: #888;
+  font-weight: 500;
+}
+
+.status {
+  font-size: 12px;
+  padding: 4px 8px;
+  border-radius: 12px;
+  background: #e0f7fa;
+  color: #006064;
+  font-weight: 600;
+}
+
+.buyerName {
+  font-size: 18px;
+  color: #073b4c;
+  margin-bottom: 8px;
+  font-weight: 600;
+}
+
+.totalValue {
+  font-size: 20px;
+  color: #fc6100;
+  font-weight: 700;
+}
+
+.loading, .error {
+  text-align: center;
+  padding: 40px;
+  font-size: 18px;
+  color: #666;
+}
+
+.error {
+  color: #d32f2f;
+}
