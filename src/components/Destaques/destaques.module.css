@@ -127,14 +127,12 @@
 .navBtn {
   background: #fff;
   border: 1px solid #eee;
-  border-radius: 50%;
-  width: 40px;
-  height: 40px;
+  border-radius: 150%;
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  font-size: 24px; /* Larger font for text arrows */
+  font-size: 14px; /* Larger font for text arrows */
   font-weight: bold;
   color: #073b4c;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
@@ -142,13 +140,22 @@
   flex-shrink: 0;
   z-index: 10;
   line-height: 1;
+  padding: 10px;
+}
+
+.prev {
+  margin-right: 0px;
+}
+
+.next {
+  margin-left: 0px;
 }
 
 .navBtn:hover {
   background: #fc6100;
   color: #fff;
   border-color: #fc6100;
-  transform: scale(1.1);
+  transform: scale(1);
 }
 
 @media (max-width: 760px) {

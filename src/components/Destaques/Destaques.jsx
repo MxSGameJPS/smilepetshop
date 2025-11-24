@@ -3,6 +3,7 @@ import { useEffect, useRef, useState } from "react";
 import ProductCard from "../ProductCard/ProductCard";
 import { addToCart } from "../../lib/cart";
 import { FaChevronLeft, FaChevronRight } from "react-icons/fa";
+import { SlArrowLeft, SlArrowRight } from "react-icons/sl";
 
 export default function Destaques() {
   const [produtos, setProdutos] = useState([]);
@@ -141,7 +142,7 @@ export default function Destaques() {
                 onClick={() => scroll(topRowRef, "left")}
                 aria-label="Rolar para esquerda"
               >
-                &lt;
+                <SlArrowLeft />
               </button>
               <div className={styles.scrollContainer} ref={topRowRef}>
                 {topRowProducts.map((produto) => (
@@ -173,7 +174,7 @@ export default function Destaques() {
                 onClick={() => scroll(topRowRef, "right")}
                 aria-label="Rolar para direita"
               >
-                &gt;
+                <SlArrowRight />
               </button>
             </div>
 
@@ -185,7 +186,7 @@ export default function Destaques() {
                   onClick={() => scroll(bottomRowRef, "left")}
                   aria-label="Rolar para esquerda"
                 >
-                  &lt;
+                  <SlArrowLeft />
                 </button>
                 <div className={styles.scrollContainer} ref={bottomRowRef}>
                   {bottomRowProducts.map((produto) => (
@@ -217,7 +218,7 @@ export default function Destaques() {
                   onClick={() => scroll(bottomRowRef, "right")}
                   aria-label="Rolar para direita"
                 >
-                  &gt;
+                  <SlArrowRight />
                 </button>
               </div>
             )}

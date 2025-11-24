@@ -262,6 +262,7 @@
   padding: 12px;
   min-width: 220px;
   z-index: 60;
+  font-family: CircularXX !important;
 }
 
 .submenuLeft {

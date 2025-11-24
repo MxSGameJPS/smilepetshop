@@ -8,7 +8,7 @@
 
   @media (max-width: 760px) {
     padding: 0 8px;
-    margin: 90px 0 40px 0;
+    margin: -90px 0 40px 0;
 
   }
 }
@@ -101,6 +101,7 @@
 
   @media (max-width: 760px) {
     gap: 10px;
+    animation: scroll 5s linear infinite;
   }
 }
 
