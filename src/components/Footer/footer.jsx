@@ -1,7 +1,7 @@
 import React from "react";
 import styles from "./footer.module.css";
 import { Link } from "react-router-dom";
-import { 
+import {
   FaInstagram,
   FaFacebookF,
   FaTwitter,
@@ -33,8 +33,10 @@ export default function Footer() {
           <div className={styles.column}>
             <h4>SmilePetShop</h4>
             <ul>
-              <li>Sobre nós</li>
-              <li>Cartões-presente</li>
+              <li>
+                <Link to="/sobre-nos">Sobre nós</Link>
+              </li>
+              {/* <li>Cartões-presente</li> */}
             </ul>
           </div>
           <div className={styles.column}>
@@ -42,8 +44,10 @@ export default function Footer() {
             <ul>
               <li>
                 <Link to="/produtos?pet=Cachorro">Cachorro</Link>
-                </li>
-              <li><Link to="/produtos?pet=Gato">Gato</Link></li>
+              </li>
+              <li>
+                <Link to="/produtos?pet=Gato">Gato</Link>
+              </li>
             </ul>
           </div>
           {/* <div className={styles.column}>

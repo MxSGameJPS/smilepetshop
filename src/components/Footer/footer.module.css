@@ -3,18 +3,15 @@
   padding: 40px 0 0 0;
   font-family: inherit;
   color: #09344a;
-  /* make footer span the full viewport width even when it's inside a centered container */
-  width: 100vw;
   box-sizing: border-box;
-  margin-left: calc(50% - 50vw);
-  margin-right: calc(50% - 50vw);
-  max-width: none;
+  width: 100%;
+  max-width: 100%;
+  margin: 0;
   position: relative;
 
   @media (max-width: 760px) {
     padding: 24px 16px 0 16px;
     text-align: center;
-    max-width: none;
   }
 }
 
@@ -31,6 +28,7 @@
   @media (max-width: 760px) {
     gap: 20px;
     justify-content: center;
+    max-width: none;
   }
 }
 
@@ -184,6 +182,7 @@
   text-align: left;
   max-width: 1400px;
   margin: 40px auto 0 auto;
+  width: 100%;
 
   @media (max-width: 760px) {
     align-items: center;
@@ -197,7 +196,6 @@
   gap: 40px;
   font-size: 2.2rem;
   margin-bottom: 8px;
-  max-width: 1400px;
   align-items: flex-start;
   text-align: left;
 

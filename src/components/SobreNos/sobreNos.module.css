@@ -1,0 +1,22 @@
+.sobreNosContainer {
+  width: 100%;
+  max-width: 800px;
+  margin: 140px auto 40px auto;
+  padding: 32px 24px;
+  /* Removido background e border-radius para evitar "corte" visual do footer */
+  box-shadow: 0 2px 16px rgba(0, 0, 0, 0.07);
+  font-family: "Segoe UI", Arial, sans-serif;
+}
+.sobreNosContainer h1 {
+  color: #fc6100;
+  font-size: 2.2rem;
+  margin-bottom: 24px;
+  text-align: center;
+}
+.sobreNosContainer p {
+  color: #444;
+  font-size: 1.15rem;
+  line-height: 1.7;
+  margin-bottom: 18px;
+  text-align: justify;
+}

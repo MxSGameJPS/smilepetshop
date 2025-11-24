@@ -1,4 +1,5 @@
 import Produtos from "./components/Produtos/produtos.jsx";
+import SobreNos from "./components/SobreNos/sobreNos";
 import Produto from "./components/Produtos/produto.jsx";
 import MarcasTodas from "./components/MarcasTodas/marcastodas";
 import "./App.css";
@@ -119,6 +120,7 @@ function App() {
             <Route path="/meus-pedidos" element={<MeusPedidos />} />
             <Route path="/bling/callback" element={<BlingCallback />} />
             <Route path="/adm/*" element={<AdmPage />} />
+            <Route path="/sobre-nos" element={<SobreNos />} />
           </Routes>
         </main>
       </div>

@@ -1,0 +1,91 @@
+/* Versão mobile do banner. Baseado em banner.module.css, com foco em telas pequenas */
+.banner {
+  position: relative;
+  width: 100%;
+  margin: 0px auto 0px auto;
+  box-shadow: none;
+  height: 100%;
+}
+
+.bannerImage {
+  width: 100%;
+  display: block;
+  height: auto;
+  object-fit: cover;
+}
+
+.slides {
+  position: relative;
+  width: 100%;
+  min-height: 300px;
+}
+
+.slide {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  transform: scale(1.02);
+  transition: opacity 400ms ease, transform 400ms ease;
+  z-index: 1;
+  height: 100%;
+}
+
+.slide img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.active {
+  opacity: 1;
+  transform: scale(1);
+  z-index: 2;
+}
+
+.arrow {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  background: rgba(255, 255, 255, 0.8);
+  border-radius: 100%;
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  cursor: pointer;
+  padding: 8px;
+  z-index: 10;
+  color: #000;
+}
+
+.left {
+  left: 8px;
+}
+.right {
+  right: 8px;
+}
+
+.dots {
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+  margin-top: 8px;
+}
+
+.dot {
+  border-radius: 100%;
+  background: rgba(0, 0, 0, 0.6);
+  border: none;
+  padding: 6px;
+}
+.dotActive {
+  background: #d32f2f;
+}
+
+.bannerWrapper {
+  position: relative;
+  width: 100%;
+  margin: 0 0 12px 0;
+  overflow: hidden;
+}
