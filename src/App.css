@@ -73,7 +73,6 @@
   /* imgs fluid by default to avoid overflow */
   .homeWrapper img {
     max-width: 100%;
-    height: auto;
   }
 
 
