@@ -65,7 +65,7 @@
   min-width: 100%;
 
   @media (max-width: 760px) {
-    max-height: 180px;
+    max-height: 100px;
     margin: 0px auto 0px auto;
     
   }
@@ -95,9 +95,9 @@
   color: #000000;
 
   @media (max-width: 760px) {
-    padding: 12px;
-    font-size: 20px;
-    top: 25%;
+    padding: 10px;
+    font-size: 15px;
+    top: 15%;
   }
 }
 
