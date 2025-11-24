@@ -74,6 +74,7 @@ export default function HeaderAdm({ admin }) {
         <Link to="/adm/clientes">Página de Clientes</Link>
         <Link to="/adm/produtos">Página de Produtos</Link>
         <Link to="/adm/vendas">Página de Vendas</Link>
+        <Link to="/adm/relatorios">Página de Relatórios</Link>
       </nav>
     </header>
   );

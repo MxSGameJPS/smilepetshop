@@ -152,6 +152,15 @@ export default function AdmHome() {
             <div className={styles.value}>{counts.promos}</div>
             <div className={styles.label}>Produtos em promoção</div>
           </div>
+
+          <div
+            className={styles.card}
+            {...makeClickable(() => navigate("/adm/relatorios"))}
+            aria-label={`Relatórios`}
+          >
+            <div className={styles.value}>—</div>
+            <div className={styles.label}>Relatórios</div>
+          </div>
         </div>
       )}
     </section>

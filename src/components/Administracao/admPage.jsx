@@ -7,6 +7,9 @@ import PaginaProdutos from "./PaginaProdutos/paginaProduto";
 import PaginaVendas from "./PaginaVendas/paginaVendas";
 import VendaDetalhes from "./PaginaVendas/VendaDetalhes/vendaDetalhes";
 import AdmHome from "./AdmHome/admHome";
+import RelatoriosAdm from "./RelatoriosAdm/relatoriosAdm";
+import RelatorioVendas from "./RelatoriosAdm/relatorioVendas";
+import RelatorioProdutos from "./RelatoriosAdm/relatorioProdutos";
 import ProdutoAdm from "./PaginaProdutos/Produtos/produtoAdm";
 import CadastroProduto from "./PaginaProdutos/Cadastro de Produto/cadastroProduto";
 
@@ -58,6 +61,9 @@ export default function AdmPage() {
           <Route path="produtos/:id/editar" element={<ProdutoAdm />} />
           <Route path="vendas" element={<PaginaVendas />} />
           <Route path="vendas/:id" element={<VendaDetalhes />} />
+          <Route path="relatorios" element={<RelatoriosAdm />} />
+          <Route path="relatorios/vendas" element={<RelatorioVendas />} />
+          <Route path="relatorios/produtos" element={<RelatorioProdutos />} />
         </Routes>
       </div>
     </div>
