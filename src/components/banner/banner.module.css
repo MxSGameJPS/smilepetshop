@@ -10,7 +10,7 @@
   min-height: 320px;
 
   @media (max-width: 760px) {
-    max-height: 50px;
+    max-height: 150px;
     margin: 0px auto 0px auto;
     width: 100%;
   }
@@ -23,7 +23,7 @@
   height: auto;
 
   @media (max-width: 760px) {
-    max-height: 80px;
+    max-height: 150px;
     margin: 0px auto 0px auto;
   }
 }
@@ -36,7 +36,7 @@
   min-height: 420px;
 
   @media (max-width: 760px) {
-    max-height: 80px;
+    max-height: 150px;
     margin: 0px auto 0px auto;
   }
 }
@@ -65,7 +65,7 @@
   min-width: 100%;
 
   @media (max-width: 760px) {
-    max-height: 100px;
+    max-height: 150px;
     margin: 0px auto 0px auto;
     
   }
@@ -97,7 +97,7 @@
   @media (max-width: 760px) {
     padding: 10px;
     font-size: 15px;
-    top: 15%;
+    top: 20%;
   }
 }
 
