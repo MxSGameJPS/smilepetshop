@@ -50,7 +50,7 @@ export default function Banner() {
   }
 
   function handleBannerClick(i) {
-    if (slides[i] === "/banners/banner5.png") {
+    if (slides[i] === "/banners/banner5.png" || slides[i] === "/banners/banner3.png") {
       navigate("/ofertas");
     }
   }
@@ -70,7 +70,7 @@ export default function Banner() {
               aria-hidden={i !== index}
               onClick={() => handleBannerClick(i)}
               style={
-                src === "/banners/banner5.png" ? { cursor: "pointer" } : {}
+                src === "/banners/banner5.png" || src === "/banners/banner3.png" ? { cursor: "pointer" } : {}
               }
             >
               <img

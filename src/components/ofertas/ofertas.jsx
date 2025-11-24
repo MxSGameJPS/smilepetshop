@@ -12,7 +12,7 @@ export default function Ofertas() {
       <main className={styles.content}>
         <HeroOfertas />
         {/* <SobreOfertas /> */}
-        <div className={styles.produtosContainer}>
+        <div id="produtos-ofertas" className={styles.produtosContainer}>
           <ProdutosOfertas />
         </div>
 
