@@ -6,7 +6,7 @@
     <link rel="icon" type="image/webp" href="/logo/produtos.webp" />
     <link rel="icon" type="image/x-icon" href="/logo/produtos.ico" />
     <!-- Fallbacks / apple -->
-    <link rel="apple-touch-icon" href="/logo/produtos.png" />
+    <link rel="apple-touch-icon" href="/logo/produtos.webp" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Smile Pet Shop: Onde a Felicidade do Seu Pet Custa Menos</title>
 
@@ -21,8 +21,9 @@
     />
     <meta name="author" content="Smile Pet Shop" />
     <meta name="robots" content="index, follow" />
-    <link rel="canonical" href="/" />
-    <link rel="alternate" href="/" hreflang="pt-BR" />
+    <!-- Use URL absoluta em produção para evitar que o bundler tente ler diretórios locais -->
+    <link rel="canonical" href="https://smilepetshop.com/" />
+    <link rel="alternate" href="https://smilepetshop.com/" hreflang="pt-BR" />
     <meta name="theme-color" content="#ffffff" />
 
     <!-- Open Graph / Social -->
@@ -34,8 +35,11 @@
       property="og:description"
       content="Loja online de rações e produtos para cães e gatos com marcas confiáveis, preços competitivos e entrega para todo o Brasil."
     />
-    <meta property="og:image" content="/logo/produtos.webp" />
-    <meta property="og:url" content="/" />
+    <meta
+      property="og:image"
+      content="https://smilepetshop.com/logo/produtos.webp"
+    />
+    <meta property="og:url" content="https://smilepetshop.com/" />
     <meta property="og:type" content="website" />
 
     <!-- Twitter card -->
@@ -48,7 +52,10 @@
       name="twitter:description"
       content="Loja online de rações e produtos para cães e gatos com marcas confiáveis, preços competitivos e entrega para todo o Brasil."
     />
-    <meta name="twitter:image" content="/logo/produtos.webp" />
+    <meta
+      name="twitter:image"
+      content="https://smilepetshop.com/logo/produtos.webp"
+    />
 
     <!-- Structured data (JSON-LD) -->
     <script type="application/ld+json">
@@ -56,8 +63,8 @@
         "@context": "https://schema.org",
         "@type": "Organization",
         "name": "Smile Pet Shop",
-        "url": "/",
-        "logo": "/logo/produtos.webp",
+        "url": "https://smilepetshop.com/",
+        "logo": "https://smilepetshop.com/logo/produtos.webp",
         "sameAs": []
       }
     </script>
