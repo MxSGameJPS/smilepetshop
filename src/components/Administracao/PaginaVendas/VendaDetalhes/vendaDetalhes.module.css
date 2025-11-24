@@ -47,7 +47,8 @@
 
 .date {
   color: #666;
-  font-size: 14px;
+  font-size: 16px;
+  font-style: italic;
 }
 
 .section {
