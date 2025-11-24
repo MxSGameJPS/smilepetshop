@@ -27,28 +27,35 @@ export default function VendaDetalhes() {
       });
   }, [id]);
 
-  if (loading) return <div className={styles.loading}>Carregando detalhes...</div>;
+  if (loading)
+    return <div className={styles.loading}>Carregando detalhes...</div>;
   if (error) return <div className={styles.error}>{error}</div>;
   if (!order) return <div className={styles.error}>Venda não encontrada.</div>;
 
   const calculateTotal = (order) => {
     let total = 0;
     const items = order.items_data || order.Items_data;
-    
+
     if (items && Array.isArray(items)) {
       total += items.reduce((acc, item) => {
         const price = Number(item.precoUnit) || 0;
         const qty = Number(item.quantidade) || 1;
-        return acc + (price * qty);
+        return acc + price * qty;
       }, 0);
     } else if (order.itens) {
-       total += order.itens.reduce((acc, item) => acc + (item.quantidade * item.preco_unitario), 0);
+      total += order.itens.reduce(
+        (acc, item) => acc + item.quantidade * item.preco_unitario,
+        0
+      );
     }
-    
+
     if (order.shipping_data) {
-        if (order.shipping_data.cost) total += Number(order.shipping_data.cost) || 0;
-        else if (order.shipping_data.cust) total += Number(order.shipping_data.cust) || 0;
-        else if (order.shipping_data.price) total += Number(order.shipping_data.price) || 0;
+      if (order.shipping_data.cost)
+        total += Number(order.shipping_data.cost) || 0;
+      else if (order.shipping_data.cust)
+        total += Number(order.shipping_data.cust) || 0;
+      else if (order.shipping_data.price)
+        total += Number(order.shipping_data.price) || 0;
     }
 
     if (total === 0 && order.total) return Number(order.total);
@@ -69,41 +76,110 @@ export default function VendaDetalhes() {
 
   const getCustomerName = (order) => {
     if (order.customer_data) {
-        const { firstName, lastName } = order.customer_data;
-        if (firstName || lastName) {
-            return `${firstName || ""} ${lastName || ""}`.trim();
-        }
+      const { firstName, lastName } = order.customer_data;
+      if (firstName || lastName) {
+        return `${firstName || ""} ${lastName || ""}`.trim();
+      }
     }
     return order.usuario_nome || "Cliente não identificado";
   };
-  
+
   const getCustomerEmail = (order) => {
-      if (order.customer_data && order.customer_data.email) return order.customer_data.email;
-      return order.usuario_email || "-";
+    if (order.customer_data && order.customer_data.email)
+      return order.customer_data.email;
+    return order.usuario_email || "-";
+  };
+
+  const getShippingInfo = (order) => {
+    const ship = order.shipping_data || order.shipping || order.freight || null;
+    if (!ship) return { serviceName: "-", cost: 0 };
+    const serviceName =
+      ship.serviceName ||
+      ship.service_name ||
+      ship.nome ||
+      ship.serviceId ||
+      "-";
+    const cost = Number(ship.cost || ship.cust || ship.price || 0) || 0;
+    return { serviceName, cost };
   };
 
   // Determine items list to display
-  const itemsToDisplay = order.items_data || order.Items_data || order.itens || [];
+  const itemsToDisplay =
+    order.items_data || order.Items_data || order.itens || [];
 
   return (
     <div className={styles.container}>
-      <button className={styles.backButton} onClick={() => navigate("/adm/vendas")}>
+      <h3>Detalhes da venda {getCustomerName(order)}</h3>
+      <button
+        className={styles.backButton}
+        onClick={() => navigate("/adm/vendas")}
+      >
         <TiArrowBack /> Voltar
       </button>
 
       <div className={styles.header}>
         <h2 className={styles.title}>Venda #{order.id}</h2>
         <span className={styles.date}>{formatDate(order.created_at)}</span>
+        {/* aplicar classe de cor conforme status */}
+        {(() => {
+          const s = (order.status || "").toString().toLowerCase();
+          let statusClass = styles.status;
+          if (
+            s.includes("cancel") ||
+            s.includes("cancelado") ||
+            s.includes("canceled")
+          ) {
+            statusClass = `${styles.status} ${styles.statusCancelado}`;
+          } else if (
+            s.includes("pend") ||
+            s.includes("pendente") ||
+            s.includes("pending")
+          ) {
+            statusClass = `${styles.status} ${styles.statusPendente}`;
+          } else if (
+            s.includes("paid") ||
+            s.includes("pago") ||
+            s.includes("conclu")
+          ) {
+            statusClass = `${styles.status} ${styles.statusPago}`;
+          }
+          return <p className={statusClass}>{order.status}</p>;
+        })()}
       </div>
 
       <div className={styles.section}>
         <h3>Dados do Cliente</h3>
-        <p><strong>Nome:</strong> {getCustomerName(order)}</p>
-        <p><strong>Email:</strong> {getCustomerEmail(order)}</p>
+        <div className={styles.separador}></div>
+        <p>
+          <strong>Nome:</strong> {getCustomerName(order)}
+        </p>
+        <p>
+          <strong>Email:</strong> {getCustomerEmail(order)}
+        </p>
+      </div>
+
+      <div className={styles.section}>
+        <h3>Entrega</h3>
+        <div className={styles.separador}></div>
+        {(() => {
+          const ship = getShippingInfo(order);
+          return (
+            <>
+              <p>
+                <strong>Tipo de entrega:</strong> {ship.serviceName || "-"}
+              </p>
+              <p>
+                <strong>Custo de entrega:</strong>{" "}
+                {formatCurrency(ship.cost || 0)}
+              </p>
+            </>
+          );
+        })()}
       </div>
 
       <div className={styles.section}>
         <h3>Itens do Pedido</h3>
+        <div className={styles.separador}></div>
         <table className={styles.table}>
           <thead>
             <tr>
@@ -118,8 +194,15 @@ export default function VendaDetalhes() {
               <tr key={idx}>
                 <td>{item.nome || item.produto_nome || "Produto"}</td>
                 <td>{item.quantidade || 1}</td>
-                <td>{formatCurrency(item.precoUnit || item.preco_unitario || 0)}</td>
-                <td>{formatCurrency((item.precoUnit || item.preco_unitario || 0) * (item.quantidade || 1))}</td>
+                <td>
+                  {formatCurrency(item.precoUnit || item.preco_unitario || 0)}
+                </td>
+                <td>
+                  {formatCurrency(
+                    (item.precoUnit || item.preco_unitario || 0) *
+                      (item.quantidade || 1)
+                  )}
+                </td>
               </tr>
             ))}
           </tbody>
@@ -128,7 +211,6 @@ export default function VendaDetalhes() {
 
       <div className={styles.totalSection}>
         <h3>Total: {formatCurrency(calculateTotal(order))}</h3>
-        <p>{order.status}</p>
       </div>
     </div>
   );

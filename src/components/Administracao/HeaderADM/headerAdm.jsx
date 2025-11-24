@@ -70,6 +70,7 @@ export default function HeaderAdm({ admin }) {
         </button>
       </div>
       <nav className={styles.nav}>
+        <Link to="/adm/home">Home</Link>
         <Link to="/adm/clientes">Página de Clientes</Link>
         <Link to="/adm/produtos">Página de Produtos</Link>
         <Link to="/adm/vendas">Página de Vendas</Link>

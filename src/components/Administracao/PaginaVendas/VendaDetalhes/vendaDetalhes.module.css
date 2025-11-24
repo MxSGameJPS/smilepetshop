@@ -4,7 +4,13 @@
   margin: 0 auto;
   background: #fff;
   border-radius: 8px;
-  box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+}
+
+.container h3 {
+  text-align: center;
+  color: #073b4c;
+  margin-bottom: 24px;
 }
 
 .backButton {
@@ -27,7 +33,7 @@
 .header {
   display: flex;
   justify-content: space-between;
-  align-items: center;
+  align-items: flex-start;
   border-bottom: 1px solid #eee;
   padding-bottom: 16px;
   margin-bottom: 24px;
@@ -46,19 +52,25 @@
 
 .section {
   margin-bottom: 32px;
+  text-align: left;
 }
 
 .section h3 {
   font-size: 18px;
   color: #073b4c;
-  margin-bottom: 12px;
+  margin-bottom: 18px;
   border-left: 4px solid #fc6100;
   padding-left: 12px;
+  text-align: left;
 }
 
 .section p {
   margin: 8px 0;
   color: #444;
+}
+
+.separador {
+  border: 1px solid #4c1b077e;
 }
 
 .table {
@@ -67,7 +79,8 @@
   margin-top: 12px;
 }
 
-.table th, .table td {
+.table th,
+.table td {
   text-align: left;
   padding: 12px;
   border-bottom: 1px solid #eee;
@@ -94,7 +107,8 @@
   color: #444;
 }
 
-.loading, .error {
+.loading,
+.error {
   text-align: center;
   padding: 40px;
   font-size: 18px;
@@ -107,4 +121,22 @@
 .tableBody {
   overflow-y: auto;
   color: #444;
+}
+
+.status {
+  margin-top: 8px;
+  font-size: 26px;
+  color: #9c3f00;
+  font-weight: 600;
+}
+
+/* status colors */
+.statusCancelado {
+  color: #d32f2f; /* vermelho */
+}
+.statusPendente {
+  color: #f6b000; /* amarelo/dourado */
+}
+.statusPago {
+  color: #2e7d32; /* verde */
 }
