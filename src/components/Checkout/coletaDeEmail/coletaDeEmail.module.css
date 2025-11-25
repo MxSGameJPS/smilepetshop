@@ -225,3 +225,35 @@
     font-size: 1.6rem;
   }
 }
+
+/* pequenas utilidades para o fluxo de escolha */
+.choiceRow {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  align-items: center;
+}
+
+.choiceRow p {
+  margin: 0;
+  color: #4a5a68;
+}
+
+.choiceBtns {
+  display: flex;
+  gap: 12px;
+}
+.orSeparator {
+  color: #6c7a89;
+  font-size: 0.95rem;
+}
+.smallNote {
+  color: #5b6b76;
+  font-size: 0.9rem;
+  text-align: center;
+}
+.actionsInline {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}

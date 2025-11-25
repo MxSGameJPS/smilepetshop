@@ -512,6 +512,15 @@ export default function Produto() {
 
   return (
     <div className={styles.container}>
+      {produto?.promocao && (
+        <div className={styles.promoOverlay} aria-hidden="true">
+          <div className={styles.fireworks}>
+            {Array.from({ length: 12 }).map((_, i) => (
+              <span key={i} className={styles.confetti} />
+            ))}
+          </div>
+        </div>
+      )}
       <div className={styles.grid}>
         {/* Coluna esquerda: galeria */}
         <div className={styles.galeria}>
@@ -570,6 +579,15 @@ export default function Produto() {
 
         {/* Coluna direita: informações e ações */}
         <div className={styles.info}>
+          {produto?.promocao && (
+            <div
+              className={styles.smileFridayTag}
+              role="img"
+              aria-label="Promoção SmileFriday"
+            >
+              Produto SmileFriday
+            </div>
+          )}
           <h1 className={styles.titulo}>{titulo}</h1>
           <div className={styles.vendedor}>
             por <a href="#">{vendedor}</a>

@@ -28,6 +28,8 @@ const EMPTY_FORM = {
 export default function Checkout() {
   const navigate = useNavigate();
 
+  // mostrar dados do usuário local imediatamente após login/cadastro
+
   const [form, setForm] = useState(() => ({ ...EMPTY_FORM }));
   const [step, setStep] = useState("personal");
   const [cartItems, setCartItems] = useState(() => getCart() || []);
@@ -108,6 +110,16 @@ export default function Checkout() {
       }
 
       const localUser = getUser();
+
+      // prefill immediately from locally stored user to avoid empty form
+      // while we fetch the canonical server record. This makes checkout
+      // show the user's data right after auto-login/registration.
+      try {
+        if (localUser)
+          setForm(() => ({ ...EMPTY_FORM, ...mapUserToForm(localUser) }));
+      } catch {
+        /* ignore */
+      }
       let finalUser = null;
 
       // prefer fetching the canonical user by id when possible to avoid using stale local data
@@ -485,6 +497,7 @@ export default function Checkout() {
       } else if (data && Array.isArray(data.result)) {
         sourceArray = data.result;
       }
+      // map options (exclude any free option here)
       let options = sourceArray
         .filter((option) => option.price)
         .map((option) => ({
@@ -492,20 +505,40 @@ export default function Checkout() {
           name: option.name,
           price: Number(option.price),
           label: `${option.name} - Em até ${option.delivery_time} dias úteis`,
+          delivery_time: option.delivery_time,
           picture: option.company?.picture || null,
         }));
 
+      // Se o subtotal for maior que R$50, tratamos frete grátis como uma
+      // mensagem fixa — não adicionamos a opção 'gratis' na lista de opções
+      // para evitar que o usuário veja múltiplas opções; selecionamos a
+      // opção grátis automaticamente e persistimos no localStorage.
       if (summaryTotal > 50) {
-        options.unshift({
-          id: "gratis",
-          name: "Frete Grátis",
-          price: 0,
-          label: "Frete Grátis",
-          picture: null,
-        });
+        const label = "Parabéns! Você ganhou FRETE GRÁTIS!";
+        setShippingOptions([]);
+        setSelectedShipping({ id: "gratis", price: 0, label });
+        setShippingNumeric(0);
+        setShippingLabel(label);
+        try {
+          localStorage.setItem("smilepet_shipping", String(0));
+          localStorage.setItem("smilepet_shipping_label", label);
+          localStorage.setItem(
+            "smilepet_shipping_service_name",
+            "Frete Grátis"
+          );
+          localStorage.setItem("smilepet_shipping_service_id", "gratis");
+        } catch (e) {
+          // ignore storage failures
+        }
+        setStep("shipping");
+      } else {
+        setShippingOptions(options);
+        // reset any previously auto-selected free shipping
+        setSelectedShipping(null);
+        setShippingLabel("");
+        setShippingNumeric(0);
+        setStep("shipping");
       }
-      setShippingOptions(options);
-      setStep("shipping");
     } catch (error) {
       console.error("Erro ao calcular frete:", error);
       alert("Não foi possível calcular o frete. Tente novamente.");
@@ -934,6 +967,18 @@ export default function Checkout() {
                 <div className={styles.boxContent}>
                   {isCalculatingShipping ? (
                     <div>Calculando frete...</div>
+                  ) : summaryTotal > 50 ? (
+                    <div
+                      style={{
+                        padding: 12,
+                        borderRadius: 6,
+                        background: "#e6ffed",
+                        color: "#0b6b2d",
+                      }}
+                    >
+                      <strong>Parabéns!</strong> Você ganhou{" "}
+                      <strong>FRETE GRÁTIS</strong> para este pedido.
+                    </div>
                   ) : (
                     shippingOptions.map((opt) => (
                       <label

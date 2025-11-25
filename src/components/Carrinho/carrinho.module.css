@@ -747,6 +747,11 @@
   transform: scale(1);
 }
 
+.shippingDelivery {
+  font-size: 0.9rem;
+  color: #666;
+}
+
 .shippingCompanyLogo {
   width: 32px;
   height: 32px;

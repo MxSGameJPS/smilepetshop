@@ -278,6 +278,24 @@
   color: #000000;
   justify-content: flex-start;
 }
+
+/* Banner para usuário recém-cadastrado */
+.newlyRegisteredBanner {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  background: linear-gradient(90deg, #fff8eb, #fffdf8);
+  border: 1px solid rgba(252, 97, 0, 0.08);
+  padding: 12px;
+  border-radius: 10px;
+  margin-bottom: 12px;
+}
+.bannerActions {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
 .deliveryActions {
   display: flex;
   gap: 12px;

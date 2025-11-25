@@ -2,7 +2,6 @@
   max-width: 980px;
   margin: 170px auto;
   padding: 18px;
-  
 }
 .center {
   padding: 24px;
@@ -67,11 +66,21 @@
 .details {
   margin-top: 8px;
 }
+.details summary {
+  /* keep summary readable and avoid inherited translucent backgrounds */
+  background: transparent;
+  color: #073b4c;
+  cursor: pointer;
+  padding: 6px 0;
+}
+
 .pre {
-  background: #f7f7f7;
+  background: #ffffff; /* explicit white to avoid transparent overlays */
+  color: #222222; /* ensure readable text */
   padding: 8px;
   border-radius: 6px;
   overflow: auto;
+  border: 1px solid #eee;
 }
 .error {
   color: #b00020;

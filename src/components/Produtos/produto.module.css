@@ -6,6 +6,7 @@
   align-items: center;
   flex-direction: column;
   margin-top: 170px;
+  position: relative;
 
   @media (max-width: 760px) {
     padding: 16px;
@@ -145,7 +146,6 @@
   margin: 0 0 8px 0;
   color: #09344a;
 
-
   @media (max-width: 760px) {
     font-size: 20px;
   }
@@ -174,7 +174,6 @@
   margin-bottom: 12px;
   text-align: left;
   margin-left: 25px;
-
 
   @media (max-width: 760px) {
     font-size: 9px;
@@ -298,7 +297,6 @@
   align-items: center;
   gap: 12px;
   margin-top: 12px;
-
 
   @media (max-width: 760px) {
     gap: 10px;
@@ -445,6 +443,90 @@
   .thumbsColumn {
     width: 64px;
   }
+}
+
+/* Promoção: overlay de fogos/confetes e tag SmileFriday */
+.promoOverlay {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 50;
+  overflow: hidden;
+}
+.fireworks {
+  position: absolute;
+  inset: 0;
+}
+.confetti {
+  position: absolute;
+  width: 10px;
+  height: 14px;
+  background: linear-gradient(45deg, #ffeb3b, #ff6b6b);
+  opacity: 0.95;
+  border-radius: 2px;
+  transform-origin: center;
+  animation: confettiFall 2200ms linear infinite;
+}
+.confetti:nth-child(odd) {
+  background: linear-gradient(45deg, #ffd54f, #ef5350);
+  animation-duration: 1800ms;
+}
+.confetti:nth-child(even) {
+  background: linear-gradient(45deg, #81c784, #4dd0e1);
+  animation-duration: 2400ms;
+}
+.confetti:nth-child(3n) {
+  left: 8%;
+  animation-delay: 120ms;
+}
+.confetti:nth-child(3n + 1) {
+  left: 22%;
+  animation-delay: 260ms;
+}
+.confetti:nth-child(3n + 2) {
+  left: 40%;
+  animation-delay: 50ms;
+}
+.confetti:nth-child(4n) {
+  left: 58%;
+  animation-delay: 420ms;
+}
+.confetti:nth-child(5n) {
+  left: 72%;
+  animation-delay: 170ms;
+}
+.confetti:nth-child(6n) {
+  left: 86%;
+  animation-delay: 320ms;
+}
+
+@keyframes confettiFall {
+  0% {
+    transform: translateY(-10%) rotate(0deg) scale(1);
+    opacity: 1;
+  }
+  70% {
+    transform: translateY(80vh) rotate(180deg) scale(1.1);
+    opacity: 0.9;
+  }
+  100% {
+    transform: translateY(120vh) rotate(360deg) scale(0.9);
+    opacity: 0;
+  }
+}
+
+.smileFridayTag {
+  display: inline-block;
+  background: linear-gradient(90deg, #ff8a00, #ff3d00, #000000);
+  color: #fff;
+  padding: 10px 15px;
+  border-radius: 999px;
+  font-weight: 800;
+  font-size: 2.9rem;
+  margin-bottom: 58px;
+  z-index: 60;
+  position: relative;
+  box-shadow: 0 6px 18px rgba(255, 77, 0, 0.16);
 }
 
 /* Produtos relacionados */

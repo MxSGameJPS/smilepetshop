@@ -248,13 +248,12 @@ export default function Carrinho() {
           }
 
           const label = "Frete Grátis";
+          // Aplicar frete grátis: não exibir opções ao usuário (fixo)
           setShippingCost(0);
           setShippingLabel(label);
-          setShippingOptions(validOptions);
-          setSelectedShipping(cheapest);
-          setShippingMsg(
-            "Frete grátis aplicado — opção mais barata selecionada para envio."
-          );
+          setShippingOptions([]); // esconder opções quando frete grátis for aplicado
+          setSelectedShipping(cheapest); // persistir a opção escolhida internamente
+          setShippingMsg("Parabéns! Você ganhou FRETE GRÁTIS!");
           try {
             localStorage.setItem("smilepet_shipping", String(0));
             localStorage.setItem("smilepet_shipping_label", label);
@@ -275,18 +274,11 @@ export default function Carrinho() {
           } catch (err) {
             void err;
           }
-          try {
-            window.dispatchEvent(
-              new CustomEvent("smilepet_cart_update", {
-                detail: { shipping: true },
-              })
-            );
-          } catch (err) {
-            /* ignore */
-          }
+          // Não disparar evento global aqui para evitar abrir modal do carrinho.
+          // Outras partes do app podem ler o localStorage diretamente se necessário.
         } else {
           setShippingMsg(
-            "Frete grátis aplicado, porém nenhuma opção de transporte foi retornada."
+            "Parabéns! Você ganhou FRETE GRÁTIS! Nenhuma opção de transporte foi retornada, frete grátis aplicado."
           );
           setShippingCost(0);
           setShippingLabel("Frete Grátis");
@@ -551,11 +543,20 @@ export default function Carrinho() {
                         className={styles.shippingRadio}
                       />
                       <img
-                        src={option.company.picture}
-                        alt={option.company.name}
+                        src={option.company?.picture}
+                        alt={option.company?.name || option.name}
                         className={styles.shippingCompanyLogo}
                       />
-                      <span className={styles.shippingName}>{option.name}</span>
+                      <div className={styles.shippingInfoBlock}>
+                        <span className={styles.shippingName}>
+                          {option.name}
+                        </span>
+                        {option && option.delivery_time ? (
+                          <div className={styles.shippingDelivery}>
+                            {String(option.delivery_time)} dias úteis
+                          </div>
+                        ) : null}
+                      </div>
                       <span className={styles.shippingPrice}>
                         {moeda(option.price)}
                       </span>

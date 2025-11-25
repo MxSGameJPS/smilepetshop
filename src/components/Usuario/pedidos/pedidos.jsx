@@ -91,8 +91,66 @@ export default function MeusPedidos() {
         return;
       }
 
+      // if we have a logged user id or email, prefer to filter server results
+      const matchOrder = (o, userId, userEmail) => {
+        if (!o) return false;
+        // helper to flatten candidate id/email values
+        const candidates = [];
+        const push = (v) => {
+          if (v === null || v === undefined) return;
+          if (typeof v === "string" && v.trim() !== "") candidates.push(v);
+          else if (typeof v === "number") candidates.push(String(v));
+        };
+
+        // common id fields
+        [
+          o.id,
+          o._id,
+          o.clientId,
+          o.clienteId,
+          o.cliente?.id,
+          o.cliente?._id,
+          o.customerId,
+          o.customer?._id,
+          o.customer?.id,
+          o.user?._id,
+          o.user?.id,
+          o.buyerId,
+        ].forEach(push);
+
+        // common email fields
+        [
+          o.email,
+          o.buyer_email,
+          o.customer?.email,
+          o.cliente?.email,
+          o.email_cliente,
+          o.contact_email,
+          o.buyer?.email,
+        ].forEach(push);
+
+        const norm = candidates.map((c) => String(c).toLowerCase());
+        if (userId) {
+          const uid = String(userId).toLowerCase();
+          if (norm.includes(uid)) return true;
+        }
+        if (userEmail) {
+          const uemail = String(userEmail).toLowerCase();
+          if (norm.includes(uemail)) return true;
+        }
+        return false;
+      };
+
+      // apply client-side filtering when possible
+      let filtered = found.arr;
+      if (id || email) {
+        const f = found.arr.filter((o) => matchOrder(o, id, email));
+        // if we found matches, use them; otherwise keep empty (user likely has no orders)
+        filtered = f;
+      }
+
       // normalize order items
-      const list = found.arr.map((o) => ({
+      const list = filtered.map((o) => ({
         id: o.id ?? o._id ?? o.orderId ?? o.numero ?? o.numero_pedido ?? null,
         date: o.created_at ?? o.createdAt ?? o.date ?? o.data_criacao ?? null,
         status: normalizeStatus(o.status ?? o.estado ?? o.situacao),

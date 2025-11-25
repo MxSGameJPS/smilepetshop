@@ -9,6 +9,7 @@ import {
   Route,
   useLocation,
 } from "react-router-dom";
+import { useEffect } from "react";
 import Avaliacao from "./components/Avaliacao/avaliacao";
 import Banner from "./components/banner/Banner";
 import BannerMeio from "./components/BannerMeio/BannerMeio";
@@ -74,6 +75,25 @@ function HeaderConditional() {
   return <Header />;
 }
 
+// scroll to top on route change — keeps pages starting at top when navigating
+function ScrollToTopOnRouteChange() {
+  const location = useLocation();
+  useEffect(() => {
+    try {
+      window.scrollTo({ top: 0, left: 0, behavior: "auto" });
+    } catch {
+      try {
+        // fallback
+        document.documentElement.scrollTop = 0;
+        document.body.scrollTop = 0;
+      } catch {
+        /* ignore */
+      }
+    }
+  }, [location.pathname]);
+  return null;
+}
+
 function FooterConditional() {
   const location = useLocation();
   if (location && location.pathname === "/") return null;
@@ -89,6 +109,7 @@ function CarrinhoModalConditional() {
 function App() {
   return (
     <Router>
+      <ScrollToTopOnRouteChange />
       <HeaderConditional />
       <div className="appContent">
         <main className="mainContent">
