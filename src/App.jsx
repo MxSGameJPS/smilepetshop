@@ -68,9 +68,7 @@ function HeaderConditional() {
   // hide the global header on the ofertas page and on adm area
   if (
     location &&
-    (location.pathname === "/ofertas" ||
-      location.pathname.startsWith("/adm") ||
-      location.pathname === "/")
+    (location.pathname === "/ofertas" || location.pathname.startsWith("/adm"))
   )
     return null;
   return <Header />;
@@ -95,8 +93,7 @@ function App() {
       <div className="appContent">
         <main className="mainContent">
           <Routes>
-            <Route path="/" element={<HomeTemporaria />} />
-            <Route path="/home" element={<Home />} />
+            <Route path="/" element={<Home />} />
             <Route path="/contato" element={<Contato />} />
             <Route path="/envio" element={<Envio />} />
             <Route path="/devolucoes" element={<Devolucoes />} />

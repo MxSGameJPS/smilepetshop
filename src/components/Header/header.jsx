@@ -659,7 +659,7 @@ export default function Header() {
                   aria-label="TikTok - SmilePet"
                   title="TikTok"
                 >
-                  <AiFillTikTok />
+                  <AiFillTikTok color="white" />
                 </a>
                 <a
                   href="https://www.instagram.com/smilepetbrasil?igsh=cXBuaDY1ODRpcmR6"
@@ -668,7 +668,7 @@ export default function Header() {
                   aria-label="Instagram - SmilePet"
                   title="Instagram"
                 >
-                  <FaInstagramSquare />
+                  <FaInstagramSquare color="white" />
                 </a>
               </div>
 
