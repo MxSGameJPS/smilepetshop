@@ -18,135 +18,66 @@ export default function MeusPedidos() {
   const [loading, setLoading] = useState(true);
   const [orders, setOrders] = useState(null);
   const [error, setError] = useState("");
+  const [cancelling, setCancelling] = useState(null);
 
   useEffect(() => {
     async function load() {
       setLoading(true);
       setError("");
       const saved = getUser();
-      const id =
-        saved?.id ??
-        saved?._id ??
-        saved?.data?.id ??
-        saved?.clienteId ??
-        saved?.clientId ??
-        null;
       const email = saved?.email ?? saved?.data?.email ?? null;
 
-      // candidate endpoints - try in order until one returns a usable result
-      const candidates = [];
-      if (id) {
-        candidates.push(
-          `https://apismilepet.vercel.app/api/client/${id}/orders`,
-          `https://apismilepet.vercel.app/api/client/${id}/pedidos`,
-          `https://apismilepet.vercel.app/api/orders?clientId=${id}`,
-          `https://apismilepet.vercel.app/api/pedidos?clientId=${id}`,
-          `https://apismilepet.vercel.app/api/pedidos?clienteId=${id}`
-        );
-      }
-      if (email) {
-        candidates.push(
-          `https://apismilepet.vercel.app/api/pedidos?email=${encodeURIComponent(
-            email
-          )}`,
-          `https://apismilepet.vercel.app/api/orders?email=${encodeURIComponent(
-            email
-          )}`
-        );
-      }
-      // generic fallbacks
-      candidates.push(
-        `https://apismilepet.vercel.app/api/pedidos`,
-        `https://apismilepet.vercel.app/api/orders`
-      );
-
+      // Fetch all orders and filter by the logged user's email.
+      // The endpoint `/api/orders` returns the list of orders; we must
+      // compare the `email` property of each order with the logged user's email.
       let found = null;
-      for (const url of candidates) {
-        try {
-          const res = await fetch(url);
-          if (!res.ok) continue;
-          const data = await res.json().catch(() => null);
-          // try common shapes: array at root, data array, pedidos, orders
-          const arr = Array.isArray(data)
-            ? data
-            : Array.isArray(data?.data)
-            ? data.data
-            : Array.isArray(data?.pedidos)
-            ? data.pedidos
-            : Array.isArray(data?.orders)
-            ? data.orders
-            : null;
-          if (arr) {
-            found = { url, arr };
-            break;
-          }
-        } catch {
-          // ignore and try next
-        }
+      if (!email) {
+        // If we don't have an email for the logged user, don't fetch public orders.
+        setOrders([]);
+        setLoading(false);
+        return;
       }
 
-      if (!found) {
+      try {
+        const res = await fetch("https://apismilepet.vercel.app/api/orders");
+        if (!res.ok) {
+          setOrders([]);
+          setLoading(false);
+          return;
+        }
+        const data = await res.json().catch(() => null);
+        const arr = Array.isArray(data)
+          ? data
+          : Array.isArray(data?.data)
+          ? data.data
+          : Array.isArray(data?.orders)
+          ? data.orders
+          : null;
+        if (!arr) {
+          setOrders([]);
+          setLoading(false);
+          return;
+        }
+        found = { url: "https://apismilepet.vercel.app/api/orders", arr };
+      } catch (err) {
+        console.debug("Erro ao buscar pedidos em /api/orders:", err);
         setOrders([]);
         setLoading(false);
         return;
       }
 
       // if we have a logged user id or email, prefer to filter server results
-      const matchOrder = (o, userId, userEmail) => {
-        if (!o) return false;
-        // helper to flatten candidate id/email values
-        const candidates = [];
-        const push = (v) => {
-          if (v === null || v === undefined) return;
-          if (typeof v === "string" && v.trim() !== "") candidates.push(v);
-          else if (typeof v === "number") candidates.push(String(v));
-        };
+      // note: we fetch /api/orders and filter by the `email` property
+      // of each order, so the previous generic matchOrder helper is
+      // no longer necessary.
 
-        // common id fields
-        [
-          o.id,
-          o._id,
-          o.clientId,
-          o.clienteId,
-          o.cliente?.id,
-          o.cliente?._id,
-          o.customerId,
-          o.customer?._id,
-          o.customer?.id,
-          o.user?._id,
-          o.user?.id,
-          o.buyerId,
-        ].forEach(push);
-
-        // common email fields
-        [
-          o.email,
-          o.buyer_email,
-          o.customer?.email,
-          o.cliente?.email,
-          o.email_cliente,
-          o.contact_email,
-          o.buyer?.email,
-        ].forEach(push);
-
-        const norm = candidates.map((c) => String(c).toLowerCase());
-        if (userId) {
-          const uid = String(userId).toLowerCase();
-          if (norm.includes(uid)) return true;
-        }
-        if (userEmail) {
-          const uemail = String(userEmail).toLowerCase();
-          if (norm.includes(uemail)) return true;
-        }
-        return false;
-      };
-
-      // apply client-side filtering when possible
-      let filtered = found.arr;
-      if (id || email) {
-        const f = found.arr.filter((o) => matchOrder(o, id, email));
-        // if we found matches, use them; otherwise keep empty (user likely has no orders)
-        filtered = f;
+      // apply client-side filtering by email (the orders endpoint returns all orders)
+      let filtered = [];
+      if (email) {
+        const target = String(email).toLowerCase();
+        filtered = found.arr.filter(
+          (o) => String(o.email || "").toLowerCase() === target
+        );
       }
 
       // normalize order items
@@ -192,7 +123,75 @@ export default function MeusPedidos() {
               <div>
                 <strong>Pedido:</strong> {o.id || "—"}
               </div>
-              <div className={styles.status}>{o.status}</div>
+              <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
+                <div className={styles.status}>{o.status}</div>
+                {/* Mostrar botão de cancelar quando não estiver cancelado ou entregue */}
+                {o.status !== "Cancelado" && o.status !== "Entregue" && (
+                  <button
+                    type="button"
+                    className={styles.cancelBtn}
+                    onClick={async () => {
+                      // Confirmar ação irreversível
+                      const ok = window.confirm(
+                        "Atenção: Esta ação é irreversível. Se cancelar este pedido você terá que fazer um novo pedido caso precise do produto. Deseja continuar?"
+                      );
+                      if (!ok) return;
+
+                      // pedir justificativa
+                      const justificativa = window.prompt(
+                        "Por favor, informe a justificativa para o cancelamento deste pedido:"
+                      );
+                      if (justificativa === null) return; // usuário cancelou o prompt
+                      if (!justificativa.trim()) {
+                        alert(
+                          "Justificativa obrigatória para cancelar o pedido."
+                        );
+                        return;
+                      }
+
+                      try {
+                        setCancelling(o.id);
+                        const res = await fetch(
+                          "https://apismilepet.vercel.app/api/orders/cancel",
+                          {
+                            method: "POST",
+                            headers: { "Content-Type": "application/json" },
+                            body: JSON.stringify({
+                              orderId: o.id,
+                              justificativa: justificativa.trim(),
+                            }),
+                          }
+                        );
+                        if (!res.ok) {
+                          const t = await res.text().catch(() => null);
+                          throw new Error(
+                            `Falha ao cancelar pedido: ${res.status} ${t || ""}`
+                          );
+                        }
+                        // marcar localmente como cancelado para feedback imediato
+                        setOrders((prev) =>
+                          (prev || []).map((it) =>
+                            it.id || it.id === o.id
+                              ? { ...it, status: "Cancelado" }
+                              : it
+                          )
+                        );
+                        alert("Pedido cancelado com sucesso.");
+                      } catch (err) {
+                        console.error("Erro ao cancelar pedido:", err);
+                        alert(
+                          "Não foi possível cancelar o pedido. Tente novamente mais tarde."
+                        );
+                      } finally {
+                        setCancelling(null);
+                      }
+                    }}
+                    disabled={cancelling === o.id}
+                  >
+                    {cancelling === o.id ? "Cancelando..." : "Cancelar pedido"}
+                  </button>
+                )}
+              </div>
             </div>
             <div className={styles.orderBody}>
               <div>

@@ -2,7 +2,15 @@
   max-width: 980px;
   margin: 170px auto;
   padding: 18px;
+  color: #073b4c;
 }
+
+.pedidosWrap h1 {
+  text-align: center;
+  margin-bottom: 24px;
+  color: #073b4c;
+}
+
 .center {
   padding: 24px;
   text-align: center;
@@ -84,4 +92,18 @@
 }
 .error {
   color: #b00020;
+}
+
+.cancelBtn {
+  background: #e74c3c;
+  color: #fff;
+  border: none;
+  padding: 6px 10px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 600;
+}
+.cancelBtn[disabled] {
+  opacity: 0.6;
+  cursor: default;
 }
