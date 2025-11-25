@@ -652,8 +652,24 @@ export default function Header() {
               </div>
 
               <div className={styles.socialMediaIcons}>
-                <AiFillTikTok />
-                <FaInstagramSquare />
+                <a
+                  href="https://www.tiktok.com/@smilepetoficial?_r=1&_t=ZS-91fqa6rqe29"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label="TikTok - SmilePet"
+                  title="TikTok"
+                >
+                  <AiFillTikTok />
+                </a>
+                <a
+                  href="https://www.instagram.com/smilepetbrasil?igsh=cXBuaDY1ODRpcmR6"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label="Instagram - SmilePet"
+                  title="Instagram"
+                >
+                  <FaInstagramSquare />
+                </a>
               </div>
 
               <div className={styles.headerRight}>

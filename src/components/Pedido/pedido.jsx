@@ -135,6 +135,28 @@ export default function Pedido() {
                   }
                   // finalize: show congratulatory alert, clear cart and storage, navigate home
                   alert("Parabéns vc finalizou seu pedido.");
+                  // disparar evento de compra para Meta Pixel (se disponível)
+                  try {
+                    if (
+                      typeof window !== "undefined" &&
+                      typeof window.fbq === "function"
+                    ) {
+                      // enviar valor total e moeda quando possível
+                      try {
+                        window.fbq("track", "Purchase", {
+                          value: Number(total) || 0,
+                          currency: "BRL",
+                        });
+                      } catch (_) {
+                        // fallback: tentar sem payload
+                        try {
+                          window.fbq("track", "Purchase");
+                        } catch (_) {}
+                      }
+                    }
+                  } catch (_) {
+                    /* ignore */
+                  }
                   try {
                     clearCart();
                     localStorage.removeItem("smilepet_shipping");
