@@ -5,10 +5,7 @@ import { TiChevronLeftOutline, TiChevronRightOutline } from "react-icons/ti";
 
 export default function BannerMobile() {
   // substitua os nomes abaixo pelas imagens que você colocar em public/banners/
-  const slides = [
-    "/banners/bannerMobile.png",
-    "/banners/bannerMobile2.png",
-  ];
+  const slides = ["/banners/bannerMobile.png", "/banners/bannerMobile2.png"];
   const DELAY = 5000;
   const [index, setIndex] = useState(0);
   const [paused, setPaused] = useState(false);
@@ -40,10 +37,8 @@ export default function BannerMobile() {
   }
 
   function handleBannerClick(i) {
-    // exemplo: se quiser que o segundo banner leve a /ofertas
-    if (slides[i] && slides[i].includes("ofertas")) {
-      navigate("/ofertas");
-    }
+    // levar o usuário para a página de ofertas em qualquer clique no banner
+    navigate("/ofertas");
   }
 
   return (
@@ -60,7 +55,7 @@ export default function BannerMobile() {
               className={`${styles.slide} ${i === index ? styles.active : ""}`}
               aria-hidden={i !== index}
               onClick={() => handleBannerClick(i)}
-              style={src.includes("ofertas") ? { cursor: "pointer" } : {}}
+              style={{ cursor: "pointer" }}
             >
               <img
                 src={src}
