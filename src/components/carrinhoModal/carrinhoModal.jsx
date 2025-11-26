@@ -6,7 +6,7 @@ import {
   updateCartItemQuantity,
   removeCartItem,
 } from "../../lib/cart";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 
 function calcSubtotal(items) {
   return items.reduce((sum, it) => {
@@ -20,12 +20,22 @@ export default function CarrinhoModal() {
   const [open, setOpen] = useState(false);
   const [items, setItems] = useState(() => getCart());
   const navigate = useNavigate();
+  const location = useLocation();
 
   useEffect(() => {
-    function handleUpdate() {
+    function handleUpdate(e) {
       try {
         const c = getCart();
         setItems(c);
+
+        // Evitar abrir o modal se:
+        // 1. Já estivermos na página do carrinho (/carrinho)
+        // 2. O evento for apenas de atualização de frete (shipping: true)
+        // 3. O evento for silencioso (silent: true)
+        if (location.pathname === "/carrinho") return;
+        if (e?.detail?.shipping) return;
+        if (e?.detail?.silent) return;
+
         // open modal when cart was updated and has items
         const count = getCartCount();
         if (count > 0) setOpen(true);
@@ -42,7 +52,7 @@ export default function CarrinhoModal() {
       window.removeEventListener("smilepet_cart_update", handleUpdate);
       window.removeEventListener("storage", handleUpdate);
     };
-  }, []);
+  }, [location]);
 
   function close() {
     setOpen(false);
