@@ -4,10 +4,15 @@
   font-family: inherit;
   color: #09344a;
   box-sizing: border-box;
-  width: 100%;
-  max-width: 100%;
-  margin: 0;
+  width: 100vw; /* force full viewport width */
   position: relative;
+  left: 50%;
+  transform: translateX(-50%);
+  box-sizing: border-box;
+  margin: 0;
+
+  /* background covers full width; inner content will be centered
+     by the internal containers (columnsContainer and socialAndLegal) */
 
   @media (max-width: 760px) {
     padding: 24px 16px 0 16px;
@@ -22,8 +27,10 @@
   gap: 60px;
   flex-wrap: wrap;
   width: 100%;
+  /* manter conteúdo centralizado igual ao Header */
   max-width: 1400px;
   margin: 0 auto;
+  padding: 0 58px; /* align with header horizontal padding */
 
   @media (max-width: 760px) {
     gap: 20px;
@@ -182,6 +189,7 @@
   text-align: left;
   max-width: 1400px;
   margin: 40px auto 0 auto;
+  padding: 0 58px; /* align with header */
   width: 100%;
 
   @media (max-width: 760px) {
@@ -219,7 +227,7 @@
   color: #09344a;
   justify-content: flex-start;
   margin-bottom: 24px;
-  width: 65%;
+  width: 100%;
 
   @media (max-width: 760px) {
     flex-direction: column;

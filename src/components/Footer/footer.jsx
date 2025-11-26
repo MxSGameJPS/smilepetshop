@@ -6,6 +6,7 @@ import {
   FaFacebookF,
   FaTwitter,
   FaPinterestP,
+  FaTiktok,
 } from "react-icons/fa";
 
 export default function Footer() {
@@ -95,18 +96,18 @@ export default function Footer() {
       </div>
       <div className={styles.socialAndLegal}>
         <div className={styles.socialIcons}>
-          <a href="#" aria-label="Instagram">
+          <a href="https://www.instagram.com/smilepetbrasil?igsh=cXBuaDY1ODRpcmR6" target="_blank" rel="noopener noreferrer" aria-label="Instagram">
             <FaInstagram />
           </a>
-          <a href="#" aria-label="Facebook">
-            <FaFacebookF />
+          <a href="https://www.tiktok.com/@smilepetoficial?_r=1&_t=ZS-91fqa6rqe29" target="_blank" rel="noopener noreferrer" aria-label="TikTok">
+            <FaTiktok  />
           </a>
-          <a href="#" aria-label="Twitter">
+          {/* <a href="#" aria-label="Twitter">
             <FaTwitter />
           </a>
           <a href="#" aria-label="Pinterest">
             <FaPinterestP />
-          </a>
+          </a> */}
         </div>
         <div className={styles.legal}>
           <span>©2025 SmilePetShop. Todos os direitos reservados.</span>

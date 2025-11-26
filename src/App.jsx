@@ -96,8 +96,7 @@ function ScrollToTopOnRouteChange() {
 }
 
 function FooterConditional() {
-  const location = useLocation();
-  if (location && location.pathname === "/") return null;
+  // Sempre renderizar o Footer (mostrar também na home)
   return <Footer />;
 }
 
@@ -144,8 +143,8 @@ function App() {
           </Routes>
         </main>
       </div>
-      <FooterConditional />
       <CarrinhoModalConditional />
+      <FooterConditional />
     </Router>
   );
 }
