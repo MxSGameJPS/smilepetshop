@@ -149,8 +149,8 @@
 }
 
 .filtrosAside {
-  max-width: 200px;
-  margin-left: 24px;
+  width: 220px;
+  margin: 0;
 
   @media (max-width: 760px) {
     display: none;
@@ -340,15 +340,20 @@
   padding-left: 18px;
   margin: 4px 0 0 0;
 }
+
 .produtosSection {
-  display: flex;
-  margin: 0 auto;
+  /* layout agora em grid: coluna fixa para filtros e coluna fluida para produtos
+     assim a largura/visibilidade do aside não afeta a grade de produtos */
+  display: grid;
+  grid-template-columns: 220px 1fr;
+  gap: 24px;
+  align-items: start;
+  width: 100%;
   background: #fff;
   padding: 8px 0 0 0;
-  width: 100%;
 
   @media (max-width: 760px) {
-    flex-direction: column;
+    display: block;
     padding: 0;
   }
 }
@@ -396,16 +401,11 @@
   background: #ff7f3f;
 }
 .produtosSection .produtosGrid {
-  flex: 1;
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
-  flex-wrap: wrap;
-  gap: 0px; /* ainda menor para fileiras mais próximas */
-  column-gap: 0px;
+  gap: 12px; /* espaço entre cards */
   padding: 24px 40px;
-  max-width: 1400px;
-  margin: 0 auto;
-  justify-content: center;
+  width: 100%;
   align-items: start;
 
   @media (max-width: 1200px) {
@@ -445,6 +445,7 @@
   font-weight: 700;
   color: #09344a;
 }
+
 .produtosSection .produtoCard {
   background: #f7f8f8;
   border-radius: 16px;

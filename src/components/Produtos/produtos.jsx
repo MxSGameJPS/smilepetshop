@@ -193,28 +193,80 @@ export default function Produtos() {
       catInfo && catInfo.id !== undefined && catInfo.id !== null
         ? String(catInfo.id)
         : catInfo?.idString ?? null;
-    setSelectedCategorias((prev) => {
-      const exists = prev.some((item) => {
-        const matchId = id && item.id && String(item.id) === id;
-        const matchName =
-          normalizedName && item.normalizedName === normalizedName;
-        return matchId || matchName;
-      });
-      if (exists) {
-        return prev.filter((item) => {
-          const matchId = id && item.id && String(item.id) === id;
-          const matchName =
-            normalizedName && item.normalizedName === normalizedName;
-          return !(matchId || matchName);
-        });
+
+    // detect if this subcategory belongs to one of the special pet groups
+    const findPetFor = (nomeBuscaOrLabel) => {
+      const n = normalize(nomeBuscaOrLabel || "");
+      for (const pet of Object.keys(specialCategoriasPorPet)) {
+        const arr = specialCategoriasPorPet[pet] || [];
+        for (const s of arr) {
+          if (normalize(s.nomeBusca || s.label || "") === n) return pet;
+        }
       }
-      return [
-        ...prev,
-        {
-          id: id ?? null,
-          normalizedName,
-        },
-      ];
+      return null;
+    };
+
+    const petForCat = findPetFor(
+      catInfo?.nomeBusca || catInfo?.label || catInfo?.nome
+    );
+
+    if (petForCat) {
+      // ensure pet filter is set to this pet
+      setFiltroPet((prev) => {
+        const next = petForCat;
+        if (prev !== next) updatePetParamInUrl(next);
+        return next;
+      });
+
+      // only one subcategory per pet: remove other pet subcategories and
+      // toggle this one
+      setSelectedCategorias((prev) => {
+        const prevNotPetSubs = (prev || []).filter((item) => {
+          // keep items that are NOT a special pet subcategory
+          let belongs = false;
+          for (const pet of Object.keys(specialCategoriasPorPet)) {
+            const arr = specialCategoriasPorPet[pet] || [];
+            for (const s of arr) {
+              if (
+                item.normalizedName === normalize(s.nomeBusca || s.label || "")
+              ) {
+                belongs = true;
+                break;
+              }
+            }
+            if (belongs) break;
+          }
+          return !belongs;
+        });
+
+        const exists = (prev || []).some(
+          (item) =>
+            item.normalizedName === normalizedName ||
+            (id && item.id && String(item.id) === id)
+        );
+        if (exists) return prevNotPetSubs; // deselect
+        return [...prevNotPetSubs, { id: id ?? null, normalizedName }];
+      });
+
+      return;
+    }
+
+    // fallback: toggle general category
+    setSelectedCategorias((prev) => {
+      const exists = (prev || []).some(
+        (item) =>
+          item.normalizedName === normalizedName ||
+          (id && item.id && String(item.id) === id)
+      );
+      if (exists)
+        return (prev || []).filter(
+          (item) =>
+            !(
+              item.normalizedName === normalizedName ||
+              (id && item.id && String(item.id) === id)
+            )
+        );
+      return [...(prev || []), { id: id ?? null, normalizedName }];
     });
   };
   const specialCategoriasPorPet = {
@@ -247,6 +299,17 @@ export default function Produtos() {
     setFiltroPet((prev) => {
       const next = prev === petNome ? "" : petNome;
       updatePetParamInUrl(next);
+      if (next === "") {
+        // remove any selected subcategories that belong to this pet
+        const petSubs = (specialCategoriasPorPet[petNome] || []).map((s) =>
+          normalize(s.nomeBusca || s.label || "")
+        );
+        setSelectedCategorias((prevSel) =>
+          (prevSel || []).filter(
+            (item) => !petSubs.includes(item.normalizedName)
+          )
+        );
+      }
       return next;
     });
   };
@@ -269,6 +332,28 @@ export default function Produtos() {
   const toggleMarca = (marca) => {
     setFiltroMarca((prev) => {
       if (prev === marca) return MARCA_CLEAR;
+
+      // Ao selecionar uma marca nova, limpar filtros por pet e
+      // quaisquer subcategorias especiais de pet que possam estar marcadas.
+      try {
+        // remover subcategorias especiais de Gato/Cachorro
+        const petSubs = Object.values(specialCategoriasPorPet)
+          .flat()
+          .map((s) => normalize(s.nomeBusca || s.label || ""));
+        setSelectedCategorias((prevSel) =>
+          (prevSel || []).filter(
+            (item) => !petSubs.includes(item.normalizedName)
+          )
+        );
+      } catch {
+        /* ignore */
+      }
+      // limpar pet param/state
+      try {
+        updatePetParamInUrl("");
+      } catch {}
+      setFiltroPet("");
+
       return marca;
     });
   };
