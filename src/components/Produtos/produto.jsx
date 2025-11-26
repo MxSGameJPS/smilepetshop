@@ -4,6 +4,7 @@ import styles from "./produto.module.css";
 import { AiOutlineHeart, AiFillHeart } from "react-icons/ai";
 import { useNavigate } from "react-router-dom";
 import { addToCart } from "../../lib/cart";
+import { trackEvent } from "../../lib/meta";
 
 export default function Produto() {
   const { id } = useParams();
@@ -206,7 +207,6 @@ export default function Produto() {
         } catch {
           /* ignore */
         }
-        // se não houver entradas, mantemos null
         setMapaPrecosState(Object.keys(mp).length ? mp : null);
 
         // definir variante padrão: preferir o produto pai (mostrar preço do pai por default)
@@ -229,6 +229,77 @@ export default function Produto() {
         setLoadingVariacoes(false);
       });
   }, [produto, id]);
+
+  // Tenta descobrir o mapa de preços por variação em diferentes formatos possíveis
+  const mapaPrecosRaw =
+    produto?.precoVariacoes ||
+    produto?.precosVariacoes ||
+    produto?.variacoesPrecos ||
+    produto?.precos_por_variacao ||
+    produto?.precosPorVariacao ||
+    produto?.precoPorVariacao ||
+    produto?.precos;
+
+  // Normaliza para um objeto { variante: preco }
+  // preferir mapa vindo do endpoint de variações se disponível
+  let mapaPrecos = mapaPrecosState ?? null;
+  if (!mapaPrecos) {
+    if (Array.isArray(mapaPrecosRaw) && Array.isArray(produto?.variacoes)) {
+      mapaPrecos = {};
+      produto.variacoes.forEach((v, i) => {
+        mapaPrecos[v] = mapaPrecosRaw[i] ?? null;
+      });
+    } else if (mapaPrecosRaw && typeof mapaPrecosRaw === "object") {
+      mapaPrecos = mapaPrecosRaw;
+    }
+  }
+
+  const formatarPreco = (valor) => {
+    if (valor === undefined || valor === null || isNaN(Number(valor)))
+      return "";
+    try {
+      const n = Number(valor);
+      return new Intl.NumberFormat("pt-BR", {
+        style: "currency",
+        currency: "BRL",
+        minimumFractionDigits: 2,
+      }).format(n);
+    } catch {
+      return String(valor);
+    }
+  };
+
+  const precoAtual = (() => {
+    if (mapaPrecos && variante && mapaPrecos[variante] != null) {
+      return mapaPrecos[variante];
+    }
+    // Fallbacks: preco específico, senão menor preço disponível
+    if (produto?.preco != null) return produto.preco;
+    if (produto?.precoMin != null) return produto.precoMin;
+    return null;
+  })();
+  const precoUnitario =
+    precoAtual ?? produto?.preco ?? produto?.precoMin ?? produto?.precoMax ?? 0;
+
+  useEffect(() => {
+    if (produto) {
+      const idValue = produto?.id ?? produto?.SKU ?? produto?.codigo ?? id;
+      trackEvent("ViewContent", {
+        content_ids: [String(idValue)],
+        content_type: "product",
+        value: Number(precoUnitario) || 0,
+        currency: "BRL",
+        quantity: 1,
+      });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [produto?.id]);
+
+  const precoTotal = (Number(precoUnitario) || 0) * (Number(quantidade) || 1);
+  const temIntervalo =
+    produto?.precoMin != null &&
+    produto?.precoMax != null &&
+    Number(produto.precoMin) !== Number(produto.precoMax);
 
   // Produtos relacionados (hooks posicionados antes dos retornos condicionais)
   const [relacionados, setRelacionados] = useState([]);
@@ -304,7 +375,7 @@ export default function Produto() {
         setVariante(produto.variacoes[0]);
       }
     }
-  }, [produto]);
+  }, [produto, id]);
 
   // when variante changes, update displayed title and sku to match the selected variation
   useEffect(() => {
@@ -390,61 +461,6 @@ export default function Produto() {
 
   // thumbnails list (secondary images). The primary image is shown separately via imgSelecionada
   const imagens = buildThumbs(produto);
-  // Tenta descobrir o mapa de preços por variação em diferentes formatos possíveis
-  const mapaPrecosRaw =
-    produto?.precoVariacoes ||
-    produto?.precosVariacoes ||
-    produto?.variacoesPrecos ||
-    produto?.precos_por_variacao ||
-    produto?.precosPorVariacao ||
-    produto?.precoPorVariacao ||
-    produto?.precos;
-
-  // Normaliza para um objeto { variante: preco }
-  // preferir mapa vindo do endpoint de variações se disponível
-  let mapaPrecos = mapaPrecosState ?? null;
-  if (!mapaPrecos) {
-    if (Array.isArray(mapaPrecosRaw) && Array.isArray(produto?.variacoes)) {
-      mapaPrecos = {};
-      produto.variacoes.forEach((v, i) => {
-        mapaPrecos[v] = mapaPrecosRaw[i] ?? null;
-      });
-    } else if (mapaPrecosRaw && typeof mapaPrecosRaw === "object") {
-      mapaPrecos = mapaPrecosRaw;
-    }
-  }
-
-  const formatarPreco = (valor) => {
-    if (valor === undefined || valor === null || isNaN(Number(valor)))
-      return "";
-    try {
-      const n = Number(valor);
-      return new Intl.NumberFormat("pt-BR", {
-        style: "currency",
-        currency: "BRL",
-        minimumFractionDigits: 2,
-      }).format(n);
-    } catch {
-      return String(valor);
-    }
-  };
-
-  const precoAtual = (() => {
-    if (mapaPrecos && variante && mapaPrecos[variante] != null) {
-      return mapaPrecos[variante];
-    }
-    // Fallbacks: preco específico, senão menor preço disponível
-    if (produto?.preco != null) return produto.preco;
-    if (produto?.precoMin != null) return produto.precoMin;
-    return null;
-  })();
-  const precoUnitario =
-    precoAtual ?? produto?.preco ?? produto?.precoMin ?? produto?.precoMax ?? 0;
-  const precoTotal = (Number(precoUnitario) || 0) * (Number(quantidade) || 1);
-  const temIntervalo =
-    produto?.precoMin != null &&
-    produto?.precoMax != null &&
-    Number(produto.precoMin) !== Number(produto.precoMax);
 
   if (loading) return <div>Carregando...</div>;
   if (error) return <div>{error}</div>;
@@ -503,6 +519,7 @@ export default function Produto() {
         ncm: produto?.ncm ?? produto?.produto?.ncm ?? null,
       };
       addToCart(item);
+      // Track AddToCart is handled inside addToCart (lib/cart.js) to avoid duplicates
       setAddedMsg(true);
       setTimeout(() => setAddedMsg(false), 1800);
     } catch (err) {

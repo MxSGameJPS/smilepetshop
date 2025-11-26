@@ -27,6 +27,8 @@ export function getCartCount() {
 }
 
 // item: { id, nome, variante, quantidade, precoUnit, imagem_url }
+import { trackEvent } from "./meta";
+
 export function addToCart(item) {
   if (!item || !item.id) return getCartCount();
   const cart = getCart();
@@ -60,6 +62,20 @@ export function addToCart(item) {
     );
   } catch {
     /* ignore */
+  }
+  // Disparar evento AddToCart com parâmetros dinâmicos
+  try {
+    const value = Number(item.precoUnit || 0) || 0;
+    const quantity = Number(item.quantidade || 1) || 1;
+    trackEvent("AddToCart", {
+      content_ids: [String(item.id)],
+      content_type: "product",
+      value,
+      currency: "BRL",
+      quantity,
+    });
+  } catch (err) {
+    /* ignore tracking errors */
   }
   return count;
 }

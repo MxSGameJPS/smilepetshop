@@ -1,8 +1,8 @@
 import React, { useState } from "react";
 import styles from "./pedido.module.css";
-import { getCart } from "../../lib/cart";
 import { useNavigate } from "react-router-dom";
-import { clearCart } from "../../lib/cart";
+import { clearCart, getCart } from "../../lib/cart";
+import { trackEvent } from "../../lib/meta";
 
 const moeda = (v) => {
   try {
@@ -128,7 +128,7 @@ export default function Pedido() {
             <div className={styles.actions}>
               <button
                 className={styles.primary}
-                onClick={() => {
+                onClick={async () => {
                   if (!paymentMethod) {
                     alert("Escolha uma forma de pagamento.");
                     return;
@@ -137,25 +137,21 @@ export default function Pedido() {
                   alert("Parabéns vc finalizou seu pedido.");
                   // disparar evento de compra para Meta Pixel (se disponível)
                   try {
-                    if (
-                      typeof window !== "undefined" &&
-                      typeof window.fbq === "function"
-                    ) {
-                      // enviar valor total e moeda quando possível
-                      try {
-                        window.fbq("track", "Purchase", {
-                          value: Number(total) || 0,
-                          currency: "BRL",
-                        });
-                      } catch (_) {
-                        // fallback: tentar sem payload
-                        try {
-                          window.fbq("track", "Purchase");
-                        } catch (_) {}
-                      }
-                    }
-                  } catch (_) {
-                    /* ignore */
+                    const cartItems = getCart() || [];
+                    const content_ids = cartItems.map((it) => String(it.id));
+                    const quantity = cartItems.reduce(
+                      (s, it) => s + (Number(it.quantidade) || 0),
+                      0
+                    );
+                    await trackEvent("Purchase", {
+                      content_ids: content_ids,
+                      content_type: "product",
+                      value: Number(total) || 0,
+                      currency: "BRL",
+                      quantity: Number(quantity) || 0,
+                    });
+                  } catch (err) {
+                    console.debug("Purchase tracking failed", err);
                   }
                   try {
                     clearCart();

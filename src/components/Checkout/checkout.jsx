@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from "react";
 import styles from "./checkout.module.css";
-import { useNavigate } from "react-router-dom";
+// useNavigate not required here
 import { getUser, setUser as setStoredUser } from "../../lib/auth";
+import { trackEvent } from "../../lib/meta";
 import { getCart } from "../../lib/cart";
 
 const EMAIL_STORAGE_KEY = "smilepet_checkout_email";
@@ -26,7 +27,7 @@ const EMPTY_FORM = {
 };
 
 export default function Checkout() {
-  const navigate = useNavigate();
+  // not using navigate here; keep import if needed elsewhere
 
   // mostrar dados do usuário local imediatamente após login/cadastro
 
@@ -42,22 +43,29 @@ export default function Checkout() {
 
   // helper: map various user shapes to our form fields (shared)
   const mapUserToForm = (u) => ({
-    firstName: u?.nome || u?.firstName || u?.name || "",
-    lastName: u?.sobrenome || u?.lastName || "",
+    firstName: u?.nome || u?.firstName || u?.name || u?.first_name || "",
+    lastName: u?.sobrenome || u?.lastName || u?.last_name || "",
     email: u?.email || u?.emailAddress || "",
-    cpf: u?.cpf || u?.cpf_cliente || "",
-    phone: u?.whatsapp || u?.phone || u?.telefone || "",
-    address1: u?.rua || u?.street || u?.address1 || "",
+    cpf: u?.cpf || u?.cpf_cliente || u?.doc || "",
+    phone: u?.whatsapp || u?.phone || u?.telefone || u?.celular || "",
+    address1: u?.rua || u?.street || u?.address1 || u?.logradouro || "",
     numero: u?.numero || u?.number || "",
     bairro: u?.bairro || u?.neighborhood || "",
-    city: u?.cidade || u?.city || "",
-    state: u?.estado || u?.state || "",
-    postal: u?.cep || u?.postal || "",
+    city: u?.cidade || u?.city || u?.municipio || "",
+    state: u?.estado || u?.state || u?.uf || "",
+    postal: u?.cep || u?.postal || u?.zip || "",
   });
 
   // helper to pick a stable id from various user shapes
   const pickUserId = (u) =>
-    u?.id || u?._id || u?.clienteId || u?.clientId || u?.client || null;
+    u?.id ||
+    u?._id ||
+    u?.clienteId ||
+    u?.clientId ||
+    u?.client ||
+    u?.uid ||
+    u?.user_id ||
+    null;
   // fetch remote user; if id provided, call /api/client/{id}, else /api/client
   const fetchRemoteUser = async (id) => {
     try {
@@ -73,15 +81,20 @@ export default function Checkout() {
         ? `https://apismilepet.vercel.app/api/client/${encodeURIComponent(id)}`
         : "https://apismilepet.vercel.app/api/client";
 
+      console.debug("Fetching remote user from:", url);
       const res = await fetch(url, {
         cache: "no-store",
         credentials: headers.Authorization ? "omit" : "include",
         headers,
       });
       const data = await res.json().catch(() => null);
-      if (!res.ok) return null;
+      if (!res.ok) {
+        console.warn("Remote user fetch failed:", res.status, data);
+        return null;
+      }
       let client = data?.data ?? data?.client ?? data?.user ?? data ?? null;
       if (Array.isArray(client) && client.length > 0) client = client[0];
+      console.debug("Remote user data:", client);
       return client;
     } catch (err) {
       console.debug("Não foi possível buscar usuário remoto:", err);
@@ -110,6 +123,7 @@ export default function Checkout() {
       }
 
       const localUser = getUser();
+      console.debug("Local user found:", localUser);
 
       // prefill immediately from locally stored user to avoid empty form
       // while we fetch the canonical server record. This makes checkout
@@ -124,26 +138,38 @@ export default function Checkout() {
 
       // prefer fetching the canonical user by id when possible to avoid using stale local data
       const pickId = (u) =>
-        u?.id || u?._id || u?.clienteId || u?.clientId || u?.client || null;
+        u?.id ||
+        u?._id ||
+        u?.clienteId ||
+        u?.clientId ||
+        u?.client ||
+        u?.uid ||
+        u?.user_id ||
+        u?.user?.id ||
+        u?.data?.id ||
+        null;
 
       if (localUser) {
         const id = pickId(localUser);
+        console.debug("Checkout: localUser", localUser, "extracted id", id);
         if (id) {
+          // se tivermos um id confiável, buscar registro canônico por id
           const remote = await fetchRemoteUser(id);
           finalUser = remote
             ? { ...(localUser || {}), ...(remote || {}) }
             : localUser;
         } else {
-          // no id available — try to fetch generic endpoint as fallback
-          const remote = await fetchRemoteUser();
+          // Fallback: se temos usuário local mas sem ID aparente, tentar endpoint genérico com token
+          // Isso pode acontecer se o objeto salvo no login estiver incompleto
+          console.debug("Checkout: ID não encontrado, tentando fetch genérico");
+          const remote = await fetchRemoteUser(null);
           finalUser = remote
             ? { ...(localUser || {}), ...(remote || {}) }
             : localUser;
         }
       } else {
-        // no local user — try to fetch remote (may return null or a single client)
-        const remote = await fetchRemoteUser();
-        if (remote) finalUser = remote;
+        // sem usuário local, não chamar o endpoint genérico — manter finalUser nulo
+        finalUser = null;
       }
 
       const mapped = finalUser ? mapUserToForm(finalUser) : {};
@@ -164,7 +190,19 @@ export default function Checkout() {
         }
       }
 
+      // Merge strategy: mapped user data is base. Draft overrides ONLY if it has values.
+      // However, if draft is stale or empty, we prefer mapped data.
+      // Simple merge:
       let finalForm = useDraft ? { ...mapped, ...savedDraft } : { ...mapped };
+
+      // Ensure critical fields from mapped user are not overwritten by empty draft fields if draft was partial
+      if (useDraft) {
+        Object.keys(mapped).forEach((key) => {
+          if (mapped[key] && !finalForm[key]) {
+            finalForm[key] = mapped[key];
+          }
+        });
+      }
 
       try {
         const storedEmail = localStorage.getItem(EMAIL_STORAGE_KEY);
@@ -199,6 +237,39 @@ export default function Checkout() {
         // ignore storage failures
       }
     })();
+  }, []);
+
+  // Track InitiateCheckout when entering checkout (use cart snapshot to compute value)
+  useEffect(() => {
+    try {
+      const cart = getCart() || [];
+      const subtotal = cart.reduce((acc, it) => {
+        const qty = Number(it.quantidade ?? it.quantity ?? 1) || 0;
+        const priceRaw = Number(it.precoUnit ?? it.preco ?? it.price ?? 0) || 0;
+        const price = priceRaw > 10000 ? priceRaw / 100 : priceRaw;
+        return acc + qty * price;
+      }, 0);
+      const shipping =
+        Number(localStorage.getItem("smilepet_shipping") || 0) || 0;
+
+      const content_ids = cart
+        .map((it) => String(it.id ?? it.productId ?? it.sku ?? ""))
+        .filter(Boolean);
+      const num_items = cart.reduce(
+        (acc, it) => acc + (Number(it.quantidade ?? it.quantity ?? 1) || 0),
+        0
+      );
+
+      trackEvent("InitiateCheckout", {
+        content_ids,
+        content_type: "product",
+        num_items,
+        value: Number(subtotal + shipping) || 0,
+        currency: "BRL",
+      });
+    } catch {
+      /* ignore */
+    }
   }, []);
 
   // listen for user updates (login/logout) and storage changes to refresh the form
@@ -527,7 +598,7 @@ export default function Checkout() {
             "Frete Grátis"
           );
           localStorage.setItem("smilepet_shipping_service_id", "gratis");
-        } catch (e) {
+        } catch {
           // ignore storage failures
         }
         setStep("shipping");
@@ -697,6 +768,28 @@ export default function Checkout() {
         shippingServiceName: shippingServiceName || null,
         shippingServiceId: shippingServiceId || null,
       };
+
+      // Save order details for Purchase event on Thank You page (since we redirect away)
+      try {
+        const totalValue =
+          payload.items.reduce(
+            (acc, it) => acc + it.quantidade * it.precoUnit,
+            0
+          ) + payload.shippingCost;
+        const purchaseData = {
+          content_ids: payload.items.map((it) => String(it.id)),
+          content_type: "product",
+          value: totalValue,
+          currency: "BRL",
+          num_items: payload.items.reduce((acc, it) => acc + it.quantidade, 0),
+        };
+        localStorage.setItem(
+          "smilepet_last_order",
+          JSON.stringify(purchaseData)
+        );
+      } catch (e) {
+        console.error("Erro ao salvar dados do pedido para tracking:", e);
+      }
 
       const resp = await fetch(ENDPOINT_MP, {
         method: "POST",
