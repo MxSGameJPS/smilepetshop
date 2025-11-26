@@ -153,12 +153,11 @@ export default function MeusPedidos() {
                       try {
                         setCancelling(o.id);
                         const res = await fetch(
-                          "https://apismilepet.vercel.app/api/orders/cancel",
+                          `https://apismilepet.vercel.app/api/orders/cancel/${o.id}`,
                           {
                             method: "POST",
                             headers: { "Content-Type": "application/json" },
                             body: JSON.stringify({
-                              orderId: o.id,
                               justificativa: justificativa.trim(),
                             }),
                           }
