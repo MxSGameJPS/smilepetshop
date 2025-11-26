@@ -41,6 +41,11 @@ export default function Checkout() {
 
   const [shippingLabel, setShippingLabel] = useState("");
 
+  // Coupon state
+  const [appliedCoupon, setAppliedCoupon] = useState(null);
+  const [couponInput, setCouponInput] = useState("");
+  const [couponMsg, setCouponMsg] = useState("");
+
   // helper: map various user shapes to our form fields (shared)
   const mapUserToForm = (u) => ({
     firstName: u?.nome || u?.firstName || u?.name || u?.first_name || "",
@@ -239,6 +244,30 @@ export default function Checkout() {
     })();
   }, []);
 
+  useEffect(() => {
+    // Load coupon from storage
+    try {
+      const stored = localStorage.getItem("smilepet_coupon");
+      if (stored) {
+        const parsed = JSON.parse(stored);
+        const user = getUser();
+        const userId = user
+          ? user.id || user._id || user.sub || user.uid || user.email
+          : null;
+        const appliedBy = parsed.appliedBy;
+
+        if (appliedBy && appliedBy !== "guest" && appliedBy !== userId) {
+          localStorage.removeItem("smilepet_coupon");
+          setAppliedCoupon(null);
+        } else {
+          setAppliedCoupon(parsed);
+        }
+      }
+    } catch {
+      /* ignore */
+    }
+  }, []);
+
   // Track InitiateCheckout when entering checkout (use cart snapshot to compute value)
   useEffect(() => {
     try {
@@ -292,6 +321,13 @@ export default function Checkout() {
             }
             try {
               localStorage.removeItem(EMAIL_STORAGE_KEY);
+            } catch {
+              /* ignore */
+            }
+            // Clear coupon on logout
+            setAppliedCoupon(null);
+            try {
+              localStorage.removeItem("smilepet_coupon");
             } catch {
               /* ignore */
             }
@@ -447,6 +483,64 @@ export default function Checkout() {
     const priceNorm = priceRaw > 10000 ? priceRaw / 100 : priceRaw;
     return acc + qty * priceNorm;
   }, 0);
+
+  const couponDiscount = (() => {
+    if (!appliedCoupon) return 0;
+    if (appliedCoupon.min_purchase && summaryTotal < appliedCoupon.min_purchase)
+      return 0;
+
+    let discount = 0;
+    if (appliedCoupon.discount_type === "percentage") {
+      discount = summaryTotal * (Number(appliedCoupon.discount_value) / 100);
+      if (appliedCoupon.max_discount && discount > appliedCoupon.max_discount) {
+        discount = Number(appliedCoupon.max_discount);
+      }
+    } else {
+      discount = Number(appliedCoupon.discount_value);
+    }
+    return Math.min(discount, summaryTotal);
+  })();
+
+  const finalTotal =
+    summaryTotal - couponDiscount + (Number(shippingNumeric) || 0);
+
+  const handleApplyCoupon = async (e) => {
+    e.preventDefault();
+    if (!couponInput) return;
+    setCouponMsg("Validando...");
+    try {
+      const res = await fetch("https://apismilepet.vercel.app/api/coupons");
+      if (!res.ok) throw new Error("Erro ao validar");
+      const data = await res.json();
+      const list = Array.isArray(data) ? data : data.data || [];
+      const found = list.find((c) => c.code === couponInput);
+
+      if (!found) throw new Error("Cupom não encontrado");
+      if (!found.active) throw new Error("Cupom inativo");
+      const now = new Date();
+      if (found.start_date && new Date(found.start_date) > now)
+        throw new Error("Ainda não válido");
+      if (found.end_date && new Date(found.end_date) < now)
+        throw new Error("Expirado");
+      if (found.min_purchase && summaryTotal < found.min_purchase)
+        throw new Error(`Mínimo: R$ ${found.min_purchase}`);
+
+      const user = getUser();
+      const userId = user
+        ? user.id || user._id || user.sub || user.uid || user.email
+        : "guest";
+      const couponData = { ...found, appliedBy: userId };
+
+      setAppliedCoupon(couponData);
+      localStorage.setItem("smilepet_coupon", JSON.stringify(couponData));
+      setCouponMsg("Aplicado!");
+    } catch (err) {
+      setCouponMsg(err.message);
+      setAppliedCoupon(null);
+      localStorage.removeItem("smilepet_coupon");
+    }
+    setTimeout(() => setCouponMsg(""), 3000);
+  };
 
   const handleCpfChange = (e) => {
     const digits = (e.target.value || "").replace(/\D/g, "");
@@ -767,6 +861,8 @@ export default function Checkout() {
         shippingCost: Number(savedShippingCost) || 0,
         shippingServiceName: shippingServiceName || null,
         shippingServiceId: shippingServiceId || null,
+        coupon: appliedCoupon?.code || null,
+        discount: Number(couponDiscount) || 0,
       };
 
       // Save order details for Purchase event on Thank You page (since we redirect away)
@@ -775,7 +871,9 @@ export default function Checkout() {
           payload.items.reduce(
             (acc, it) => acc + it.quantidade * it.precoUnit,
             0
-          ) + payload.shippingCost;
+          ) +
+          payload.shippingCost -
+          couponDiscount; // Subtract discount for tracking
         const purchaseData = {
           content_ids: payload.items.map((it) => String(it.id)),
           content_type: "product",
@@ -1217,6 +1315,14 @@ export default function Checkout() {
                 <span>Subtotal</span>
                 <span>{formatPrice(summaryTotal)}</span>
               </div>
+
+              {couponDiscount > 0 && (
+                <div className={styles.summaryRow} style={{ color: "#28a745" }}>
+                  <span>Desconto ({appliedCoupon?.code})</span>
+                  <span>- {formatPrice(couponDiscount)}</span>
+                </div>
+              )}
+
               <div className={styles.summaryRow}>
                 <span>Frete</span>
                 <span>
@@ -1225,10 +1331,38 @@ export default function Checkout() {
               </div>
               <div className={styles.summaryTotal}>
                 <span>Total</span>
-                <span>
-                  {formatPrice(summaryTotal + (Number(shippingNumeric) || 0))}
-                </span>
+                <span>{formatPrice(finalTotal)}</span>
               </div>
+
+              {!appliedCoupon && (
+                <div className={styles.couponContainer}>
+                  <div className={styles.couponRow}>
+                    <input
+                      placeholder="Cupom de desconto"
+                      value={couponInput}
+                      onChange={(e) => setCouponInput(e.target.value)}
+                      className={styles.couponInput}
+                    />
+                    <button
+                      onClick={handleApplyCoupon}
+                      className={styles.couponBtn}
+                    >
+                      Aplicar
+                    </button>
+                  </div>
+                  {couponMsg && (
+                    <div
+                      className={`${styles.couponMsg} ${
+                        couponMsg.includes("Aplicado")
+                          ? styles.couponMsgSuccess
+                          : styles.couponMsgError
+                      }`}
+                    >
+                      {couponMsg}
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
           </aside>
         </div>

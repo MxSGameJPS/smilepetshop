@@ -12,6 +12,7 @@ import RelatorioVendas from "./RelatoriosAdm/relatorioVendas";
 import RelatorioProdutos from "./RelatoriosAdm/relatorioProdutos";
 import ProdutoAdm from "./PaginaProdutos/Produtos/produtoAdm";
 import CadastroProduto from "./PaginaProdutos/Cadastro de Produto/cadastroProduto";
+import Cupons from "./Cupons/cupons";
 
 function readAdminFromStorage() {
   try {
@@ -64,6 +65,7 @@ export default function AdmPage() {
           <Route path="relatorios" element={<RelatoriosAdm />} />
           <Route path="relatorios/vendas" element={<RelatorioVendas />} />
           <Route path="relatorios/produtos" element={<RelatorioProdutos />} />
+          <Route path="cupons" element={<Cupons />} />
         </Routes>
       </div>
     </div>

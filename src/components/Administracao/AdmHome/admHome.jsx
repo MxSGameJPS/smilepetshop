@@ -161,6 +161,15 @@ export default function AdmHome() {
             <div className={styles.value}>—</div>
             <div className={styles.label}>Relatórios</div>
           </div>
+
+          <div
+            className={styles.card}
+            {...makeClickable(() => navigate("/adm/cupons"))}
+            aria-label={`Cupons`}
+          >
+            <div className={styles.value}>%</div>
+            <div className={styles.label}>Cupons</div>
+          </div>
         </div>
       )}
     </section>

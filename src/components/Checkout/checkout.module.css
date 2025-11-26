@@ -398,3 +398,46 @@
   font-weight: 800;
   color: #073b4c;
 }
+
+/* Coupon section */
+.couponContainer {
+  margin-top: 15px;
+  border-top: 1px solid #eee;
+  padding-top: 10px;
+}
+
+.couponRow {
+  display: flex;
+  gap: 5px;
+}
+
+.couponInput {
+  flex: 1;
+  padding: 8px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  background: transparent;
+  color: #000;
+}
+
+.couponBtn {
+  background: #fc6100;
+  color: #fff;
+  border: none;
+  padding: 0 15px;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.couponMsg {
+  font-size: 12px;
+  margin-top: 5px;
+}
+
+.couponMsgSuccess {
+  color: green;
+}
+
+.couponMsgError {
+  color: red;
+}

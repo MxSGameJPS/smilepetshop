@@ -21,6 +21,12 @@ export function getUser() {
 export function clearUser() {
   try {
     localStorage.removeItem(STORAGE_KEY);
+    localStorage.removeItem("smilepet_coupon");
+    localStorage.removeItem("smilepet_shipping");
+    localStorage.removeItem("smilepet_shipping_label");
+    localStorage.removeItem("smilepet_shipping_service_name");
+    localStorage.removeItem("smilepet_shipping_service_id");
+    localStorage.removeItem("smilepet_shipping_option");
   } catch {
     // ignore
   }

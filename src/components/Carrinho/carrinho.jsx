@@ -5,6 +5,7 @@ import {
   updateCartItemQuantity,
   removeCartItem,
 } from "../../lib/cart";
+import { getUser } from "../../lib/auth";
 import { useNavigate } from "react-router-dom";
 
 const moeda = (v) => {
@@ -21,6 +22,7 @@ const moeda = (v) => {
 export default function Carrinho() {
   const [cart, setCart] = useState(() => getCart());
   const [coupon, setCoupon] = useState("");
+  const [appliedCoupon, setAppliedCoupon] = useState(null);
   const [couponMsg, setCouponMsg] = useState("");
   const [cep, setCep] = useState("");
   const [shippingCost, setShippingCost] = useState(0);
@@ -38,6 +40,53 @@ export default function Carrinho() {
     const handler = () => setCart(getCart());
     window.addEventListener("smilepet_cart_update", handler);
     return () => window.removeEventListener("smilepet_cart_update", handler);
+  }, []);
+
+  useEffect(() => {
+    try {
+      const stored = localStorage.getItem("smilepet_coupon");
+      if (stored) {
+        const parsed = JSON.parse(stored);
+        const user = getUser();
+        const userId = user
+          ? user.id || user._id || user.sub || user.uid || user.email
+          : null;
+        const appliedBy = parsed.appliedBy;
+
+        // Se o cupom foi aplicado por um usuário específico (não guest)
+        // e o usuário atual é diferente (ou nulo), removemos o cupom.
+        // Se foi aplicado por 'guest', mantemos (mesmo se logar).
+        if (appliedBy && appliedBy !== "guest" && appliedBy !== userId) {
+          localStorage.removeItem("smilepet_coupon");
+          setAppliedCoupon(null);
+          setCoupon("");
+        } else {
+          setAppliedCoupon(parsed);
+          setCoupon(parsed.code || "");
+        }
+      }
+    } catch {
+      /* ignore */
+    }
+  }, []);
+
+  // Monitorar mudanças de usuário (login/logout) enquanto na tela
+  useEffect(() => {
+    const handler = (e) => {
+      const u = e.detail; // user object or null
+      // Se fez logout, limpar cupom
+      if (!u) {
+        setAppliedCoupon(null);
+        setCoupon("");
+        localStorage.removeItem("smilepet_coupon");
+      }
+      // Se trocou de usuário (ex: login direto), a lógica de mount/validação
+      // acima cuidaria se recarregasse, mas aqui podemos forçar limpeza se necessário.
+      // Por enquanto, limpamos apenas no logout explícito para evitar limpar
+      // cupom de guest ao fazer login.
+    };
+    window.addEventListener("smilepet_user_update", handler);
+    return () => window.removeEventListener("smilepet_user_update", handler);
   }, []);
 
   useEffect(() => {
@@ -116,8 +165,25 @@ export default function Carrinho() {
   );
   // shippingCost is determined by CEP calculation (default 0 until calculated)
 
-  // coupon simple: SMILE10 => 10% off
-  const couponDiscount = coupon === "SMILE10" ? subtotal * 0.1 : 0;
+  // Calculate discount based on applied coupon
+  const couponDiscount = (() => {
+    if (!appliedCoupon) return 0;
+    // Validate basic constraints again just in case
+    if (appliedCoupon.min_purchase && subtotal < appliedCoupon.min_purchase)
+      return 0;
+
+    let discount = 0;
+    if (appliedCoupon.discount_type === "percentage") {
+      discount = subtotal * (Number(appliedCoupon.discount_value) / 100);
+      if (appliedCoupon.max_discount && discount > appliedCoupon.max_discount) {
+        discount = Number(appliedCoupon.max_discount);
+      }
+    } else {
+      discount = Number(appliedCoupon.discount_value);
+    }
+    return Math.min(discount, subtotal);
+  })();
+
   // Total: produtos (subtotal) - cupom + frete (sem VAT)
   const total = subtotal - couponDiscount + (Number(shippingCost) || 0);
 
@@ -128,18 +194,49 @@ export default function Carrinho() {
     (subtotal / FRETE_GRATIS_THRESHOLD) * 100
   );
 
-  const applyCoupon = (e) => {
+  const applyCoupon = async (e) => {
     e.preventDefault();
     if (!coupon) {
       setCouponMsg("Insira um código de cupom");
       return;
     }
-    if (coupon === "SMILE10") {
-      setCouponMsg("Cupom aplicado: 10% off");
-    } else {
-      setCouponMsg("Cupom inválido");
+    setCouponMsg("Validando...");
+
+    try {
+      const res = await fetch("https://apismilepet.vercel.app/api/coupons");
+      if (!res.ok) throw new Error("Erro ao validar cupom");
+      const data = await res.json();
+      const list = Array.isArray(data) ? data : data.data || [];
+
+      const found = list.find((c) => c.code === coupon);
+      if (!found) throw new Error("Cupom não encontrado");
+
+      // Validations
+      if (!found.active) throw new Error("Cupom inativo");
+      const now = new Date();
+      if (found.start_date && new Date(found.start_date) > now)
+        throw new Error("Cupom ainda não válido");
+      if (found.end_date && new Date(found.end_date) < now)
+        throw new Error("Cupom expirado");
+      if (found.min_purchase && subtotal < found.min_purchase)
+        throw new Error(`Valor mínimo: ${moeda(found.min_purchase)}`);
+
+      const user = getUser();
+      const userId = user
+        ? user.id || user._id || user.sub || user.uid || user.email
+        : "guest";
+      const couponData = { ...found, appliedBy: userId };
+
+      setAppliedCoupon(couponData);
+      localStorage.setItem("smilepet_coupon", JSON.stringify(couponData));
+      setCouponMsg("Cupom aplicado com sucesso!");
+    } catch (err) {
+      setCouponMsg(err.message);
+      setAppliedCoupon(null);
+      localStorage.removeItem("smilepet_coupon");
     }
-    setTimeout(() => setCouponMsg(""), 2500);
+
+    setTimeout(() => setCouponMsg(""), 3000);
   };
 
   const calculateShipping = async (e) => {
@@ -494,6 +591,13 @@ export default function Carrinho() {
                 <div className={styles.bold}>{moeda(subtotal)}</div>
               </div>
             </div>
+
+            {couponDiscount > 0 && (
+              <div className={styles.rowBetween} style={{ color: "#28a745" }}>
+                <span>Desconto ({appliedCoupon?.code})</span>
+                <span>- {moeda(couponDiscount)}</span>
+              </div>
+            )}
 
             <div className={styles.shippingSection}>
               <div className={styles.shippingTitle}>Envio</div>
