@@ -75,9 +75,10 @@ export default function MeusPedidos() {
       let filtered = [];
       if (email) {
         const target = String(email).toLowerCase();
-        filtered = found.arr.filter(
-          (o) => String(o.email || "").toLowerCase() === target
-        );
+        filtered = found.arr.filter((o) => {
+          const orderEmail = o.email || o.customer_data?.email || "";
+          return String(orderEmail).toLowerCase() === target;
+        });
       }
 
       // normalize order items
