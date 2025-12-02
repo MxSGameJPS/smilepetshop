@@ -15,7 +15,6 @@ const avaliacoes = [
     titulo: "Altamente recomendado",
     texto:
       "Maravilhoso produto recomendo 🐈🐾🥰.",
-    autor: "Emma Carter",
   },
   {
     nota: 5,
