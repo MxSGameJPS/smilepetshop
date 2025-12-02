@@ -64,7 +64,7 @@ export default function Footer() {
             <h4>Contato</h4>
             <ul>
               <li>SmilePetShop</li>
-              <li>(21) 97666-3909</li>
+              <li>(21) 3955-2133</li>
               <li>
                 <a href="mailto:info@shopdogandco.com">
                   contato@smilepetshop.com.br
