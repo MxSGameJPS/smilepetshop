@@ -1,14 +1,15 @@
 .pedidosWrap {
-  max-width: 980px;
-  margin: 170px auto;
-  padding: 18px;
+  max-width: 100%;
+  margin: 0 auto;
+  padding: 0;
   color: #073b4c;
 }
 
 .pedidosWrap h1 {
-  text-align: center;
+  text-align: left;
   margin-bottom: 24px;
   color: #073b4c;
+  font-size: 24px;
 }
 
 .center {
@@ -20,7 +21,7 @@
   padding: 40px;
   border: 1px dashed #e6e6e6;
   border-radius: 8px;
-  margin-top: 170px;
+  margin-top: 20px;
 }
 
 .emptyBox h2 {
@@ -106,4 +107,106 @@
 .cancelBtn[disabled] {
   opacity: 0.6;
   cursor: default;
+}
+
+/* New Details Styles */
+.detailsContent {
+  padding: 16px;
+  background-color: #f9f9f9;
+  border-radius: 8px;
+  margin-top: 10px;
+  border: 1px solid #eee;
+}
+
+.section {
+  margin-bottom: 20px;
+}
+
+.section h4 {
+  margin: 0 0 12px 0;
+  color: #073b4c;
+  font-size: 16px;
+  border-bottom: 2px solid #fc6100;
+  display: inline-block;
+  padding-bottom: 4px;
+}
+
+.itemsList {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.itemRow {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: white;
+  padding: 10px;
+  border-radius: 6px;
+  border: 1px solid #eee;
+}
+
+.itemImage {
+  width: 50px;
+  height: 50px;
+  object-fit: cover;
+  border-radius: 4px;
+  border: 1px solid #ddd;
+}
+
+.itemInfo {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.itemName {
+  font-weight: 600;
+  color: #333;
+  font-size: 14px;
+}
+
+.itemMeta {
+  font-size: 12px;
+  color: #666;
+}
+
+.itemTotal {
+  font-weight: 700;
+  color: #073b4c;
+}
+
+.rowLayout {
+  display: flex;
+  gap: 24px;
+  flex-wrap: wrap;
+}
+
+.rowLayout > .section {
+  flex: 1;
+  min-width: 250px;
+}
+
+.addressInfo p {
+  margin: 4px 0;
+  color: #555;
+  font-size: 14px;
+}
+
+.summaryRow {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 8px;
+  font-size: 14px;
+  color: #555;
+}
+
+.totalRow {
+  font-weight: 700;
+  color: #fc6100;
+  font-size: 16px;
+  border-top: 1px solid #ddd;
+  padding-top: 8px;
+  margin-top: 8px;
 }

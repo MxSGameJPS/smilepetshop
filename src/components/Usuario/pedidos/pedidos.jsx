@@ -205,7 +205,87 @@ export default function MeusPedidos() {
             </div>
             <details className={styles.details}>
               <summary>Ver detalhes</summary>
-              <pre className={styles.pre}>{JSON.stringify(o.raw, null, 2)}</pre>
+              <div className={styles.detailsContent}>
+                <div className={styles.section}>
+                  <h4>Itens do Pedido</h4>
+                  <div className={styles.itemsList}>
+                    {(o.raw.items_data || o.raw.itens || []).map((item, idx) => (
+                      <div key={idx} className={styles.itemRow}>
+                        {item.imagem_url && (
+                          <img
+                            src={item.imagem_url}
+                            alt={item.nome}
+                            className={styles.itemImage}
+                          />
+                        )}
+                        <div className={styles.itemInfo}>
+                          <span className={styles.itemName}>
+                            {item.nome || item.produto_nome}
+                          </span>
+                          <span className={styles.itemMeta}>
+                            Qtd: {item.quantidade} x{" "}
+                            {new Intl.NumberFormat("pt-BR", {
+                              style: "currency",
+                              currency: "BRL",
+                            }).format(item.precoUnit || item.preco_unitario || 0)}
+                          </span>
+                        </div>
+                        <div className={styles.itemTotal}>
+                          {new Intl.NumberFormat("pt-BR", {
+                            style: "currency",
+                            currency: "BRL",
+                          }).format(
+                            (item.precoUnit || item.preco_unitario || 0) *
+                              (item.quantidade || 1)
+                          )}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                <div className={styles.rowLayout}>
+                  <div className={styles.section}>
+                    <h4>Endereço de Entrega</h4>
+                    {o.raw.customer_data ? (
+                      <div className={styles.addressInfo}>
+                        <p>
+                          {o.raw.customer_data.address1 || o.raw.customer_data.rua}
+                          , {o.raw.customer_data.numero}
+                        </p>
+                        <p>
+                          {o.raw.customer_data.bairro
+                            ? `${o.raw.customer_data.bairro}, `
+                            : ""}
+                          {o.raw.customer_data.city || o.raw.customer_data.cidade}
+                          {" - "}
+                          {o.raw.customer_data.state || o.raw.customer_data.estado}
+                        </p>
+                        <p>CEP: {o.raw.customer_data.postal || o.raw.customer_data.cep}</p>
+                      </div>
+                    ) : (
+                      <p>Endereço não disponível</p>
+                    )}
+                  </div>
+
+                  <div className={styles.section}>
+                    <h4>Resumo</h4>
+                    <div className={styles.summaryRow}>
+                      <span>Frete ({o.raw.shipping_data?.serviceName || "Envio"}):</span>
+                      <span>
+                        {new Intl.NumberFormat("pt-BR", {
+                          style: "currency",
+                          currency: "BRL",
+                        }).format(o.raw.shipping_data?.cost || 0)}
+                      </span>
+                    </div>
+                    <div className={`${styles.summaryRow} ${styles.totalRow}`}>
+                      <span>Total:</span>
+                      <span>{o.total || "R$ 0,00"}</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
             </details>
           </li>
         ))}

@@ -1,79 +1,201 @@
 .perfilSection {
-  max-width: 1400px;
-  margin: 170px auto;
-  padding: 18px;
-  background: #fff;
-  border-radius: 10px;
-  box-shadow: 0 6px 24px rgba(7, 59, 76, 0.05);
+  padding: 40px 20px;
+  background-color: #f5f5f5;
+  min-height: calc(100vh - 200px);
+  margin-top: 140px;
 }
 
-.perfilSection h1 {
-  font-size: 3.4rem;
-  margin-bottom: 16px;
-  color: #fc6100;
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: flex;
+  gap: 30px;
+  align-items: flex-start;
 }
 
-.perfilSection p {
-  font-size: 1rem;
-  margin-bottom: 25px;
-  color: #073b4c;
+/* Sidebar Styles */
+.sidebar {
+  width: 250px;
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+  overflow: hidden;
+  flex-shrink: 0;
 }
 
-.form {
-  display: grid;
-  gap: 12px;
+.sidebarHeader {
+  padding: 20px;
+  background-color: #073b4c;
+  color: white;
 }
-.row {
+
+.sidebarHeader h3 {
+  margin: 0;
+  font-size: 18px;
+  text-align: center;
+}
+
+.nav {
   display: flex;
   flex-direction: column;
 }
-.row label {
-  font-weight: 700;
-  margin-bottom: 6px;
+
+.navButton {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px 20px;
+  background: none;
+  border: none;
+  width: 100%;
+  text-align: left;
+  cursor: pointer;
+  font-size: 16px;
+  color: #555;
+  transition: all 0.2s;
+  border-left: 4px solid transparent;
+}
+
+.navButton:hover {
+  background-color: #f9f9f9;
   color: #073b4c;
 }
-.row input {
-  padding: 10px 12px;
-  border-radius: 8px;
-  border: 1px solid #e6e6e6;
-  background: transparent;
-  color: #000000;
+
+.navButton.active {
+  background-color: #f0f7fa;
+  color: #073b4c;
+  border-left-color: #fc6100;
+  font-weight: 600;
 }
-.actions {
+
+/* Content Area */
+.content {
+  flex: 1;
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+  padding: 30px;
+  min-height: 500px;
+  max-width: 750px;
+  text-align: center;
+}
+
+/* DadosUsuario Styles (migrated from old perfil) */
+.dadosContainer h2 {
+  color: #073b4c;
+  margin-bottom: 8px;
+}
+
+.subtitle {
+  color: #666;
+  margin-bottom: 24px;
+}
+
+.form {
   display: flex;
-  gap: 12px;
-  margin-top: 12px;
+  flex-direction: column;
+  gap: 16px;
+  text-align: center;
+}
+
+.row {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
   align-items: center;
 }
-.saveBtn {
-  background: #fc6100;
-  color: #fff;
-  border: none;
-  padding: 10px 16px;
-  border-radius: 8px;
-  cursor: pointer;
+
+.row label {
+  font-weight: 600;
+  color: #444;
 }
-.deleteBtn {
-  background: transparent;
-  color: #c62828;
-  border: 1px solid rgba(198, 40, 40, 0.14);
-  padding: 8px 12px;
-  border-radius: 8px;
-  cursor: pointer;
-}
-.ordersBtn {
-  background: transparent;
+
+.row input {
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-size: 16px;
+  width: 100%;
+  max-width: 400px;
+  background-color: transparent;
   color: #073b4c;
-  border: 1px solid rgba(7, 59, 76, 0.06);
-  padding: 8px 12px;
-  border-radius: 8px;
-  text-decoration: none;
 }
+
+.row input:focus {
+  outline: none;
+  border-color: #fc6100;
+}
+
+.actions {
+  display: flex;
+  gap: 16px;
+  margin-top: 20px;
+  align-items: center;
+  justify-content: center;
+}
+
+.saveBtn {
+  background-color: #fc6100;
+  color: white;
+  border: 1px solid #fc6100;
+  padding: 12px 24px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 16px;
+  transition: background 0.2s;
+}
+
+.saveBtn:hover {
+  background-color: #ffffff;
+  color: #fc6100;
+  border-color: #fc6100;
+}
+
+.deleteBtn {
+  background: none;
+  border: 1px solid #d32f2f;
+  color: #d32f2f;
+  padding: 11px 23px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 16px;
+  transition: all 0.2s;
+}
+
+.deleteBtn:hover {
+  background-color: #b8001c;
+  color: white;
+  border-color: #b8001c;
+}
+
 .message {
-  color: #0a8a00;
-  font-weight: 700;
+  padding: 10px;
+  background-color: #e8f5e9;
+  color: #2e7d32;
+  border-radius: 4px;
 }
+
 .error {
-  color: #b00020;
-  font-weight: 700;
+  padding: 10px;
+  background-color: #ffebee;
+  color: #c62828;
+  border-radius: 4px;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .container {
+    flex-direction: column;
+  }
+  
+  .sidebar {
+    width: 100%;
+  }
+  
+  .content {
+    width: 100%;
+    padding: 20px;
+  }
 }
