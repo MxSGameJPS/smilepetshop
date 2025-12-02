@@ -9,6 +9,45 @@ export default function VendaDetalhes() {
   const [order, setOrder] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [showCancelModal, setShowCancelModal] = useState(false);
+  const [justification, setJustification] = useState("");
+  const [canceling, setCanceling] = useState(false);
+
+  const handleCancelOrder = async () => {
+    if (!justification.trim()) {
+      alert("Por favor, informe uma justificativa.");
+      return;
+    }
+
+    setCanceling(true);
+    try {
+      const res = await fetch("https://apismilepet.vercel.app/api/orders/cancel", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          orderId: order.id,
+          justificativa: justification,
+        }),
+      });
+
+      if (!res.ok) {
+        const errData = await res.json();
+        throw new Error(errData.message || "Erro ao cancelar venda");
+      }
+
+      setOrder((prev) => ({ ...prev, status: "CANCELLED" }));
+      setShowCancelModal(false);
+      setJustification("");
+      alert("Venda cancelada com sucesso!");
+    } catch (err) {
+      console.error(err);
+      alert("Erro ao cancelar venda: " + err.message);
+    } finally {
+      setCanceling(false);
+    }
+  };
 
   useEffect(() => {
     fetch(`https://apismilepet.vercel.app/api/orders/${id}`)
@@ -118,33 +157,47 @@ export default function VendaDetalhes() {
       </button>
 
       <div className={styles.header}>
-        <h2 className={styles.title}>Venda #{order.id}</h2>
-        <span className={styles.date}>{formatDate(order.created_at)}</span>
-        {/* aplicar classe de cor conforme status */}
-        {(() => {
-          const s = (order.status || "").toString().toLowerCase();
-          let statusClass = styles.status;
-          if (
-            s.includes("cancel") ||
-            s.includes("cancelado") ||
-            s.includes("canceled")
-          ) {
-            statusClass = `${styles.status} ${styles.statusCancelado}`;
-          } else if (
-            s.includes("pend") ||
-            s.includes("pendente") ||
-            s.includes("pending")
-          ) {
-            statusClass = `${styles.status} ${styles.statusPendente}`;
-          } else if (
-            s.includes("paid") ||
-            s.includes("pago") ||
-            s.includes("conclu")
-          ) {
-            statusClass = `${styles.status} ${styles.statusPago}`;
-          }
-          return <p className={statusClass}>{order.status}</p>;
-        })()}
+        <div>
+          <h2 className={styles.title}>Venda #{order.id}</h2>
+          <span className={styles.date}>{formatDate(order.created_at)}</span>
+        </div>
+        
+        <div className={styles.headerActions}>
+          {order.status !== "CANCELLED" && (
+            <button 
+              className={styles.cancelButton}
+              onClick={() => setShowCancelModal(true)}
+            >
+              Cancelar Venda
+            </button>
+          )}
+          
+          {/* aplicar classe de cor conforme status */}
+          {(() => {
+            const s = (order.status || "").toString().toLowerCase();
+            let statusClass = styles.status;
+            if (
+              s.includes("cancel") ||
+              s.includes("cancelado") ||
+              s.includes("canceled")
+            ) {
+              statusClass = `${styles.status} ${styles.statusCancelado}`;
+            } else if (
+              s.includes("pend") ||
+              s.includes("pendente") ||
+              s.includes("pending")
+            ) {
+              statusClass = `${styles.status} ${styles.statusPendente}`;
+            } else if (
+              s.includes("paid") ||
+              s.includes("pago") ||
+              s.includes("conclu")
+            ) {
+              statusClass = `${styles.status} ${styles.statusPago}`;
+            }
+            return <p className={statusClass}>{order.status}</p>;
+          })()}
+        </div>
       </div>
 
       <div className={styles.section}>
@@ -212,6 +265,38 @@ export default function VendaDetalhes() {
       <div className={styles.totalSection}>
         <h3>Total: {formatCurrency(calculateTotal(order))}</h3>
       </div>
+
+      {showCancelModal && (
+        <div className={styles.modalOverlay}>
+          <div className={styles.modalContent}>
+            <h3>Cancelar Venda</h3>
+            <p>Por favor, informe o motivo do cancelamento:</p>
+            <textarea
+              className={styles.textarea}
+              value={justification}
+              onChange={(e) => setJustification(e.target.value)}
+              placeholder="Ex: Cliente desistiu da compra..."
+              rows={4}
+            />
+            <div className={styles.modalActions}>
+              <button 
+                className={styles.closeButton}
+                onClick={() => setShowCancelModal(false)}
+                disabled={canceling}
+              >
+                Fechar
+              </button>
+              <button 
+                className={styles.confirmButton}
+                onClick={handleCancelOrder}
+                disabled={canceling}
+              >
+                {canceling ? "Cancelando..." : "Confirmar Cancelamento"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
