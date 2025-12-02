@@ -844,8 +844,12 @@ export default function Checkout() {
       }
 
       // Prepara o payload com TUDO que o backend precisa
+      const currentUser = getUser();
+      const currentUserId = pickUserId(currentUser);
+
       const payload = {
         user: {
+          id: currentUserId, // Backend precisa do ID para validar limite de uso do cupom
           firstName: form.firstName,
           lastName: form.lastName,
           email: form.email,
@@ -862,7 +866,7 @@ export default function Checkout() {
         shippingServiceName: shippingServiceName || null,
         shippingServiceId: shippingServiceId || null,
         coupon: appliedCoupon?.code || null,
-        discount: Number(couponDiscount) || 0,
+        // discount: Number(couponDiscount) || 0, // REMOVIDO: Backend calcula o desconto agora
       };
 
       // Save order details for Purchase event on Thank You page (since we redirect away)

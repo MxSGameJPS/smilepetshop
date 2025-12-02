@@ -5,7 +5,7 @@ import { TiChevronLeftOutline, TiChevronRightOutline } from "react-icons/ti";
 
 export default function BannerMobile() {
   // substitua os nomes abaixo pelas imagens que você colocar em public/banners/
-  const slides = ["/banners/bannerMobile.png", "/banners/bannerMobile2.png"];
+  const slides = ["/banners/bannerMobile6.png","/banners/bannerMobile.png", "/banners/bannerMobile2.png"];
   const DELAY = 5000;
   const [index, setIndex] = useState(0);
   const [paused, setPaused] = useState(false);
@@ -37,8 +37,14 @@ export default function BannerMobile() {
   }
 
   function handleBannerClick(i) {
-    // levar o usuário para a página de ofertas em qualquer clique no banner
-    navigate("/ofertas");
+    if (slides[i] === "/banners/bannerMobile6.png") {
+      window.open("https://lista.mercadolivre.com.br/pagina/smilepet/", "_blank");
+    } else if (
+      slides[i] === "/banners/bannerMobile.png" ||
+      slides[i] === "/banners/bannerMobile2.png"
+    ) {
+      navigate("/ofertas");
+    }
   }
 
   return (
