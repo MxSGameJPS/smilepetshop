@@ -21,16 +21,19 @@ export default function VendaDetalhes() {
 
     setCanceling(true);
     try {
-      const res = await fetch("https://apismilepet.vercel.app/api/orders/cancel", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          orderId: order.id,
-          justificativa: justification,
-        }),
-      });
+      const res = await fetch(
+        "https://apismilepet.vercel.app/api/orders/cancel",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            orderId: order.id,
+            justificativa: justification,
+          }),
+        }
+      );
 
       if (!res.ok) {
         const errData = await res.json();
@@ -142,6 +145,64 @@ export default function VendaDetalhes() {
     return { serviceName, cost };
   };
 
+  const getPaymentMethod = (order) => {
+    const candidates = [
+      order.payment_method_id,
+      order.payment_type_id,
+      order.payment_method,
+      order.payment && order.payment.method,
+      order.pay_method,
+      order.pagamento && order.pagamento.method,
+      order.payments &&
+        order.payments[0] &&
+        (order.payments[0].method || order.payments[0].payment_method_id),
+    ];
+    const val = candidates.find(
+      (v) => v !== undefined && v !== null && v !== ""
+    );
+    if (!val) return "-";
+    const key = String(val).toLowerCase();
+    const map = {
+      account_money: "Conta (account_money)",
+      pix: "PIX",
+      bank_transfer: "Transferência bancária",
+      credit_card: "Cartão de crédito",
+      boleto: "Boleto",
+    };
+    return (
+      map[key] ||
+      key.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase())
+    );
+  };
+
+  const getPaymentStatus = (order) => {
+    const candidates = [
+      order.payment_status,
+      order.payment && order.payment.status,
+      order.payment_status_detail,
+      order.status_pagamento || order.status,
+      order.pagamento && order.pagamento.status,
+      order.payments && order.payments[0] && order.payments[0].status,
+    ];
+    const val = candidates.find(
+      (v) => v !== undefined && v !== null && v !== ""
+    );
+    if (!val) return "-";
+    const s = String(val).toLowerCase();
+    if (s.includes("paid") || s.includes("pago") || s.includes("conclu"))
+      return "Pago";
+    if (s.includes("pend") || s.includes("pending") || s.includes("aguard"))
+      return "Pendente";
+    if (
+      s.includes("cancel") ||
+      s.includes("canceled") ||
+      s.includes("cancelado")
+    )
+      return "Cancelado";
+    if (s.includes("refun") || s.includes("devol")) return "Reembolsado";
+    return String(val);
+  };
+
   // Determine items list to display
   const itemsToDisplay =
     order.items_data || order.Items_data || order.itens || [];
@@ -161,17 +222,17 @@ export default function VendaDetalhes() {
           <h2 className={styles.title}>Venda #{order.id}</h2>
           <span className={styles.date}>{formatDate(order.created_at)}</span>
         </div>
-        
+
         <div className={styles.headerActions}>
           {order.status !== "CANCELLED" && (
-            <button 
+            <button
               className={styles.cancelButton}
               onClick={() => setShowCancelModal(true)}
             >
               Cancelar Venda
             </button>
           )}
-          
+
           {/* aplicar classe de cor conforme status */}
           {(() => {
             const s = (order.status || "").toString().toLowerCase();
@@ -231,6 +292,17 @@ export default function VendaDetalhes() {
       </div>
 
       <div className={styles.section}>
+        <h3>Pagamento</h3>
+        <div className={styles.separador}></div>
+        <p>
+          <strong>Método:</strong> {getPaymentMethod(order)}
+        </p>
+        <p>
+          <strong>Status do pagamento:</strong> {getPaymentStatus(order)}
+        </p>
+      </div>
+
+      <div className={styles.section}>
         <h3>Itens do Pedido</h3>
         <div className={styles.separador}></div>
         <table className={styles.table}>
@@ -279,14 +351,14 @@ export default function VendaDetalhes() {
               rows={4}
             />
             <div className={styles.modalActions}>
-              <button 
+              <button
                 className={styles.closeButton}
                 onClick={() => setShowCancelModal(false)}
                 disabled={canceling}
               >
                 Fechar
               </button>
-              <button 
+              <button
                 className={styles.confirmButton}
                 onClick={handleCancelOrder}
                 disabled={canceling}
