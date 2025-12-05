@@ -1,0 +1,265 @@
+.overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+}
+.modal {
+  background: #fff;
+  border-radius: 8px;
+  width: 90%;
+  max-width: 920px;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.3);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  max-height: 90vh; /* limit modal height to viewport */
+}
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 16px;
+  border-bottom: 1px solid #eee;
+  color: #333;
+}
+.closeBtn {
+  background: none;
+  border: 0;
+  font-size: 20px;
+  cursor: pointer;
+  color: #fc6100;
+}
+.body {
+  padding: 16px;
+  overflow: auto; /* allow internal scrolling when content is tall */
+  /* ensure body area scrolls and respects modal max-height */
+  max-height: calc(90vh - 64px); /* subtract header/footer approx. */
+}
+
+/* When modal content is long on small screens, allow the overlay to scroll too */
+.overlay {
+  padding: 20px; /* keep space for modal on small screens */
+}
+.optionsRow {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.card {
+  flex: 1 1 30%;
+  min-width: 220px;
+  padding: 12px;
+  border: 1px solid #eee;
+  border-radius: 8px;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.card:hover {
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.06);
+}
+.selected {
+  border-color: #0070f3;
+}
+.icon {
+  font-size: 28px;
+  color: #69d383;
+}
+
+.iconBoleto {
+  font-size: 28px;
+  color: #000000;
+}
+
+.iconCartao {
+  font-size: 28px;
+  color: #d3915b;
+}
+
+.cardImg {
+  margin-top: 2px;
+  margin-bottom: 2px;
+}
+
+.cardImgem {
+  width: 200px;
+}
+
+.cardTitle {
+  font-weight: 600;
+  color: #333;
+}
+.cardSubtitle {
+  color: #666;
+  font-size: 13px;
+}
+.cardAction {
+  margin-top: 10px;
+}
+.primaryAction {
+  background: #fc6100;
+  color: #fff;
+  border: 0;
+  padding: 8px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+}
+.info {
+  margin-top: 10px;
+  color: #333;
+}
+.error {
+  margin-top: 10px;
+  color: #b00020;
+}
+.pixBox,
+.boletoBox {
+  margin-top: 12px;
+  padding: 12px;
+  border: 1px dashed #ddd;
+  border-radius: 6px;
+  color: #333;
+}
+.qrText textarea {
+  width: 100%;
+}
+.cardForm label {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 12px;
+  align-items: stretch;
+}
+.rowInline {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+}
+.cardActions {
+  margin-top: 8px;
+}
+
+/* Inputs transparentes, borda preta arredondada e texto preto */
+.cardForm input,
+.cardForm select,
+.cardForm textarea {
+  background: transparent;
+  border: 1px solid #000;
+  border-radius: 8px;
+  color: #000;
+  padding: 8px 10px;
+  font-size: 14px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.cardForm input::placeholder,
+.cardForm textarea::placeholder {
+  color: #000;
+  opacity: 0.6;
+}
+
+.cardForm input:focus,
+.cardForm select:focus,
+.cardForm textarea:focus {
+  outline: none;
+  border-color: #000;
+  box-shadow: 0 0 0 3px rgba(0, 0, 0, 0.06);
+}
+
+.cardForm .rowInline > label {
+  flex: 1 1 0;
+}
+.cardForm .rowInline > label:first-child {
+  flex: 2 1 0;
+}
+.cardForm .rowInline > label:last-child {
+  flex: 1 1 0;
+  max-width: 140px;
+}
+
+/* ensure inputs fill their label horizontally */
+.cardForm .rowInline input,
+.cardForm .rowInline select {
+  width: 100%;
+}
+
+/* invalid state */
+.invalid {
+  border-color: #b00020 !important;
+  box-shadow: 0 0 0 3px rgba(176, 0, 32, 0.06);
+}
+
+.errorMessage {
+  color: #b00020;
+  font-size: 13px;
+  margin-top: 6px;
+}
+
+/* small input used for CVV */
+.smallInput {
+  max-width: 140px;
+  width: 100%;
+}
+
+/* select narrower for parcelas */
+.parcelSelect {
+  max-width: 220px;
+  width: 100%;
+  margin-left: 0;
+  display: block;
+}
+
+/* center the parcelas select inside its label for nicer visual balance */
+.cardForm > label > .parcelSelect {
+  margin: 6px auto 0 auto;
+}
+
+/* Additional classes for selected-only panels */
+.selectedPanel {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.backBtn {
+  background: transparent;
+  border: 0;
+  color: #fc6100;
+  cursor: pointer;
+  font-size: 14px;
+}
+.pixOnly,
+.boletoOnly,
+.cardOnly {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  color: #333;
+}
+.iconLarge {
+  font-size: 48px;
+  color: #69d383;
+}
+
+.iconLargeBoleto {
+  font-size: 48px;
+  color: #000000;
+}
+
+.iconLargeCartao {
+  font-size: 48px;
+  color: #d3915b;
+  margin-top: 2px;
+}
+
+.iconLargeCartao h3 {
+  margin-top: 2px;
+  font-size: 20px;
+  color: #333;
+}

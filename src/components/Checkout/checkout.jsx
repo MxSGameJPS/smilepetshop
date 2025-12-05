@@ -4,6 +4,7 @@ import styles from "./checkout.module.css";
 import { getUser, setUser as setStoredUser } from "../../lib/auth";
 import { trackEvent } from "../../lib/meta";
 import { getCart } from "../../lib/cart";
+import PaymentModal from "./PaymentModal";
 
 const EMAIL_STORAGE_KEY = "smilepet_checkout_email";
 
@@ -45,6 +46,9 @@ export default function Checkout() {
   const [appliedCoupon, setAppliedCoupon] = useState(null);
   const [couponInput, setCouponInput] = useState("");
   const [couponMsg, setCouponMsg] = useState("");
+
+  // Payment modal state
+  const [paymentModalOpen, setPaymentModalOpen] = useState(false);
 
   // helper: map various user shapes to our form fields (shared)
   const mapUserToForm = (u) => ({
@@ -475,14 +479,41 @@ export default function Checkout() {
   const summaryTotal = cartItems.reduce((acc, it) => {
     const qty =
       Number(it.quantidade ?? it.quantity ?? it.qtd ?? it.qty ?? 1) || 0;
-    const priceRaw =
+    const price =
       Number(
         it.precoUnit ?? it.preco ?? it.price ?? it.valor ?? it.unit_price ?? 0
       ) || 0;
-    // assume precoUnit is already BRL number; if very large, treat as cents
-    const priceNorm = priceRaw > 10000 ? priceRaw / 100 : priceRaw;
-    return acc + qty * priceNorm;
+    return acc + qty * price;
   }, 0);
+
+  const FRETE_GRATIS_THRESHOLD = 50;
+
+  // If there's a previously saved shipping set to 0 (possible stale 'frete grátis'),
+  // but the current cart subtotal is below the free threshold, clear saved shipping
+  // to avoid showing 'Frete Grátis' incorrectly in the checkout summary.
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem("smilepet_shipping");
+      const label = localStorage.getItem("smilepet_shipping_label");
+      const num = saved != null ? Number(saved) : null;
+      if (
+        num === 0 &&
+        label &&
+        Number(summaryTotal || 0) < FRETE_GRATIS_THRESHOLD
+      ) {
+        localStorage.removeItem("smilepet_shipping");
+        localStorage.removeItem("smilepet_shipping_label");
+        localStorage.removeItem("smilepet_shipping_service_name");
+        localStorage.removeItem("smilepet_shipping_service_id");
+        localStorage.removeItem("smilepet_shipping_option");
+        setShippingNumeric(0);
+        setShippingLabel("");
+        setSelectedShipping(null);
+      }
+    } catch {
+      // ignore
+    }
+  }, [summaryTotal]);
 
   const couponDiscount = (() => {
     if (!appliedCoupon) return 0;
@@ -726,7 +757,7 @@ export default function Checkout() {
     }
   };
 
-  const handleFinalizeCheckout = async () => {
+  const _handleFinalizeCheckout = async () => {
     if (!selectedShipping) {
       alert("Por favor, selecione uma opção de frete antes de continuar.");
       return;
@@ -909,6 +940,33 @@ export default function Checkout() {
     } catch (err) {
       console.error(err);
       alert("Erro de conexão ao criar pagamento.");
+    }
+  };
+
+  // helper to normalize items for the payment modal / backend
+  const buildNormalizedItems = () =>
+    (cartItems || []).map((it) => ({
+      id: it.id ?? it.productId ?? it.sku ?? null,
+      nome: it.nome ?? it.title ?? it.name ?? "",
+      variante: it.variante ?? it.variant ?? null,
+      quantidade: Number(it.quantidade ?? it.quantity ?? it.qty ?? 1) || 1,
+      precoUnit:
+        Number(it.precoUnit ?? it.preco ?? it.price ?? it.unit_price ?? 0) || 0,
+      imagem_url:
+        it.imagem_url || it.imagem || it.image_url || it.image || null,
+      ncm: it.ncm || null,
+    }));
+
+  const getSavedShippingServiceName = () => {
+    try {
+      return (
+        localStorage.getItem("smilepet_shipping_service_name") ||
+        JSON.parse(localStorage.getItem("smilepet_shipping_option") || "null")
+          ?.name ||
+        null
+      );
+    } catch {
+      return null;
     }
   };
 
@@ -1114,7 +1172,24 @@ export default function Checkout() {
                       <button
                         type="button"
                         className={styles.primaryAction}
-                        onClick={calculateShipping}
+                        onClick={async () => {
+                          await calculateShipping();
+                          // only open modal if shipping was already selected or saved
+                          try {
+                            const saved =
+                              localStorage.getItem("smilepet_shipping");
+                            if (saved != null) {
+                              // shipping available (includes '0' for free shipping)
+                              setPaymentModalOpen(true);
+                            } else {
+                              // show shipping options to let user choose (modal would block interaction)
+                              setStep("shipping");
+                            }
+                          } catch {
+                            // fallback: open shipping step
+                            setStep("shipping");
+                          }
+                        }}
                       >
                         Ir para o Pagamento
                       </button>
@@ -1212,7 +1287,7 @@ export default function Checkout() {
                     <button
                       type="button"
                       className={styles.primaryAction}
-                      onClick={handleFinalizeCheckout}
+                      onClick={() => setPaymentModalOpen(true)}
                       disabled={!selectedShipping}
                     >
                       Ir para o Pagamento
@@ -1238,7 +1313,16 @@ export default function Checkout() {
                       <button
                         type="button"
                         className={styles.submitBtn}
-                        onClick={handleFinalizeCheckout} // Alterado aqui
+                        onClick={() => {
+                          try {
+                            const saved =
+                              localStorage.getItem("smilepet_shipping");
+                            if (saved != null) setPaymentModalOpen(true);
+                            else setStep("shipping");
+                          } catch {
+                            setStep("shipping");
+                          }
+                        }}
                       >
                         Pagar com Mercado Pago
                       </button>
@@ -1268,7 +1352,7 @@ export default function Checkout() {
                       ) || 1;
                     // prefer the cart's precoUnit field (canonical in cart.js),
                     // then fall back to other common names
-                    const priceRaw =
+                    const price =
                       Number(
                         it.precoUnit ??
                           it.preco ??
@@ -1277,7 +1361,6 @@ export default function Checkout() {
                           it.unit_price ??
                           0
                       ) || 0;
-                    const price = priceRaw > 10000 ? priceRaw / 100 : priceRaw;
                     const lineTotal = qty * price;
                     const imageUrl =
                       it.imagem_url ||
@@ -1371,6 +1454,39 @@ export default function Checkout() {
           </aside>
         </div>
       </div>
+      <PaymentModal
+        isOpen={paymentModalOpen}
+        onClose={() => setPaymentModalOpen(false)}
+        items={buildNormalizedItems()}
+        user={getUser()}
+        formData={form}
+        shippingCost={shippingNumeric}
+        shippingServiceName={getSavedShippingServiceName() || shippingLabel}
+        coupon={appliedCoupon?.code}
+        onSuccess={(data) => {
+          try {
+            // persist for thank you page tracking (backend may return purchase info)
+            const payload = {
+              content_ids: (buildNormalizedItems() || []).map((it) =>
+                String(it.id)
+              ),
+              value: Number(finalTotal) || 0,
+              currency: "BRL",
+              num_items: (buildNormalizedItems() || []).reduce(
+                (a, b) => a + (b.quantidade || 0),
+                0
+              ),
+            };
+            localStorage.setItem(
+              "smilepet_last_order",
+              JSON.stringify(payload)
+            );
+            console.debug("Payment success:", data, payload);
+          } catch (e) {
+            console.error("Failed to persist last order", e);
+          }
+        }}
+      />
     </div>
   );
 }

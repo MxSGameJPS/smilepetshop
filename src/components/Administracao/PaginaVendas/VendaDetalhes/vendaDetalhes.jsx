@@ -58,8 +58,10 @@ export default function VendaDetalhes() {
         if (!res.ok) throw new Error("Erro ao buscar detalhes da venda");
         return res.json();
       })
-      .then((data) => {
-        setOrder(data);
+      .then((raw) => {
+        // API can return the order directly or wrapped as { data: { ... } }
+        const payload = raw && raw.data ? raw.data : raw;
+        setOrder(payload);
         setLoading(false);
       })
       .catch((err) => {
@@ -118,12 +120,12 @@ export default function VendaDetalhes() {
 
   const getCustomerName = (order) => {
     if (order.customer_data) {
-      const { firstName, lastName } = order.customer_data;
-      if (firstName || lastName) {
-        return `${firstName || ""} ${lastName || ""}`.trim();
+      const { nome, sobrenome } = order.customer_data;
+      if (nome || sobrenome) {
+        return `${nome || ""} ${sobrenome || ""}`.trim();
       }
     }
-    return order.usuario_nome || "Cliente não identificado";
+    return order.nome || "Cliente não identificado";
   };
 
   const getCustomerEmail = (order) => {

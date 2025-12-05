@@ -14,13 +14,18 @@ export default function PaginaVendas() {
         if (!res.ok) throw new Error("Erro ao buscar vendas");
         return res.json();
       })
-      .then((data) => {
+      .then((raw) => {
+        // API may return either an array or a wrapper { data: [...] }
+        const payload =
+          raw && raw.data && Array.isArray(raw.data)
+            ? raw.data
+            : Array.isArray(raw)
+            ? raw
+            : [];
         // Sort by date descending
-        const sorted = Array.isArray(data)
-          ? data.sort(
-              (a, b) => new Date(b.created_at) - new Date(a.created_at)
-            )
-          : [];
+        const sorted = payload.sort(
+          (a, b) => new Date(b.created_at) - new Date(a.created_at)
+        );
         setOrders(sorted);
         setLoading(false);
       })
@@ -45,26 +50,32 @@ export default function PaginaVendas() {
 
   const calculateTotal = (order) => {
     let total = 0;
-    
+
     // Check for items_data (lowercase based on JSON) or Items_data
     const items = order.items_data || order.Items_data;
-    
+
     if (items && Array.isArray(items)) {
       total += items.reduce((acc, item) => {
         const price = Number(item.precoUnit) || 0;
         const qty = Number(item.quantidade) || 1;
-        return acc + (price * qty);
+        return acc + price * qty;
       }, 0);
     } else if (order.itens && Array.isArray(order.itens)) {
-        // Fallback to existing structure
-        total += order.itens.reduce((acc, item) => acc + (item.quantidade * item.preco_unitario), 0);
+      // Fallback to existing structure
+      total += order.itens.reduce(
+        (acc, item) => acc + item.quantidade * item.preco_unitario,
+        0
+      );
     }
 
     // Add shipping
     if (order.shipping_data) {
-        if (order.shipping_data.cost) total += Number(order.shipping_data.cost) || 0;
-        else if (order.shipping_data.cust) total += Number(order.shipping_data.cust) || 0;
-        else if (order.shipping_data.price) total += Number(order.shipping_data.price) || 0;
+      if (order.shipping_data.cost)
+        total += Number(order.shipping_data.cost) || 0;
+      else if (order.shipping_data.cust)
+        total += Number(order.shipping_data.cust) || 0;
+      else if (order.shipping_data.price)
+        total += Number(order.shipping_data.price) || 0;
     }
 
     // Fallback to order.total if calculation yields 0 (and total exists)
@@ -82,15 +93,16 @@ export default function PaginaVendas() {
 
   const getCustomerName = (order) => {
     if (order.customer_data) {
-        const { firstName, lastName } = order.customer_data;
-        if (firstName || lastName) {
-            return `${firstName || ""} ${lastName || ""}`.trim();
-        }
+      const { nome, sobrenome } = order.customer_data;
+      if (nome || sobrenome) {
+        return `${nome || ""} ${sobrenome || ""}`.trim();
+      }
     }
-    return order.usuario_nome || "Cliente não identificado";
+    return order.nome || "Cliente não identificado";
   };
 
-  if (loading) return <div className={styles.loading}>Carregando vendas...</div>;
+  if (loading)
+    return <div className={styles.loading}>Carregando vendas...</div>;
   if (error) return <div className={styles.error}>{error}</div>;
 
   const groupedOrders = groupOrdersByDate(orders);
@@ -98,7 +110,7 @@ export default function PaginaVendas() {
   return (
     <section className={styles.container}>
       <h3 className={styles.title}>Vendas Realizadas</h3>
-      
+
       {Object.keys(groupedOrders).length === 0 ? (
         <p>Nenhuma venda encontrada.</p>
       ) : (
@@ -114,7 +126,9 @@ export default function PaginaVendas() {
                 >
                   <div className={styles.cardHeader}>
                     <span className={styles.orderId}>#{order.id}</span>
-                    <span className={styles.status}>{order.status || "Pendente"}</span>
+                    <span className={styles.status}>
+                      {order.status || "Pendente"}
+                    </span>
                   </div>
                   <div className={styles.buyerName}>
                     {getCustomerName(order)}
