@@ -1,0 +1,30 @@
+.dashboardContainer {
+  display: flex;
+  min-height: 100vh;
+  background-color: #f5f7fb; /* Cor de fundo clara para o conteúdo */
+  position: relative;
+}
+
+.contentArea {
+  flex: 1;
+  margin-left: 280px; /* Mesma largura do Sidebar */
+  width: calc(100% - 280px);
+  min-height: 100vh;
+  transition: margin-left 0.3s ease, width 0.3s ease;
+  display: flex;
+  flex-direction: column;
+}
+
+.contentWrapper {
+  flex: 1;
+  padding: 24px 32px;
+  width: 100%;
+  max-width: 100%; /* Permitir expansão total */
+  box-sizing: border-box;
+  text-align: left; /* Resetar alinhamento central do root */
+}
+
+/* Responsividade simples para telas menores, se necessário futuro */
+@media (max-width: 1024px) {
+  /* Adaptações futuras se o sidebar virar overlay/colapsável */
+}

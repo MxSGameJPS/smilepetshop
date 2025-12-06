@@ -24,6 +24,11 @@
   padding-bottom: 4px;
 }
 
+.actionsRow {
+  display: flex;
+  gap: 10px;
+}
+
 .searchBar {
   display: flex;
   align-items: center;
@@ -43,6 +48,107 @@
   font-size: 14px;
   background-color: transparent;
   color: black;
+}
+
+.addButton {
+  background-color: #a855f7;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: opacity 0.2s;
+}
+
+.addButton:hover {
+  opacity: 0.9;
+}
+
+/* Form Styles */
+.formCard {
+  background: white;
+  border-radius: 12px;
+  border: 1px solid #e5e7eb;
+  padding: 30px;
+  max-width: 800px;
+  margin: 0 auto;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+}
+
+.formTitle {
+  font-size: 20px;
+  font-weight: 600;
+  margin-bottom: 24px;
+  color: #111;
+  border-bottom: 1px solid #eee;
+  padding-bottom: 10px;
+}
+
+.formGroup {
+  margin-bottom: 20px;
+}
+
+.label {
+  display: block;
+  font-size: 14px;
+  font-weight: 500;
+  color: #374151;
+  margin-bottom: 6px;
+}
+
+.input,
+.textarea {
+  width: 100%;
+  padding: 10px 14px;
+  border-radius: 8px;
+  border: 1px solid #d1d5db;
+  font-size: 14px;
+  outline: none;
+  transition: border-color 0.2s;
+  background-color: transparent; /* Updated per requirement */
+  color: #000;
+}
+
+.input:focus,
+.textarea:focus {
+  border-color: #a855f7;
+  box-shadow: 0 0 0 2px rgba(168, 85, 247, 0.1);
+}
+
+.textarea {
+  min-height: 100px;
+  resize: vertical;
+}
+
+.formActions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 30px;
+}
+
+.btnCancel {
+  background: white;
+  border: 1px solid #d1d5db;
+  color: #374151;
+  padding: 10px 20px;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.btnSave {
+  background: #a855f7;
+  border: none;
+  color: white;
+  padding: 10px 24px;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
 }
 
 /* Table Card */
@@ -81,7 +187,7 @@
 .table {
   width: 100%;
   border-collapse: collapse;
-  min-width: 800px;
+  min-width: 600px;
 }
 
 .table thead {
@@ -106,37 +212,6 @@
   vertical-align: middle;
 }
 
-/* Status Badges */
-.statusBadge {
-  padding: 4px 12px;
-  border-radius: 20px;
-  font-size: 12px;
-  font-weight: 600;
-  display: inline-block;
-  text-align: center;
-  text-transform: capitalize;
-}
-
-.statusPending {
-  background-color: #fef3c7;
-  color: #d97706;
-}
-
-.statusApproved {
-  background-color: #dcfce7;
-  color: #15803d;
-}
-
-.statusCancelled {
-  background-color: #fee2e2;
-  color: #b91c1c;
-}
-
-.statusDefault {
-  background-color: #f3f4f6;
-  color: #6b7280;
-}
-
 .actions {
   display: flex;
   gap: 12px;
@@ -152,16 +227,18 @@
 }
 
 .actionBtn:hover {
-  color: #3b82f6; /* Blue for details/view */
+  color: #6b7280;
 }
 
-.loading,
-.error {
-  text-align: center;
-  padding: 40px;
-  font-size: 16px;
-  color: #666;
+.editBtn:hover {
+  color: #3b82f6;
 }
-.error {
+.deleteBtn:hover {
   color: #ef4444;
+}
+
+input[type="checkbox"] {
+  accent-color: #a855f7;
+  background-color: transparent;
+  cursor: pointer;
 }

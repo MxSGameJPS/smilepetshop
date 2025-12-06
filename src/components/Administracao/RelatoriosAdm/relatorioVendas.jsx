@@ -1,5 +1,7 @@
 import React, { useEffect, useState } from "react";
 import styles from "./relatoriosAdm.module.css";
+import { useNavigate } from "react-router-dom";
+import { FaArrowLeft, FaFileCsv } from "react-icons/fa";
 
 function tryParseArray(respData) {
   if (!respData) return [];
@@ -28,6 +30,7 @@ export default function RelatorioVendas() {
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const navigate = useNavigate();
 
   useEffect(() => {
     let mounted = true;
@@ -35,8 +38,8 @@ export default function RelatorioVendas() {
       setLoading(true);
       try {
         const data = await fetchWithFallback([
-          "https://apismilepet.vercel.app/api/pedidos",
           "https://apismilepet.vercel.app/api/orders",
+          "https://apismilepet.vercel.app/api/pedidos",
         ]);
         const arr = tryParseArray(data) || [];
         if (mounted) setOrders(arr);
@@ -127,7 +130,6 @@ export default function RelatorioVendas() {
       .map((r) =>
         r
           .map((c) => {
-            // escape
             if (typeof c === "string") return `"${c.replace(/"/g, '""')}"`;
             return `"${String(c)}"`;
           })
@@ -160,57 +162,69 @@ export default function RelatorioVendas() {
   if (error) return <div className={styles.error}>{error}</div>;
 
   return (
-    <section className={styles.wrap}>
-      <h2>Relatório de Vendas</h2>
-      <div
-        style={{
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-          marginBottom: 12,
-        }}
+    <div className={styles.container}>
+      <button
+        className={styles.backButton}
+        onClick={() => navigate("/adm/relatorios")}
       >
-        <div>
-          <strong>Número de vendas:</strong> {orders.length}
-          <br />
-          <strong>Valor total:</strong> {formatCurrency(totalValue)}
-        </div>
-        <div>
-          <button className={styles.btn} onClick={exportCSV}>
-            Exportar CSV
-          </button>
-        </div>
+        <FaArrowLeft /> Voltar para Relatórios
+      </button>
+
+      <div className={styles.header}>
+        <h2 className={styles.title}>Relatório de Vendas</h2>
       </div>
 
-      <table className={styles.table}>
-        <thead>
-          <tr>
-            <th>ID</th>
-            <th>Data</th>
-            <th>Cliente</th>
-            <th>Valor</th>
-            <th>Nº Nota Fiscal</th>
-            <th>Status</th>
-          </tr>
-        </thead>
-        <tbody>
-          {orders.map((o, idx) => (
-            <tr key={idx}>
-              <td>{o.id || o.order_id || "-"}</td>
-              <td>{o.created_at || o.date || o.data || "-"}</td>
-              <td>
-                {(o.customer_data &&
-                  (o.customer_data.firstName || o.customer_data.name)) ||
-                  o.usuario_nome ||
-                  "-"}
-              </td>
-              <td>{formatCurrency(calculateTotal(o) || o.total || 0)}</td>
-              <td>{getInvoiceNumber(o)}</td>
-              <td>{o.status || "-"}</td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-    </section>
+      <div className={styles.tableCard}>
+        <div className={styles.tableHeader}>
+          <div className={styles.statsRow}>
+            <span>
+              <strong>Total:</strong> {orders.length} vendas
+            </span>
+            <span>
+              <strong>Faturamento:</strong> {formatCurrency(totalValue)}
+            </span>
+          </div>
+          <button className={styles.btn} onClick={exportCSV}>
+            <FaFileCsv size={16} /> Exportar CSV
+          </button>
+        </div>
+
+        <div className={styles.tableWrapper}>
+          <table className={styles.table}>
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Data</th>
+                <th>Cliente</th>
+                <th>Valor</th>
+                <th>Nº Nota Fiscal</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              {orders.map((o, idx) => (
+                <tr key={idx}>
+                  <td>{o.id || o.order_id || "-"}</td>
+                  <td>
+                    {o.created_at
+                      ? new Date(o.created_at).toLocaleDateString()
+                      : o.date || "-"}
+                  </td>
+                  <td>
+                    {(o.customer_data &&
+                      (o.customer_data.firstName || o.customer_data.name)) ||
+                      o.usuario_nome ||
+                      "-"}
+                  </td>
+                  <td>{formatCurrency(calculateTotal(o) || o.total || 0)}</td>
+                  <td>{getInvoiceNumber(o)}</td>
+                  <td>{o.status || "-"}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
   );
 }

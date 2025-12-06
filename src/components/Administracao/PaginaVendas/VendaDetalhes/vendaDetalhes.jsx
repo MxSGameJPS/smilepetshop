@@ -1,7 +1,15 @@
 import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import styles from "./vendaDetalhes.module.css";
-import { TiArrowBack } from "react-icons/ti";
+import {
+  FaArrowLeft,
+  FaBan,
+  FaCheck,
+  FaClock,
+  FaBox,
+  FaCreditCard,
+  FaUser,
+} from "react-icons/fa";
 
 export default function VendaDetalhes() {
   const { id } = useParams();
@@ -12,6 +20,24 @@ export default function VendaDetalhes() {
   const [showCancelModal, setShowCancelModal] = useState(false);
   const [justification, setJustification] = useState("");
   const [canceling, setCanceling] = useState(false);
+
+  useEffect(() => {
+    fetch(`https://apismilepet.vercel.app/api/orders/${id}`)
+      .then((res) => {
+        if (!res.ok) throw new Error("Erro ao buscar detalhes da venda");
+        return res.json();
+      })
+      .then((raw) => {
+        const payload = raw && raw.data ? raw.data : raw;
+        setOrder(payload);
+        setLoading(false);
+      })
+      .catch((err) => {
+        console.error(err);
+        setError("Não foi possível carregar os detalhes da venda.");
+        setLoading(false);
+      });
+  }, [id]);
 
   const handleCancelOrder = async () => {
     if (!justification.trim()) {
@@ -25,9 +51,7 @@ export default function VendaDetalhes() {
         "https://apismilepet.vercel.app/api/orders/cancel",
         {
           method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
+          headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             orderId: order.id,
             justificativa: justification,
@@ -45,52 +69,22 @@ export default function VendaDetalhes() {
       setJustification("");
       alert("Venda cancelada com sucesso!");
     } catch (err) {
-      console.error(err);
       alert("Erro ao cancelar venda: " + err.message);
     } finally {
       setCanceling(false);
     }
   };
 
-  useEffect(() => {
-    fetch(`https://apismilepet.vercel.app/api/orders/${id}`)
-      .then((res) => {
-        if (!res.ok) throw new Error("Erro ao buscar detalhes da venda");
-        return res.json();
-      })
-      .then((raw) => {
-        // API can return the order directly or wrapped as { data: { ... } }
-        const payload = raw && raw.data ? raw.data : raw;
-        setOrder(payload);
-        setLoading(false);
-      })
-      .catch((err) => {
-        console.error(err);
-        setError("Não foi possível carregar os detalhes da venda.");
-        setLoading(false);
-      });
-  }, [id]);
-
-  if (loading)
-    return <div className={styles.loading}>Carregando detalhes...</div>;
-  if (error) return <div className={styles.error}>{error}</div>;
-  if (!order) return <div className={styles.error}>Venda não encontrada.</div>;
-
   const calculateTotal = (order) => {
     let total = 0;
-    const items = order.items_data || order.Items_data;
+    const items = order.items_data || order.Items_data || order.itens;
 
     if (items && Array.isArray(items)) {
       total += items.reduce((acc, item) => {
-        const price = Number(item.precoUnit) || 0;
+        const price = Number(item.precoUnit || item.preco_unitario) || 0;
         const qty = Number(item.quantidade) || 1;
         return acc + price * qty;
       }, 0);
-    } else if (order.itens) {
-      total += order.itens.reduce(
-        (acc, item) => acc + item.quantidade * item.preco_unitario,
-        0
-      );
     }
 
     if (order.shipping_data) {
@@ -106,24 +100,18 @@ export default function VendaDetalhes() {
     return total;
   };
 
-  const formatCurrency = (val) => {
-    return new Intl.NumberFormat("pt-BR", {
+  const formatCurrency = (val) =>
+    new Intl.NumberFormat("pt-BR", {
       style: "currency",
       currency: "BRL",
     }).format(val);
-  };
-
-  const formatDate = (dateString) => {
-    if (!dateString) return "-";
-    return new Date(dateString).toLocaleString("pt-BR");
-  };
+  const formatDate = (dateString) =>
+    dateString ? new Date(dateString).toLocaleString("pt-BR") : "-";
 
   const getCustomerName = (order) => {
     if (order.customer_data) {
       const { nome, sobrenome } = order.customer_data;
-      if (nome || sobrenome) {
-        return `${nome || ""} ${sobrenome || ""}`.trim();
-      }
+      if (nome || sobrenome) return `${nome || ""} ${sobrenome || ""}`.trim();
     }
     return order.nome || "Cliente não identificado";
   };
@@ -152,216 +140,231 @@ export default function VendaDetalhes() {
       order.payment_method_id,
       order.payment_type_id,
       order.payment_method,
-      order.payment && order.payment.method,
+      order.payment?.method,
       order.pay_method,
-      order.pagamento && order.pagamento.method,
-      order.payments &&
-        order.payments[0] &&
-        (order.payments[0].method || order.payments[0].payment_method_id),
+      order.pagamento?.method,
+      order.payments?.[0]?.method || order.payments?.[0]?.payment_method_id,
     ];
     const val = candidates.find(
       (v) => v !== undefined && v !== null && v !== ""
     );
     if (!val) return "-";
-    const key = String(val).toLowerCase();
-    const map = {
-      account_money: "Conta (account_money)",
-      pix: "PIX",
-      bank_transfer: "Transferência bancária",
-      credit_card: "Cartão de crédito",
-      boleto: "Boleto",
-    };
-    return (
-      map[key] ||
-      key.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase())
-    );
-  };
 
-  const getPaymentStatus = (order) => {
-    const candidates = [
-      order.payment_status,
-      order.payment && order.payment.status,
-      order.payment_status_detail,
-      order.status_pagamento || order.status,
-      order.pagamento && order.pagamento.status,
-      order.payments && order.payments[0] && order.payments[0].status,
-    ];
-    const val = candidates.find(
-      (v) => v !== undefined && v !== null && v !== ""
-    );
-    if (!val) return "-";
+    // Simple Mapping
     const s = String(val).toLowerCase();
-    if (s.includes("paid") || s.includes("pago") || s.includes("conclu"))
-      return "Pago";
-    if (s.includes("pend") || s.includes("pending") || s.includes("aguard"))
-      return "Pendente";
-    if (
-      s.includes("cancel") ||
-      s.includes("canceled") ||
-      s.includes("cancelado")
-    )
-      return "Cancelado";
-    if (s.includes("refun") || s.includes("devol")) return "Reembolsado";
-    return String(val);
+    if (s.includes("pix")) return "PIX";
+    if (s.includes("credit") || s.includes("card")) return "Cartão de Crédito";
+    if (s.includes("boleto")) return "Boleto";
+    return s;
   };
 
-  // Determine items list to display
+  const getStatusBadge = (status) => {
+    if (!status)
+      return (
+        <span className={`${styles.statusBadge} ${styles.statusPending}`}>
+          <FaClock /> Pendente
+        </span>
+      );
+    const s = status.toLowerCase();
+    if (s.includes("pago") || s.includes("approved") || s.includes("aprovado"))
+      return (
+        <span className={`${styles.statusBadge} ${styles.statusApproved}`}>
+          <FaCheck /> Aprovado
+        </span>
+      );
+    if (s.includes("cancel") || s.includes("refund"))
+      return (
+        <span className={`${styles.statusBadge} ${styles.statusCancelled}`}>
+          <FaBan /> Cancelado
+        </span>
+      );
+    return (
+      <span className={`${styles.statusBadge} ${styles.statusPending}`}>
+        <FaClock /> {status}
+      </span>
+    );
+  };
+
+  if (loading)
+    return (
+      <div className={styles.container}>
+        <p style={{ textAlign: "center", marginTop: 50 }}>
+          Carregando detalhes...
+        </p>
+      </div>
+    );
+  if (error)
+    return (
+      <div className={styles.container}>
+        <p style={{ textAlign: "center", marginTop: 50, color: "red" }}>
+          {error}
+        </p>
+      </div>
+    );
+  if (!order)
+    return (
+      <div className={styles.container}>
+        <p style={{ textAlign: "center", marginTop: 50 }}>
+          Venda não encontrada.
+        </p>
+      </div>
+    );
+
   const itemsToDisplay =
     order.items_data || order.Items_data || order.itens || [];
+  const shipInfo = getShippingInfo(order);
 
   return (
     <div className={styles.container}>
-      <h3>Detalhes da venda {getCustomerName(order)}</h3>
       <button
         className={styles.backButton}
         onClick={() => navigate("/adm/vendas")}
       >
-        <TiArrowBack /> Voltar
+        <FaArrowLeft /> Voltar para Vendas
       </button>
 
-      <div className={styles.header}>
-        <div>
-          <h2 className={styles.title}>Venda #{order.id}</h2>
-          <span className={styles.date}>{formatDate(order.created_at)}</span>
+      {/* Main Order Card */}
+      <div className={styles.card}>
+        <div className={styles.cardHeader}>
+          <div>
+            <h2 className={styles.cardTitle}>Venda #{order.id}</h2>
+            <span className={styles.date}>
+              Realizada em {formatDate(order.created_at)}
+            </span>
+          </div>
+          <div style={{ display: "flex", gap: "16px", alignItems: "center" }}>
+            {getStatusBadge(order.status)}
+            {order.status !== "CANCELLED" && (
+              <button
+                className={styles.cancelButton}
+                onClick={() => setShowCancelModal(true)}
+              >
+                Cancelar Venda
+              </button>
+            )}
+          </div>
         </div>
 
-        <div className={styles.headerActions}>
-          {order.status !== "CANCELLED" && (
-            <button
-              className={styles.cancelButton}
-              onClick={() => setShowCancelModal(true)}
-            >
-              Cancelar Venda
-            </button>
-          )}
+        <div className={styles.infoGrid}>
+          <div className={styles.infoColumn}>
+            <h4>
+              <FaUser style={{ marginRight: 6, verticalAlign: "middle" }} />{" "}
+              Cliente
+            </h4>
+            <div className={styles.infoRow}>
+              <span className={styles.infoLabel}>Nome</span>
+              <span className={styles.infoValue}>{getCustomerName(order)}</span>
+            </div>
+            <div className={styles.infoRow}>
+              <span className={styles.infoLabel}>Email</span>
+              <span className={styles.infoValue}>
+                {getCustomerEmail(order)}
+              </span>
+            </div>
+          </div>
 
-          {/* aplicar classe de cor conforme status */}
-          {(() => {
-            const s = (order.status || "").toString().toLowerCase();
-            let statusClass = styles.status;
-            if (
-              s.includes("cancel") ||
-              s.includes("cancelado") ||
-              s.includes("canceled")
-            ) {
-              statusClass = `${styles.status} ${styles.statusCancelado}`;
-            } else if (
-              s.includes("pend") ||
-              s.includes("pendente") ||
-              s.includes("pending")
-            ) {
-              statusClass = `${styles.status} ${styles.statusPendente}`;
-            } else if (
-              s.includes("paid") ||
-              s.includes("pago") ||
-              s.includes("conclu")
-            ) {
-              statusClass = `${styles.status} ${styles.statusPago}`;
-            }
-            return <p className={statusClass}>{order.status}</p>;
-          })()}
+          <div className={styles.infoColumn}>
+            <h4>
+              <FaCreditCard
+                style={{ marginRight: 6, verticalAlign: "middle" }}
+              />{" "}
+              Pagamento
+            </h4>
+            <div className={styles.infoRow}>
+              <span className={styles.infoLabel}>Método</span>
+              <span className={styles.infoValue}>
+                {getPaymentMethod(order)}
+              </span>
+            </div>
+            {/* Could add Payment ID or other details here */}
+          </div>
+
+          <div className={styles.infoColumn}>
+            <h4>
+              <FaBox style={{ marginRight: 6, verticalAlign: "middle" }} />{" "}
+              Entrega
+            </h4>
+            <div className={styles.infoRow}>
+              <span className={styles.infoLabel}>Serviço</span>
+              <span className={styles.infoValue}>{shipInfo.serviceName}</span>
+            </div>
+            <div className={styles.infoRow}>
+              <span className={styles.infoLabel}>Custo</span>
+              <span className={styles.infoValue}>
+                {formatCurrency(shipInfo.cost)}
+              </span>
+            </div>
+          </div>
         </div>
       </div>
 
-      <div className={styles.section}>
-        <h3>Dados do Cliente</h3>
-        <div className={styles.separador}></div>
-        <p>
-          <strong>Nome:</strong> {getCustomerName(order)}
-        </p>
-        <p>
-          <strong>Email:</strong> {getCustomerEmail(order)}
-        </p>
-      </div>
-
-      <div className={styles.section}>
-        <h3>Entrega</h3>
-        <div className={styles.separador}></div>
-        {(() => {
-          const ship = getShippingInfo(order);
-          return (
-            <>
-              <p>
-                <strong>Tipo de entrega:</strong> {ship.serviceName || "-"}
-              </p>
-              <p>
-                <strong>Custo de entrega:</strong>{" "}
-                {formatCurrency(ship.cost || 0)}
-              </p>
-            </>
-          );
-        })()}
-      </div>
-
-      <div className={styles.section}>
-        <h3>Pagamento</h3>
-        <div className={styles.separador}></div>
-        <p>
-          <strong>Método:</strong> {getPaymentMethod(order)}
-        </p>
-        <p>
-          <strong>Status do pagamento:</strong> {getPaymentStatus(order)}
-        </p>
-      </div>
-
-      <div className={styles.section}>
-        <h3>Itens do Pedido</h3>
-        <div className={styles.separador}></div>
-        <table className={styles.table}>
-          <thead>
-            <tr>
-              <th>Produto</th>
-              <th>Qtd</th>
-              <th>Preço Unit.</th>
-              <th>Total</th>
-            </tr>
-          </thead>
-          <tbody className={styles.tableBody}>
-            {itemsToDisplay.map((item, idx) => (
-              <tr key={idx}>
-                <td>{item.nome || item.produto_nome || "Produto"}</td>
-                <td>{item.quantidade || 1}</td>
-                <td>
-                  {formatCurrency(item.precoUnit || item.preco_unitario || 0)}
-                </td>
-                <td>
-                  {formatCurrency(
-                    (item.precoUnit || item.preco_unitario || 0) *
-                      (item.quantidade || 1)
-                  )}
-                </td>
+      {/* Items Card */}
+      <div className={styles.card}>
+        <h3 className={styles.cardTitle} style={{ marginBottom: "16px" }}>
+          Itens do Pedido
+        </h3>
+        <div className={styles.tableContainer}>
+          <table className={styles.table}>
+            <thead>
+              <tr>
+                <th>Produto</th>
+                <th>Qtd</th>
+                <th style={{ textAlign: "right" }}>Preço Unit.</th>
+                <th style={{ textAlign: "right" }}>Total</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {itemsToDisplay.map((item, idx) => (
+                <tr key={idx}>
+                  <td>{item.nome || item.produto_nome || "Produto"}</td>
+                  <td>{item.quantidade || 1}</td>
+                  <td style={{ textAlign: "right" }}>
+                    {formatCurrency(item.precoUnit || item.preco_unitario || 0)}
+                  </td>
+                  <td style={{ textAlign: "right" }}>
+                    {formatCurrency(
+                      (item.precoUnit || item.preco_unitario || 0) *
+                        (item.quantidade || 1)
+                    )}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+
+        <div className={styles.totalSection}>
+          <span className={styles.totalLabel}>TOTAL DO PEDIDO</span>
+          <span className={styles.totalValue}>
+            {formatCurrency(calculateTotal(order))}
+          </span>
+        </div>
       </div>
 
-      <div className={styles.totalSection}>
-        <h3>Total: {formatCurrency(calculateTotal(order))}</h3>
-      </div>
-
+      {/* Modal */}
       {showCancelModal && (
         <div className={styles.modalOverlay}>
           <div className={styles.modalContent}>
-            <h3>Cancelar Venda</h3>
-            <p>Por favor, informe o motivo do cancelamento:</p>
+            <h3 className={styles.modalTitle}>Cancelar Venda #{order.id}</h3>
+            <p style={{ color: "#666", marginBottom: 10 }}>
+              Por favor, informe o motivo do cancelamento:
+            </p>
             <textarea
               className={styles.textarea}
+              placeholder="Ex: Cliente solicitou cancelamento..."
               value={justification}
               onChange={(e) => setJustification(e.target.value)}
-              placeholder="Ex: Cliente desistiu da compra..."
-              rows={4}
             />
             <div className={styles.modalActions}>
               <button
-                className={styles.closeButton}
+                className={styles.btnModalClose}
                 onClick={() => setShowCancelModal(false)}
                 disabled={canceling}
               >
                 Fechar
               </button>
               <button
-                className={styles.confirmButton}
+                className={styles.btnModalConfirm}
                 onClick={handleCancelOrder}
                 disabled={canceling}
               >

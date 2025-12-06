@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from "react";
 import { Routes, Route, Navigate } from "react-router-dom";
 import LoginAdm from "./Login/loginAdm";
-import HeaderAdm from "./HeaderADM/headerAdm";
+// import HeaderAdm from "./HeaderADM/headerAdm"; // Removido em favor do Dashboard
+import Dashboard from "./Dashboard/dashboard";
 import PaginaClientes from "./PaginaClientes/paginaCliente";
 import PaginaProdutos from "./PaginaProdutos/paginaProduto";
 import PaginaVendas from "./PaginaVendas/paginaVendas";
@@ -13,6 +14,8 @@ import RelatorioProdutos from "./RelatoriosAdm/relatorioProdutos";
 import ProdutoAdm from "./PaginaProdutos/Produtos/produtoAdm";
 import CadastroProduto from "./PaginaProdutos/Cadastro de Produto/cadastroProduto";
 import Cupons from "./Cupons/cupons";
+import TodasPaginas from "./Dashboard/todaAsPaginas/todasPaginas";
+import PaginaCategorias from "./PaginaCategorias/paginaCategorias";
 
 function readAdminFromStorage() {
   try {
@@ -49,25 +52,23 @@ export default function AdmPage() {
   }
 
   return (
-    <div>
-      <HeaderAdm admin={admin} />
-      <div style={{ padding: 20 }}>
-        <Routes>
-          <Route path="/" element={<Navigate to="home" replace />} />
-          <Route path="home" element={<AdmHome />} />
-          <Route path="clientes" element={<PaginaClientes />} />
-          <Route path="produtos" element={<PaginaProdutos />} />
-          <Route path="produtos/novo" element={<CadastroProduto />} />
-          <Route path="produtos/:id" element={<ProdutoAdm />} />
-          <Route path="produtos/:id/editar" element={<ProdutoAdm />} />
-          <Route path="vendas" element={<PaginaVendas />} />
-          <Route path="vendas/:id" element={<VendaDetalhes />} />
-          <Route path="relatorios" element={<RelatoriosAdm />} />
-          <Route path="relatorios/vendas" element={<RelatorioVendas />} />
-          <Route path="relatorios/produtos" element={<RelatorioProdutos />} />
-          <Route path="cupons" element={<Cupons />} />
-        </Routes>
-      </div>
-    </div>
+    <Dashboard>
+      <Routes>
+        <Route path="/" element={<Navigate to="home" replace />} />
+        <Route path="home" element={<TodasPaginas />} />
+        <Route path="clientes" element={<PaginaClientes />} />
+        <Route path="produtos" element={<PaginaProdutos />} />
+        <Route path="produtos/novo" element={<CadastroProduto />} />
+        <Route path="produtos/:id" element={<ProdutoAdm />} />
+        <Route path="produtos/:id/editar" element={<ProdutoAdm />} />
+        <Route path="categorias" element={<PaginaCategorias />} />
+        <Route path="vendas" element={<PaginaVendas />} />
+        <Route path="vendas/:id" element={<VendaDetalhes />} />
+        <Route path="relatorios" element={<RelatoriosAdm />} />
+        <Route path="relatorios/vendas" element={<RelatorioVendas />} />
+        <Route path="relatorios/produtos" element={<RelatorioProdutos />} />
+        <Route path="cupons" element={<Cupons />} />
+      </Routes>
+    </Dashboard>
   );
 }

@@ -1,40 +1,209 @@
 .container {
-  padding: 20px;
-  font-family: sans-serif;
+  padding: 24px;
+  background-color: #f8f9fa;
+  min-height: 100vh;
+  font-family: "Inter", sans-serif;
+  color: #333;
 }
 
+/* Header */
 .header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 20px;
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+  gap: 16px;
 }
 
 .title {
   font-size: 24px;
-  color: #333;
+  font-weight: 700;
+  color: #111;
+  border-bottom: 2px solid #3b82f6;
+  padding-bottom: 4px;
 }
 
-.createBtn {
-  background-color: #28a745;
+.searchBar {
+  display: flex;
+  align-items: center;
+  background: white;
+  border: 1px solid #e5e7eb;
+  padding: 8px 16px;
+  border-radius: 8px;
+  width: 300px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+
+.searchInput {
+  border: none;
+  outline: none;
+  margin-left: 8px;
+  width: 100%;
+  font-size: 14px;
+  background-color: transparent;
+  color: black;
+}
+
+.addButton {
+  background-color: #a855f7;
   color: white;
   border: none;
   padding: 10px 20px;
-  border-radius: 4px;
-  cursor: pointer;
-  font-size: 16px;
-}
-
-.createBtn:hover {
-  background-color: #218838;
-}
-
-.tableContainer {
-  overflow-x: auto;
-  background: white;
   border-radius: 8px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  color: #1a1a1a;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: opacity 0.2s;
+}
+
+.addButton:hover {
+  opacity: 0.9;
+}
+
+/* Form Styles */
+.formCard {
+  background: white;
+  border-radius: 12px;
+  border: 1px solid #e5e7eb;
+  padding: 30px;
+  max-width: 800px;
+  margin: 0 auto;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+}
+
+.formTitle {
+  font-size: 20px;
+  font-weight: 600;
+  margin-bottom: 24px;
+  color: #111;
+  border-bottom: 1px solid #eee;
+  padding-bottom: 10px;
+}
+
+.formGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 30px; /* Increased gap */
+  margin-bottom: 20px;
+}
+
+.formGroup {
+  display: flex;
+  flex-direction: column;
+}
+
+.label {
+  display: block;
+  font-size: 14px;
+  font-weight: 500;
+  color: #374151;
+  margin-bottom: 8px;
+}
+
+/* Added box-sizing to prevent overflow which might cause overlapping look */
+.input,
+.select {
+  width: 100%;
+  padding: 12px 14px; /* Slightly taller */
+  border-radius: 8px;
+  border: 1px solid #d1d5db;
+  font-size: 14px;
+  outline: none;
+  transition: border-color 0.2s;
+  background-color: transparent;
+  color: #000;
+  box-sizing: border-box;
+  height: 45px; /* Fixed height for consistency */
+}
+
+.input:focus,
+.select:focus {
+  border-color: #a855f7;
+  box-shadow: 0 0 0 2px rgba(168, 85, 247, 0.1);
+}
+
+/* Checkbox specific styling */
+.checkboxGroup {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  height: 45px; /* Math input height */
+  padding-top: 28px; /* Align with input field visually (ignoring label height) */
+}
+
+.checkboxLabel {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  color: #374151;
+}
+
+.formActions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 40px;
+  border-top: 1px solid #f3f4f6;
+  padding-top: 20px;
+}
+
+.btnCancel {
+  background: white;
+  border: 1px solid #d1d5db;
+  color: #374151;
+  padding: 10px 20px;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.btnSave {
+  background: #a855f7;
+  border: none;
+  color: white;
+  padding: 10px 24px;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+/* Table Card */
+.tableCard {
+  background: white;
+  border-radius: 12px;
+  border: 1px solid #e5e7eb;
+  overflow: hidden;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+}
+
+.tableHeader {
+  padding: 20px;
+  border-bottom: 1px solid #e5e7eb;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.tableTitle {
+  font-size: 18px;
+  font-weight: 600;
+  color: #111;
+}
+
+.paginationInfo {
+  font-size: 14px;
+  color: #a855f7;
+  font-weight: 500;
+}
+
+.tableWrapper {
+  overflow-x: auto;
 }
 
 .table {
@@ -43,146 +212,87 @@
   min-width: 800px;
 }
 
-.table th,
-.table td {
-  padding: 12px 15px;
-  text-align: left;
-  border-bottom: 1px solid #ddd;
+.table thead {
+  background-color: #f9fafb;
 }
 
 .table th {
-  background-color: #f8f9fa;
+  padding: 12px 24px;
+  text-align: left;
+  font-size: 12px;
   font-weight: 600;
-  color: #555;
+  color: #6b7280;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
 }
 
-.table tr:hover {
-  background-color: #f1f1f1;
+.table td {
+  padding: 16px 24px;
+  border-bottom: 1px solid #f3f4f6;
+  font-size: 14px;
+  color: #374151;
+  vertical-align: middle;
 }
 
-.activeBadge {
-  background-color: #d4edda;
-  color: #155724;
-  padding: 4px 8px;
-  border-radius: 12px;
+.statusBadge {
+  padding: 4px 12px;
+  border-radius: 20px;
   font-size: 12px;
-  font-weight: bold;
+  font-weight: 600;
+  display: inline-block;
+  text-align: center;
 }
 
-.inactiveBadge {
-  background-color: #f8d7da;
-  color: #721c24;
-  padding: 4px 8px;
-  border-radius: 12px;
-  font-size: 12px;
-  font-weight: bold;
+.statusActive {
+  background-color: #dcfce7;
+  color: #15803d;
+}
+
+.statusInactive {
+  background-color: #f3f4f6;
+  color: #6b7280;
 }
 
 .actions {
   display: flex;
-  gap: 10px;
+  gap: 12px;
 }
 
-.editBtn {
-  background-color: #007bff;
-  color: white;
+.actionBtn {
+  background: none;
   border: none;
-  padding: 6px 12px;
-  border-radius: 4px;
+  cursor: pointer;
+  color: #9ca3af;
+  font-size: 16px;
+  transition: color 0.2s;
+}
+
+.actionBtn:hover {
+  color: #6b7280;
+}
+
+.editBtn:hover {
+  color: #3b82f6;
+}
+.deleteBtn:hover {
+  color: #ef4444;
+}
+
+input[type="checkbox"] {
+  accent-color: #a855f7;
+  width: 18px;
+  height: 18px;
   cursor: pointer;
 }
 
-.deleteBtn {
-  background-color: #dc3545;
-  color: white;
-  border: none;
-  padding: 6px 12px;
-  border-radius: 4px;
-  cursor: pointer;
-}
-
-/* Modal / Form Styles */
-.modalOverlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background-color: rgba(0, 0, 0, 0.5);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  z-index: 1000;
-}
-
-.modalContent {
-  background: white;
-  padding: 30px;
-  border-radius: 8px;
-  width: 500px;
-  max-width: 90%;
-  max-height: 90vh;
-  overflow-y: auto;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-}
-
-.modalTitle {
-  margin-top: 0;
-  margin-bottom: 20px;
-  font-size: 20px;
-}
-
-.formGroup {
-  margin-bottom: 15px;
-}
-
-.formGroup label {
-  display: block;
-  margin-bottom: 5px;
-  font-weight: 500;
-  color: #333;
-}
-
-.formGroup input,
-.formGroup select {
-  width: 100%;
-  padding: 8px;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-  font-size: 14px;
-}
-
-.formGroup input[type="checkbox"] {
-  width: auto;
-  margin-right: 10px;
-}
-
-.modalActions {
-  display: flex;
-  justify-content: flex-end;
-  gap: 10px;
-  margin-top: 20px;
-}
-
-.cancelBtn {
-  background-color: #6c757d;
-  color: white;
-  border: none;
-  padding: 10px 20px;
-  border-radius: 4px;
-  cursor: pointer;
-}
-
-.saveBtn {
-  background-color: #28a745;
-  color: white;
-  border: none;
-  padding: 10px 20px;
-  border-radius: 4px;
-  cursor: pointer;
-}
-
-.error {
-  color: red;
-  margin-bottom: 10px;
+/* Responsive */
+@media (max-width: 768px) {
+  .formGrid {
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
+  .checkboxGroup {
+    padding-top: 0;
+    height: auto;
+  }
 }

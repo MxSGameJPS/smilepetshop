@@ -1,5 +1,7 @@
 import React, { useEffect, useState } from "react";
 import styles from "./relatoriosAdm.module.css";
+import { useNavigate } from "react-router-dom";
+import { FaArrowLeft, FaFileCsv } from "react-icons/fa";
 
 async function fetchWithFallback(urls) {
   for (const url of urls) {
@@ -27,6 +29,7 @@ export default function RelatorioProdutos() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [rows, setRows] = useState([]);
+  const navigate = useNavigate();
 
   useEffect(() => {
     let mounted = true;
@@ -34,8 +37,8 @@ export default function RelatorioProdutos() {
       setLoading(true);
       try {
         const data = await fetchWithFallback([
-          "https://apismilepet.vercel.app/api/pedidos",
           "https://apismilepet.vercel.app/api/orders",
+          "https://apismilepet.vercel.app/api/pedidos",
         ]);
         const orders = tryParseOrders(data) || [];
 
@@ -101,55 +104,61 @@ export default function RelatorioProdutos() {
 
   if (loading)
     return (
-      <div className={styles.loading}>
-        Carregando relatório de produtos vendidos...
-      </div>
+      <div className={styles.loading}>Carregando relatório de produtos...</div>
     );
   if (error) return <div className={styles.error}>{error}</div>;
 
   const totalUnits = rows.reduce((acc, r) => acc + (r.qty || 0), 0);
 
   return (
-    <section className={styles.wrap}>
-      <h2>Relatório de Produtos Vendidos</h2>
-      <div
-        style={{
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-          marginBottom: 12,
-        }}
+    <div className={styles.container}>
+      <button
+        className={styles.backButton}
+        onClick={() => navigate("/adm/relatorios")}
       >
-        <div>
-          <strong>Produtos distintos:</strong> {rows.length}
-          <br />
-          <strong>Unidades vendidas:</strong> {totalUnits}
-        </div>
-        <div>
-          <button className={styles.btn} onClick={exportCSV}>
-            Exportar CSV
-          </button>
-        </div>
+        <FaArrowLeft /> Voltar para Relatórios
+      </button>
+
+      <div className={styles.header}>
+        <h2 className={styles.title}>Relatório de Produtos Vendidos</h2>
       </div>
 
-      <table className={styles.table}>
-        <thead>
-          <tr>
-            <th>SKU</th>
-            <th>Quantidade</th>
-            <th>Nome do produto</th>
-          </tr>
-        </thead>
-        <tbody>
-          {rows.map((r, idx) => (
-            <tr key={idx}>
-              <td>{r.sku}</td>
-              <td>{r.qty}</td>
-              <td>{r.name}</td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-    </section>
+      <div className={styles.tableCard}>
+        <div className={styles.tableHeader}>
+          <div className={styles.statsRow}>
+            <span>
+              <strong>Produtos distintos:</strong> {rows.length}
+            </span>
+            <span>
+              <strong>Unidades vendidas:</strong> {totalUnits}
+            </span>
+          </div>
+          <button className={styles.btn} onClick={exportCSV}>
+            <FaFileCsv size={16} /> Exportar CSV
+          </button>
+        </div>
+
+        <div className={styles.tableWrapper}>
+          <table className={styles.table}>
+            <thead>
+              <tr>
+                <th>SKU</th>
+                <th>Quantidade</th>
+                <th>Nome do produto</th>
+              </tr>
+            </thead>
+            <tbody>
+              {rows.map((r, idx) => (
+                <tr key={idx}>
+                  <td>{r.sku}</td>
+                  <td>{r.qty}</td>
+                  <td>{r.name}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
   );
 }

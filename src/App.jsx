@@ -96,6 +96,10 @@ function ScrollToTopOnRouteChange() {
 }
 
 function FooterConditional() {
+  const location = useLocation();
+  // Hide footer on adm pages
+  if (location && location.pathname.startsWith("/adm")) return null;
+
   // Sempre renderizar o Footer (mostrar também na home)
   return <Footer />;
 }
