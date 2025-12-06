@@ -8,6 +8,36 @@ import PaymentModal from "./PaymentModal";
 
 const EMAIL_STORAGE_KEY = "smilepet_checkout_email";
 
+const BRAZIL_STATES = [
+  "AC",
+  "AL",
+  "AP",
+  "AM",
+  "BA",
+  "CE",
+  "DF",
+  "ES",
+  "GO",
+  "MA",
+  "MT",
+  "MS",
+  "MG",
+  "PA",
+  "PB",
+  "PR",
+  "PE",
+  "PI",
+  "RJ",
+  "RN",
+  "RS",
+  "RO",
+  "RR",
+  "SC",
+  "SP",
+  "SE",
+  "TO",
+];
+
 // empty form template used to reset/initialize checkout form
 const EMPTY_FORM = {
   firstName: "",
@@ -599,8 +629,48 @@ export default function Checkout() {
 
   const handlePostalChange = (e) => {
     const digits = (e.target.value || "").replace(/\D/g, "");
-    setForm((f) => ({ ...f, postal: digits.slice(0, 8) }));
+    const limited = digits.slice(0, 8);
+    setForm((f) => ({ ...f, postal: limited }));
+
+    // se o CEP estiver completo (8 dígitos), buscar endereço automaticamente
+    if (limited.length === 8) {
+      buscarEndereco(limited);
+    }
   };
+
+  // busca endereço via ViaCEP e preenche campos do formulário
+  async function buscarEndereco(cep) {
+    const cepLimpo = (cep || "").toString().replace(/\D/g, "");
+    if (cepLimpo.length !== 8) return;
+    try {
+      const res = await fetch(`https://viacep.com.br/ws/${cepLimpo}/json/`);
+      const data = await res.json();
+      if (data.erro) {
+        alert("CEP não encontrado!");
+        // Limpar campos para evitar dados errados de tentativa anterior
+        setForm((f) => ({
+          ...f,
+          address1: "",
+          bairro: "",
+          city: "",
+          state: "",
+        }));
+        return;
+      }
+
+      // Se logradouro vier vazio (CEP único da cidade), deixamos em branco para o usuário preencher
+      // Se vier preenchido, usamos o dado da API
+      setForm((f) => ({
+        ...f,
+        address1: data.logradouro || "",
+        bairro: data.bairro || "",
+        city: data.localidade || f.city,
+        state: data.uf || f.state,
+      }));
+    } catch (err) {
+      console.error("Erro ao buscar CEP:", err);
+    }
+  }
 
   const goToDelivery = () => {
     const cpfDigits = (form.cpf || "").toString().replace(/\D/g, "");
@@ -636,13 +706,26 @@ export default function Checkout() {
     }
   };
 
-  const goToPayment = () => {
-    if (!form.postal || !form.address1 || !form.numero || !form.city) {
+  const checkAddressComplete = () => {
+    if (
+      !form.postal ||
+      !form.address1 ||
+      !form.numero ||
+      !form.city ||
+      !form.state ||
+      !form.bairro
+    ) {
       alert(
-        "Preencha CEP, Rua, Número e Cidade antes de continuar para o pagamento."
+        "Por favor, preencha todos os campos do endereço (CEP, Rua, Número, Bairro, Cidade e Estado) antes de continuar."
       );
-      return;
+      setStep("delivery");
+      return false;
     }
+    return true;
+  };
+
+  const goToPayment = () => {
+    if (!checkAddressComplete()) return;
     setStep("payment");
     try {
       localStorage.setItem("smilepet_checkout_billing", JSON.stringify(form));
@@ -1106,12 +1189,26 @@ export default function Checkout() {
                       />
                     </label>
                     <label className={styles.field}>
-                      <span>Estado</span>
-                      <input
+                      <span>Estado *</span>
+                      <select
                         name="state"
                         value={form.state}
                         onChange={handleChange}
-                      />
+                        required
+                        className={styles.selectState}
+                        style={{
+                          height: "40px",
+                          borderColor: "#ccc",
+                          borderRadius: "4px",
+                        }}
+                      >
+                        <option value="">UF</option>
+                        {BRAZIL_STATES.map((uf) => (
+                          <option key={uf} value={uf}>
+                            {uf}
+                          </option>
+                        ))}
+                      </select>
                     </label>
                   </div>
 
@@ -1149,11 +1246,12 @@ export default function Checkout() {
                       />
                     </label>
                     <label className={styles.field}>
-                      <span>Bairro</span>
+                      <span>Bairro *</span>
                       <input
                         name="bairro"
                         value={form.bairro}
                         onChange={handleChange}
+                        required
                       />
                     </label>
                   </div>
@@ -1180,20 +1278,17 @@ export default function Checkout() {
                         type="button"
                         className={styles.primaryAction}
                         onClick={async () => {
+                          if (!checkAddressComplete()) return;
                           await calculateShipping();
-                          // only open modal if shipping was already selected or saved
-                          try {
-                            const saved =
-                              localStorage.getItem("smilepet_shipping");
-                            if (saved != null) {
-                              // shipping available (includes '0' for free shipping)
-                              setPaymentModalOpen(true);
-                            } else {
-                              // show shipping options to let user choose (modal would block interaction)
-                              setStep("shipping");
-                            }
-                          } catch {
-                            // fallback: open shipping step
+
+                          // Correção solicitada:
+                          // Se for acima de 50 (Frete Grátis), vai direto para o pagamento (Modal).
+                          // Se for abaixo de 50, o usuário PRECISA escolher o frete na tela seguinte (Shipping),
+                          // então garantimos que o modal não abra por cima.
+                          if (summaryTotal > FRETE_GRATIS_THRESHOLD) {
+                            setPaymentModalOpen(true);
+                          } else {
+                            setPaymentModalOpen(false);
                             setStep("shipping");
                           }
                         }}
@@ -1294,7 +1389,11 @@ export default function Checkout() {
                     <button
                       type="button"
                       className={styles.primaryAction}
-                      onClick={() => setPaymentModalOpen(true)}
+                      onClick={() => {
+                        if (checkAddressComplete()) {
+                          setPaymentModalOpen(true);
+                        }
+                      }}
                       disabled={!selectedShipping}
                     >
                       Ir para o Pagamento

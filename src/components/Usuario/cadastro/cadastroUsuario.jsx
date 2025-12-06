@@ -36,6 +36,32 @@ export default function CadastroUsuario() {
     const digits = (e.target.value || "").replace(/\D/g, "");
     const limited = digits.slice(0, 8);
     setForm((f) => ({ ...f, postal: limited }));
+
+    if (limited.length === 8) {
+      buscarEndereco(limited);
+    }
+  }
+
+  async function buscarEndereco(cep) {
+    const cepLimpo = (cep || "").toString().replace(/\D/g, "");
+    if (cepLimpo.length !== 8) return;
+    try {
+      const res = await fetch(`https://viacep.com.br/ws/${cepLimpo}/json/`);
+      const data = await res.json();
+      if (data.erro) {
+        alert("CEP não encontrado!");
+        return;
+      }
+      setForm((f) => ({
+        ...f,
+        rua: data.logradouro || f.rua,
+        bairro: data.bairro || f.bairro,
+        cidade: data.localidade || f.cidade,
+        estado: data.uf || f.estado,
+      }));
+    } catch (err) {
+      console.error("Erro ao buscar CEP:", err);
+    }
   }
 
   function validate() {
