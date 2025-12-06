@@ -603,9 +603,16 @@ export default function Checkout() {
   };
 
   const goToDelivery = () => {
-    if (!form.firstName || !form.lastName || !form.email || !form.phone) {
+    const cpfDigits = (form.cpf || "").toString().replace(/\D/g, "");
+    if (
+      !form.firstName ||
+      !form.lastName ||
+      !form.email ||
+      !form.phone ||
+      cpfDigits.length !== 11
+    ) {
       alert(
-        "Preencha Primeiro nome, Sobrenome, E-mail e Telefone antes de continuar."
+        "Preencha Primeiro nome, Sobrenome, E-mail, Telefone e CPF (11 dígitos) antes de continuar."
       );
       return;
     }
