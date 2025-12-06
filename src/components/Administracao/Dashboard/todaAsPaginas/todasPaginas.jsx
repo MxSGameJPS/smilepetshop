@@ -475,10 +475,16 @@ export default function TodasPaginas() {
           </p>
         </div>
         <div className={styles.headerActions}>
-          <button className={styles.btnSecondary}>
+          <button
+            className={styles.btnSecondary}
+            onClick={() => navigate("/adm/relatorios")}
+          >
             <FaDownload style={{ marginRight: 8 }} /> Exportar dados
           </button>
-          <button className={styles.btnPrimary}>
+          <button
+            className={styles.btnPrimary}
+            onClick={() => navigate("/adm/relatorios")}
+          >
             <FaPlus style={{ marginRight: 8 }} /> Criar relatório
           </button>
         </div>
