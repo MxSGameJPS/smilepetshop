@@ -610,7 +610,21 @@ export default function Checkout() {
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
-    const nextValue = type === "checkbox" ? checked : value;
+    let nextValue = type === "checkbox" ? checked : value;
+
+    // Capitalize City (Title Case with exceptions)
+    if (name === "city" && typeof nextValue === "string") {
+      const exceptions = ["de", "da", "do", "dos", "das", "e"];
+      nextValue = nextValue
+        .toLowerCase()
+        .split(" ")
+        .map((w, i) => {
+          if (exceptions.includes(w) && i !== 0) return w;
+          return w.charAt(0).toUpperCase() + w.slice(1);
+        })
+        .join(" ");
+    }
+
     setForm((f) => ({ ...f, [name]: nextValue }));
 
     if (name === "email" && typeof nextValue === "string") {
