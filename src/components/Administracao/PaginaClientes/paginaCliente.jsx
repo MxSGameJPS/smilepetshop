@@ -119,9 +119,9 @@ export default function PaginaClientes() {
   };
 
   const handleEdit = (c) => {
-    // Flatten address if nested
+    // Determine address fields, checking nested objects first, then root level
+    // Some APIs return address in 'endereco' or 'address' object, others at root.
     const addr = c.endereco || c.address || {};
-    const isAddrObj = typeof addr === "object" && addr !== null;
 
     setFormData({
       id: c.id || c._id || "",
@@ -130,13 +130,14 @@ export default function PaginaClientes() {
       email: c.email || "",
       whatsapp: c.whatsapp || c.celular || c.telefone || "",
       cpf: c.cpf || c.cnpj || "",
-      cep: isAddrObj ? addr.cep || "" : c.cep || "",
-      rua: isAddrObj ? addr.rua || addr.logradouro || "" : c.rua || "",
-      numero: isAddrObj ? addr.numero || "" : c.numero || "",
-      complemento: isAddrObj ? addr.complemento || "" : c.complemento || "",
-      bairro: isAddrObj ? addr.bairro || "" : c.bairro || "",
-      cidade: isAddrObj ? addr.cidade || "" : c.cidade || c.city || "",
-      estado: isAddrObj ? addr.estado || addr.uf || "" : c.estado || c.uf || "",
+
+      cep: addr.cep || c.cep || "",
+      rua: addr.rua || addr.logradouro || c.rua || "",
+      numero: addr.numero || c.numero || "",
+      complemento: addr.complemento || c.complemento || "",
+      bairro: addr.bairro || c.bairro || "",
+      cidade: addr.cidade || addr.city || c.cidade || c.city || "",
+      estado: addr.estado || addr.uf || c.estado || c.uf || "",
     });
     setView("form");
   };
