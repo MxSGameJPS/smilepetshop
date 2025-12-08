@@ -210,3 +210,127 @@
   padding-top: 8px;
   margin-top: 8px;
 }
+
+/* Modal Styles */
+.modalOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 20px;
+}
+
+.modalContent {
+  background: white;
+  padding: 34px;
+  border-radius: 12px;
+  width: 100%;
+  max-width: 500px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.modalTitle {
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: #073b4c;
+  margin: 0;
+  border-bottom: 2px solid #fc6100;
+  padding-bottom: 8px;
+  align-self: flex-start;
+}
+
+.modalText {
+  color: #555;
+  font-size: 0.95rem;
+  line-height: 1.5;
+}
+
+.modalText strong {
+  color: #d32f2f;
+}
+
+.justificationInput {
+  min-height: 100px;
+  padding: 12px;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  font-family: inherit;
+  font-size: 1rem;
+  resize: vertical;
+  background-color: transparent;
+  color: #000;
+}
+
+.justificationInput::placeholder {
+  color: #777;
+}
+
+.justificationInput:focus {
+  outline: none;
+  border-color: #fc6100;
+  box-shadow: 0 0 0 3px rgba(252, 97, 0, 0.1);
+  background-color: #fff;
+}
+
+.modalActions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 8px;
+}
+
+.modalBtnCancel {
+  background: #f5f5f5;
+  color: #333;
+  border: 1px solid #ddd;
+  padding: 10px 16px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: all 0.2s;
+}
+
+.modalBtnCancel:hover {
+  background: #e0e0e0;
+}
+
+.modalBtnConfirm {
+  background: #e74c3c;
+  color: white;
+  border: none;
+  padding: 10px 16px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: all 0.2s;
+}
+
+.modalBtnConfirm:hover {
+  background: #c0392b;
+}
+
+.modalBtnConfirm:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}

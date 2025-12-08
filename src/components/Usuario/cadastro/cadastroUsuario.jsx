@@ -54,6 +54,7 @@ export default function CadastroUsuario() {
   const [errors, setErrors] = useState({});
   const [submitting, setSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState("");
+  const [cepError, setCepError] = useState(false);
 
   const isEmailValid = (v) => /^\S+@\S+\.\S+$/.test(String(v).toLowerCase());
   const isSenhaValid = (v) => typeof v === "string" && v.length >= 8;
@@ -67,6 +68,7 @@ export default function CadastroUsuario() {
     const digits = (e.target.value || "").replace(/\D/g, "");
     const limited = digits.slice(0, 8);
     setForm((f) => ({ ...f, postal: limited }));
+    if (cepError) setCepError(false);
 
     if (limited.length === 8) {
       buscarEndereco(limited);
@@ -80,7 +82,7 @@ export default function CadastroUsuario() {
       const res = await fetch(`https://viacep.com.br/ws/${cepLimpo}/json/`);
       const data = await res.json();
       if (data.erro) {
-        alert("CEP não encontrado!");
+        setCepError(true);
         return;
       }
       setForm((f) => ({
@@ -90,9 +92,31 @@ export default function CadastroUsuario() {
         cidade: data.localidade || f.cidade,
         estado: data.uf || f.estado,
       }));
+      setCepError(false);
     } catch (err) {
       console.error("Erro ao buscar CEP:", err);
+      setCepError(true);
     }
+  }
+
+  function handleCityBlur() {
+    setForm((f) => ({ ...f, cidade: formatTitleCase(f.cidade) }));
+  }
+
+  function formatTitleCase(str) {
+    if (!str) return "";
+    const exceptions = ["de", "da", "do", "das", "dos", "e", "em"];
+    return str
+      .toLowerCase()
+      .trim()
+      .split(/\s+/)
+      .map((word, index) => {
+        if (index > 0 && exceptions.includes(word)) {
+          return word;
+        }
+        return word.charAt(0).toUpperCase() + word.slice(1);
+      })
+      .join(" ");
   }
 
   function validate() {
@@ -104,6 +128,8 @@ export default function CadastroUsuario() {
     if (!form.bairro) err.bairro = "Informe o bairro";
     if (!form.cidade) err.cidade = "Informe a cidade";
     if (!form.estado) err.estado = "Informe o estado";
+    if (!form.postal || form.postal.length !== 8) err.postal = "CEP inválido";
+    if (cepError) err.postal = "CEP não encontrado";
     if (!form.whatsapp) err.whatsapp = "Informe o WhatsApp";
     if (!isEmailValid(form.email)) err.email = "Email inválido";
     if (!isSenhaValid(form.senha))
@@ -160,7 +186,22 @@ export default function CadastroUsuario() {
           } catch {
             // ignore
           }
-          setSubmitError(msg);
+
+          // Check for email duplication error
+          if (
+            res.status === 409 ||
+            msg.toLowerCase().includes("email") ||
+            msg.toLowerCase().includes("duplicate") ||
+            msg.toLowerCase().includes("cadastrado")
+          ) {
+            setErrors((prev) => ({
+              ...prev,
+              email: "Este email já está cadastrado.",
+            }));
+            setSubmitError("");
+          } else {
+            setSubmitError(msg);
+          }
         }
       } catch {
         setSubmitError("Erro ao conectar com o servidor. Tente novamente.");
@@ -183,7 +224,9 @@ export default function CadastroUsuario() {
               name="nome"
               value={form.nome}
               onChange={handleChange}
-              className={styles.input}
+              className={`${styles.input} ${
+                errors.nome ? styles.inputError : ""
+              }`}
             />
             {errors.nome && <div className={styles.error}>{errors.nome}</div>}
           </div>
@@ -193,7 +236,9 @@ export default function CadastroUsuario() {
               name="sobrenome"
               value={form.sobrenome}
               onChange={handleChange}
-              className={styles.input}
+              className={`${styles.input} ${
+                errors.sobrenome ? styles.inputError : ""
+              }`}
             />
             {errors.sobrenome && (
               <div className={styles.error}>{errors.sobrenome}</div>
@@ -208,7 +253,9 @@ export default function CadastroUsuario() {
               name="rua"
               value={form.rua}
               onChange={handleChange}
-              className={styles.input}
+              className={`${styles.input} ${
+                errors.rua ? styles.inputError : ""
+              }`}
             />
             {errors.rua && <div className={styles.error}>{errors.rua}</div>}
           </div>
@@ -218,7 +265,9 @@ export default function CadastroUsuario() {
               name="numero"
               value={form.numero}
               onChange={handleChange}
-              className={styles.input}
+              className={`${styles.input} ${
+                errors.numero ? styles.inputError : ""
+              }`}
             />
             {errors.numero && (
               <div className={styles.error}>{errors.numero}</div>
@@ -243,11 +292,14 @@ export default function CadastroUsuario() {
               name="postal"
               value={form.postal}
               onChange={handlePostalChange}
-              className={styles.input}
+              className={`${styles.input} ${cepError ? styles.inputError : ""}`}
               inputMode="numeric"
               maxLength={8}
               placeholder="Somente números"
             />
+            {errors.postal && (
+              <div className={styles.error}>{errors.postal}</div>
+            )}
           </div>
         </div>
 
@@ -270,6 +322,7 @@ export default function CadastroUsuario() {
               name="cidade"
               value={form.cidade}
               onChange={handleChange}
+              onBlur={handleCityBlur}
               className={styles.input}
             />
             {errors.cidade && (
@@ -318,7 +371,9 @@ export default function CadastroUsuario() {
               name="email"
               value={form.email}
               onChange={handleChange}
-              className={styles.input}
+              className={`${styles.input} ${
+                errors.email ? styles.inputError : ""
+              }`}
             />
             {errors.email && <div className={styles.error}>{errors.email}</div>}
           </div>
@@ -329,7 +384,9 @@ export default function CadastroUsuario() {
               type="password"
               value={form.senha}
               onChange={handleChange}
-              className={styles.input}
+              className={`${styles.input} ${
+                errors.senha ? styles.inputError : ""
+              }`}
             />
             {errors.senha && <div className={styles.error}>{errors.senha}</div>}
           </div>

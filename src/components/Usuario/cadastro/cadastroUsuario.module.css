@@ -67,3 +67,7 @@
   align-self: flex-start;
   width: 100%;
 }
+
+.inputError {
+  border-color: #b00020 !important;
+}

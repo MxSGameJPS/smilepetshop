@@ -20,6 +20,64 @@ export default function MeusPedidos() {
   const [error, setError] = useState("");
   const [cancelling, setCancelling] = useState(null);
 
+  // States for Cancel Modal
+  const [cancelModalOpen, setCancelModalOpen] = useState(null); // stores the order ID being cancelled
+  const [cancelJustification, setCancelJustification] = useState("");
+
+  function handleOpenCancelModal(orderId) {
+    setCancelModalOpen(orderId);
+    setCancelJustification("");
+  }
+
+  function handleCloseCancelModal() {
+    setCancelModalOpen(null);
+    setCancelJustification("");
+  }
+
+  async function handleConfirmCancel() {
+    const orderId = cancelModalOpen;
+    const justification = cancelJustification.trim();
+
+    if (!justification) {
+      alert("Justificativa obrigatória para cancelar o pedido.");
+      return;
+    }
+
+    try {
+      setCancelling(orderId);
+      handleCloseCancelModal(); // close modal while processing
+
+      const res = await fetch(
+        `https://apismilepet.vercel.app/api/orders/cancel/${orderId}`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            justificativa: justification,
+          }),
+        }
+      );
+
+      if (!res.ok) {
+        const t = await res.text().catch(() => null);
+        throw new Error(`Falha ao cancelar pedido: ${res.status} ${t || ""}`);
+      }
+
+      // Update local state
+      setOrders((prev) =>
+        (prev || []).map((it) =>
+          it.id || it.id === orderId ? { ...it, status: "Cancelado" } : it
+        )
+      );
+      alert("Pedido cancelado com sucesso.");
+    } catch (err) {
+      console.error("Erro ao cancelar pedido:", err);
+      alert("Não foi possível cancelar o pedido. Tente novamente mais tarde.");
+    } finally {
+      setCancelling(null);
+    }
+  }
+
   useEffect(() => {
     async function load() {
       setLoading(true);
@@ -131,61 +189,7 @@ export default function MeusPedidos() {
                   <button
                     type="button"
                     className={styles.cancelBtn}
-                    onClick={async () => {
-                      // Confirmar ação irreversível
-                      const ok = window.confirm(
-                        "Atenção: Esta ação é irreversível. Se cancelar este pedido você terá que fazer um novo pedido caso precise do produto. Deseja continuar?"
-                      );
-                      if (!ok) return;
-
-                      // pedir justificativa
-                      const justificativa = window.prompt(
-                        "Por favor, informe a justificativa para o cancelamento deste pedido:"
-                      );
-                      if (justificativa === null) return; // usuário cancelou o prompt
-                      if (!justificativa.trim()) {
-                        alert(
-                          "Justificativa obrigatória para cancelar o pedido."
-                        );
-                        return;
-                      }
-
-                      try {
-                        setCancelling(o.id);
-                        const res = await fetch(
-                          `https://apismilepet.vercel.app/api/orders/cancel/${o.id}`,
-                          {
-                            method: "POST",
-                            headers: { "Content-Type": "application/json" },
-                            body: JSON.stringify({
-                              justificativa: justificativa.trim(),
-                            }),
-                          }
-                        );
-                        if (!res.ok) {
-                          const t = await res.text().catch(() => null);
-                          throw new Error(
-                            `Falha ao cancelar pedido: ${res.status} ${t || ""}`
-                          );
-                        }
-                        // marcar localmente como cancelado para feedback imediato
-                        setOrders((prev) =>
-                          (prev || []).map((it) =>
-                            it.id || it.id === o.id
-                              ? { ...it, status: "Cancelado" }
-                              : it
-                          )
-                        );
-                        alert("Pedido cancelado com sucesso.");
-                      } catch (err) {
-                        console.error("Erro ao cancelar pedido:", err);
-                        alert(
-                          "Não foi possível cancelar o pedido. Tente novamente mais tarde."
-                        );
-                      } finally {
-                        setCancelling(null);
-                      }
-                    }}
+                    onClick={() => handleOpenCancelModal(o.id)}
                     disabled={cancelling === o.id}
                   >
                     {cancelling === o.id ? "Cancelando..." : "Cancelar pedido"}
@@ -209,38 +213,42 @@ export default function MeusPedidos() {
                 <div className={styles.section}>
                   <h4>Itens do Pedido</h4>
                   <div className={styles.itemsList}>
-                    {(o.raw.items_data || o.raw.itens || []).map((item, idx) => (
-                      <div key={idx} className={styles.itemRow}>
-                        {item.imagem_url && (
-                          <img
-                            src={item.imagem_url}
-                            alt={item.nome}
-                            className={styles.itemImage}
-                          />
-                        )}
-                        <div className={styles.itemInfo}>
-                          <span className={styles.itemName}>
-                            {item.nome || item.produto_nome}
-                          </span>
-                          <span className={styles.itemMeta}>
-                            Qtd: {item.quantidade} x{" "}
+                    {(o.raw.items_data || o.raw.itens || []).map(
+                      (item, idx) => (
+                        <div key={idx} className={styles.itemRow}>
+                          {item.imagem_url && (
+                            <img
+                              src={item.imagem_url}
+                              alt={item.nome}
+                              className={styles.itemImage}
+                            />
+                          )}
+                          <div className={styles.itemInfo}>
+                            <span className={styles.itemName}>
+                              {item.nome || item.produto_nome}
+                            </span>
+                            <span className={styles.itemMeta}>
+                              Qtd: {item.quantidade} x{" "}
+                              {new Intl.NumberFormat("pt-BR", {
+                                style: "currency",
+                                currency: "BRL",
+                              }).format(
+                                item.precoUnit || item.preco_unitario || 0
+                              )}
+                            </span>
+                          </div>
+                          <div className={styles.itemTotal}>
                             {new Intl.NumberFormat("pt-BR", {
                               style: "currency",
                               currency: "BRL",
-                            }).format(item.precoUnit || item.preco_unitario || 0)}
-                          </span>
+                            }).format(
+                              (item.precoUnit || item.preco_unitario || 0) *
+                                (item.quantidade || 1)
+                            )}
+                          </div>
                         </div>
-                        <div className={styles.itemTotal}>
-                          {new Intl.NumberFormat("pt-BR", {
-                            style: "currency",
-                            currency: "BRL",
-                          }).format(
-                            (item.precoUnit || item.preco_unitario || 0) *
-                              (item.quantidade || 1)
-                          )}
-                        </div>
-                      </div>
-                    ))}
+                      )
+                    )}
                   </div>
                 </div>
 
@@ -250,18 +258,25 @@ export default function MeusPedidos() {
                     {o.raw.customer_data ? (
                       <div className={styles.addressInfo}>
                         <p>
-                          {o.raw.customer_data.address1 || o.raw.customer_data.rua}
+                          {o.raw.customer_data.address1 ||
+                            o.raw.customer_data.rua}
                           , {o.raw.customer_data.numero}
                         </p>
                         <p>
                           {o.raw.customer_data.bairro
                             ? `${o.raw.customer_data.bairro}, `
                             : ""}
-                          {o.raw.customer_data.city || o.raw.customer_data.cidade}
+                          {o.raw.customer_data.city ||
+                            o.raw.customer_data.cidade}
                           {" - "}
-                          {o.raw.customer_data.state || o.raw.customer_data.estado}
+                          {o.raw.customer_data.state ||
+                            o.raw.customer_data.estado}
                         </p>
-                        <p>CEP: {o.raw.customer_data.postal || o.raw.customer_data.cep}</p>
+                        <p>
+                          CEP:{" "}
+                          {o.raw.customer_data.postal ||
+                            o.raw.customer_data.cep}
+                        </p>
                       </div>
                     ) : (
                       <p>Endereço não disponível</p>
@@ -271,7 +286,9 @@ export default function MeusPedidos() {
                   <div className={styles.section}>
                     <h4>Resumo</h4>
                     <div className={styles.summaryRow}>
-                      <span>Frete ({o.raw.shipping_data?.serviceName || "Envio"}):</span>
+                      <span>
+                        Frete ({o.raw.shipping_data?.serviceName || "Envio"}):
+                      </span>
                       <span>
                         {new Intl.NumberFormat("pt-BR", {
                           style: "currency",
@@ -290,6 +307,48 @@ export default function MeusPedidos() {
           </li>
         ))}
       </ul>
+
+      {/* Cancel Modal */}
+      {cancelModalOpen && (
+        <div className={styles.modalOverlay} onClick={handleCloseCancelModal}>
+          <div
+            className={styles.modalContent}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <h3 className={styles.modalTitle}>Cancelar Pedido</h3>
+            <p className={styles.modalText}>
+              Tem certeza que deseja cancelar este pedido?
+              <br />
+              <strong>Atenção: Esta ação é irreversível.</strong>
+            </p>
+            <p className={styles.modalText}>
+              Por favor, infome a justificativa para o cancelamento:
+            </p>
+            <textarea
+              className={styles.justificationInput}
+              value={cancelJustification}
+              onChange={(e) => setCancelJustification(e.target.value)}
+              placeholder="Digite o motivo do cancelamento..."
+              autoFocus
+            />
+            <div className={styles.modalActions}>
+              <button
+                className={styles.modalBtnCancel}
+                onClick={handleCloseCancelModal}
+              >
+                Voltar
+              </button>
+              <button
+                className={styles.modalBtnConfirm}
+                onClick={handleConfirmCancel}
+                disabled={!cancelJustification.trim()}
+              >
+                Confirmar Cancelamento
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

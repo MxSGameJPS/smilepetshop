@@ -74,16 +74,17 @@
   background: white;
   border-radius: 8px;
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
-  padding: 30px;
+  padding: 60px;
   min-height: 500px;
-  max-width: 750px;
-  text-align: center;
+  /* max-width removed to allow full width */
+  text-align: left;
 }
 
 /* DadosUsuario Styles (migrated from old perfil) */
 .dadosContainer h2 {
   color: #073b4c;
   margin-bottom: 8px;
+  font-size: 1.8rem;
 }
 
 .subtitle {
@@ -94,94 +95,136 @@
 .form {
   display: flex;
   flex-direction: column;
-  gap: 16px;
-  text-align: center;
+  gap: 40px; /* Increased from 24px to fix 'colado' issue */
+  text-align: left;
+  max-width: 950px;
+  margin: 0 auto;
 }
 
-.row {
+/* Grid Groups for Layout */
+.gridGroup {
+  display: grid;
+  grid-template-columns: auto auto;
+  gap: 50px;
+}
+
+.gridGroupWithSmall {
+  display: grid;
+  grid-template-columns: auto auto;
+  gap: 50px;
+}
+
+.gridGroupThree {
+  display: grid;
+  grid-template-columns: auto auto auto;
+  gap: 50px;
+}
+
+/* Field Styles */
+.field,
+.smallField {
   display: flex;
   flex-direction: column;
-  gap: 6px;
-  align-items: center;
+  gap: 8px;
 }
 
-.row label {
-  font-weight: 600;
+.field label,
+.smallField label {
+  font-weight: 500;
   color: #444;
+  font-size: 0.95rem;
+  margin-left: 4px;
 }
 
-.row input {
-  padding: 10px;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-  font-size: 16px;
+.field input,
+.field select,
+.smallField input {
+  padding: 12px 16px;
+  border: 1px solid #e0e0e0;
+  border-radius: 12px;
+  font-size: 1rem;
   width: 100%;
-  max-width: 400px;
-  background-color: transparent;
+  background-color: #f9fbfc;
   color: #073b4c;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.02);
 }
 
-.row input:focus {
+.field input:focus,
+.field select:focus,
+.smallField input:focus {
   outline: none;
   border-color: #fc6100;
+  box-shadow: 0 0 0 4px rgba(252, 97, 0, 0.1);
+  background-color: #fff;
 }
 
+/* Action Buttons */
 .actions {
   display: flex;
   gap: 16px;
-  margin-top: 20px;
+  margin-top: 30px;
   align-items: center;
-  justify-content: center;
+  justify-content: flex-start;
 }
 
 .saveBtn {
-  background-color: #fc6100;
+  background: linear-gradient(135deg, #fc6100 0%, #ff8a00 100%);
   color: white;
-  border: 1px solid #fc6100;
-  padding: 12px 24px;
-  border-radius: 4px;
+  border: none;
+  padding: 14px 28px;
+  border-radius: 12px;
   cursor: pointer;
   font-weight: 600;
-  font-size: 16px;
-  transition: background 0.2s;
+  font-size: 1rem;
+  transition: transform 0.2s, box-shadow 0.2s;
+  box-shadow: 0 4px 10px rgba(252, 97, 0, 0.2);
 }
 
 .saveBtn:hover {
-  background-color: #ffffff;
-  color: #fc6100;
-  border-color: #fc6100;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 15px rgba(252, 97, 0, 0.3);
+}
+
+.saveBtn:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+  transform: none;
 }
 
 .deleteBtn {
-  background: none;
-  border: 1px solid #d32f2f;
+  background: transparent;
+  border: 1px solid #ffebee;
   color: #d32f2f;
-  padding: 11px 23px;
-  border-radius: 4px;
+  padding: 12px 24px;
+  border-radius: 12px;
   cursor: pointer;
   font-weight: 600;
-  font-size: 16px;
+  font-size: 0.95rem;
   transition: all 0.2s;
 }
 
 .deleteBtn:hover {
-  background-color: #b8001c;
-  color: white;
-  border-color: #b8001c;
+  background-color: #fee;
+  border-color: #ffcdd2;
 }
 
 .message {
-  padding: 10px;
+  padding: 14px;
   background-color: #e8f5e9;
   color: #2e7d32;
-  border-radius: 4px;
+  border-radius: 12px;
+  margin-top: 10px;
+  text-align: center;
 }
 
 .error {
-  padding: 10px;
+  padding: 14px;
   background-color: #ffebee;
   color: #c62828;
-  border-radius: 4px;
+  border-radius: 12px;
+  margin-top: 10px;
+  text-align: center;
 }
 
 /* Responsive */
@@ -189,13 +232,21 @@
   .container {
     flex-direction: column;
   }
-  
+
   .sidebar {
     width: 100%;
   }
-  
+
   .content {
     width: 100%;
-    padding: 20px;
+    padding: 24px;
+  }
+
+  /* Stack grid columns on mobile/tablet */
+  .gridGroup,
+  .gridGroupWithSmall,
+  .gridGroupThree {
+    grid-template-columns: 1fr;
+    gap: 20px;
   }
 }

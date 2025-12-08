@@ -80,6 +80,17 @@ export default function Checkout() {
   // Payment modal state
   const [paymentModalOpen, setPaymentModalOpen] = useState(false);
 
+  // Alert Modal state
+  const [alertInfo, setAlertInfo] = useState({
+    open: false,
+    title: "",
+    msg: "",
+  });
+  const [formErrors, setFormErrors] = useState({});
+
+  const closeAlert = () => setAlertInfo({ ...alertInfo, open: false });
+  const showAlert = (title, msg) => setAlertInfo({ open: true, title, msg });
+
   // helper: map various user shapes to our form fields (shared)
   const mapUserToForm = (u) => ({
     firstName: u?.nome || u?.firstName || u?.name || u?.first_name || "",
@@ -612,6 +623,11 @@ export default function Checkout() {
     const { name, value, type, checked } = e.target;
     let nextValue = type === "checkbox" ? checked : value;
 
+    // Clear error for this field if it has a value
+    if (formErrors[name] && nextValue) {
+      setFormErrors((prev) => ({ ...prev, [name]: false }));
+    }
+
     // Capitalize City (Title Case with exceptions)
     if (name === "city" && typeof nextValue === "string") {
       const exceptions = ["de", "da", "do", "dos", "das", "e"];
@@ -626,6 +642,8 @@ export default function Checkout() {
     }
 
     setForm((f) => ({ ...f, [name]: nextValue }));
+
+    // ... rest of email logic ...
 
     if (name === "email" && typeof nextValue === "string") {
       const trimmed = nextValue.trim();
@@ -660,7 +678,11 @@ export default function Checkout() {
       const res = await fetch(`https://viacep.com.br/ws/${cepLimpo}/json/`);
       const data = await res.json();
       if (data.erro) {
-        alert("CEP não encontrado!");
+        showAlert(
+          "CEP não encontrado",
+          "O CEP informado não foi encontrado. Por favor, verifique."
+        );
+        setFormErrors((prev) => ({ ...prev, postal: true }));
         // Limpar campos para evitar dados errados de tentativa anterior
         setForm((f) => ({
           ...f,
@@ -695,7 +717,16 @@ export default function Checkout() {
       !form.phone ||
       cpfDigits.length !== 11
     ) {
-      alert(
+      const newErrors = {};
+      if (!form.firstName) newErrors.firstName = true;
+      if (!form.lastName) newErrors.lastName = true;
+      if (!form.email) newErrors.email = true;
+      if (!form.phone) newErrors.phone = true;
+      if (cpfDigits.length !== 11) newErrors.cpf = true;
+      setFormErrors((prev) => ({ ...prev, ...newErrors }));
+
+      showAlert(
+        "Dados incompletos",
         "Preencha Primeiro nome, Sobrenome, E-mail, Telefone e CPF (11 dígitos) antes de continuar."
       );
       return;
@@ -721,17 +752,38 @@ export default function Checkout() {
   };
 
   const checkAddressComplete = () => {
-    if (
+    const postalDigits = (form.postal || "").replace(/\D/g, "");
+    const isCepInvalid = postalDigits.length !== 8;
+    const missingFields =
       !form.postal ||
       !form.address1 ||
       !form.numero ||
       !form.city ||
       !form.state ||
-      !form.bairro
-    ) {
-      alert(
-        "Por favor, preencha todos os campos do endereço (CEP, Rua, Número, Bairro, Cidade e Estado) antes de continuar."
-      );
+      !form.bairro;
+
+    if (missingFields || isCepInvalid) {
+      const newErrors = {};
+
+      // Mark postal error if missing or invalid validation
+      if (!form.postal || isCepInvalid) newErrors.postal = true;
+      if (!form.address1) newErrors.address1 = true;
+      if (!form.numero) newErrors.numero = true;
+      if (!form.city) newErrors.city = true;
+      if (!form.state) newErrors.state = true;
+      if (!form.bairro) newErrors.bairro = true;
+
+      setFormErrors((prev) => ({ ...prev, ...newErrors }));
+
+      if (isCepInvalid && form.postal) {
+        showAlert("CEP Inválido", "O CEP deve conter 8 dígitos.");
+      } else {
+        showAlert(
+          "Endereço incompleto",
+          "Por favor, preencha todos os campos do endereço (CEP, Rua, Número, Bairro, Cidade e Estado) antes de continuar."
+        );
+      }
+
       setStep("delivery");
       return false;
     }
@@ -750,7 +802,11 @@ export default function Checkout() {
 
   const calculateShipping = async () => {
     if (!form.postal) {
-      alert("Por favor, informe o CEP para calcular o frete.");
+      setFormErrors((prev) => ({ ...prev, postal: true }));
+      showAlert(
+        "CEP necessário",
+        "Por favor, informe o CEP para calcular o frete."
+      );
       return;
     }
     setIsCalculatingShipping(true);
@@ -841,7 +897,11 @@ export default function Checkout() {
       }
     } catch (error) {
       console.error("Erro ao calcular frete:", error);
-      alert("Não foi possível calcular o frete. Tente novamente.");
+      console.error("Erro ao calcular frete:", error);
+      showAlert(
+        "Erro no frete",
+        "Não foi possível calcular o frete. Tente novamente."
+      );
     } finally {
       setIsCalculatingShipping(false);
     }
@@ -1084,7 +1144,11 @@ export default function Checkout() {
             {step === "personal" ? (
               <form className={styles.form}>
                 <div className={styles.row2}>
-                  <label className={styles.field}>
+                  <label
+                    className={`${styles.field} ${
+                      formErrors.firstName ? styles.inputError : ""
+                    }`}
+                  >
                     <span>Primeiro nome *</span>
                     <input
                       name="firstName"
@@ -1093,7 +1157,11 @@ export default function Checkout() {
                       required
                     />
                   </label>
-                  <label className={styles.field}>
+                  <label
+                    className={`${styles.field} ${
+                      formErrors.lastName ? styles.inputError : ""
+                    }`}
+                  >
                     <span>Sobrenome *</span>
                     <input
                       name="lastName"
@@ -1102,7 +1170,11 @@ export default function Checkout() {
                       required
                     />
                   </label>
-                  <label className={styles.field}>
+                  <label
+                    className={`${styles.field} ${
+                      formErrors.email ? styles.inputError : ""
+                    }`}
+                  >
                     <span>Endereço de email *</span>
                     <input
                       name="email"
@@ -1112,7 +1184,11 @@ export default function Checkout() {
                       required
                     />
                   </label>
-                  <label className={styles.field}>
+                  <label
+                    className={`${styles.field} ${
+                      formErrors.cpf ? styles.inputError : ""
+                    }`}
+                  >
                     <span>CPF</span>
                     <input
                       name="cpf"
@@ -1123,7 +1199,11 @@ export default function Checkout() {
                       maxLength={11}
                     />
                   </label>
-                  <label className={styles.field}>
+                  <label
+                    className={`${styles.field} ${
+                      formErrors.phone ? styles.inputError : ""
+                    }`}
+                  >
                     <span>Telefone *</span>
                     <input
                       name="phone"
@@ -1190,7 +1270,11 @@ export default function Checkout() {
                 <h3>Entrega</h3>
                 <div className={styles.boxContent}>
                   <div className={styles.row2}>
-                    <label className={styles.field}>
+                    <label
+                      className={`${styles.field} ${
+                        formErrors.postal ? styles.inputError : ""
+                      }`}
+                    >
                       <span>CEP *</span>
                       <input
                         name="postal"
@@ -1202,7 +1286,11 @@ export default function Checkout() {
                         required
                       />
                     </label>
-                    <label className={styles.field}>
+                    <label
+                      className={`${styles.field} ${
+                        formErrors.state ? styles.inputError : ""
+                      }`}
+                    >
                       <span>Estado *</span>
                       <select
                         name="state"
@@ -1227,7 +1315,11 @@ export default function Checkout() {
                   </div>
 
                   <div className={`${styles.row2} ${styles.rowAddress}`}>
-                    <label className={styles.field}>
+                    <label
+                      className={`${styles.field} ${
+                        formErrors.address1 ? styles.inputError : ""
+                      }`}
+                    >
                       <span>Rua *</span>
                       <input
                         name="address1"
@@ -1237,7 +1329,11 @@ export default function Checkout() {
                         placeholder="Nome da rua"
                       />
                     </label>
-                    <label className={styles.field}>
+                    <label
+                      className={`${styles.field} ${
+                        formErrors.numero ? styles.inputError : ""
+                      }`}
+                    >
                       <span>Número *</span>
                       <input
                         name="numero"
@@ -1259,7 +1355,11 @@ export default function Checkout() {
                         placeholder="Apartamento, suíte, unidade, etc. (opcional)"
                       />
                     </label>
-                    <label className={styles.field}>
+                    <label
+                      className={`${styles.field} ${
+                        formErrors.bairro ? styles.inputError : ""
+                      }`}
+                    >
                       <span>Bairro *</span>
                       <input
                         name="bairro"
@@ -1271,7 +1371,11 @@ export default function Checkout() {
                   </div>
 
                   <div className={styles.row2}>
-                    <label className={styles.field}>
+                    <label
+                      className={`${styles.field} ${
+                        formErrors.city ? styles.inputError : ""
+                      }`}
+                    >
                       <span>Cidade *</span>
                       <input
                         name="city"
@@ -1607,6 +1711,23 @@ export default function Checkout() {
           }
         }}
       />
+      {/* Generic Alert Modal */}
+      {alertInfo.open && (
+        <div className={styles.modalOverlay} onClick={closeAlert}>
+          <div
+            className={styles.modalContent}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <h3 className={styles.modalTitle}>{alertInfo.title}</h3>
+            <p className={styles.modalText}>{alertInfo.msg}</p>
+            <div className={styles.modalActions}>
+              <button className={styles.modalBtn} onClick={closeAlert}>
+                OK
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
