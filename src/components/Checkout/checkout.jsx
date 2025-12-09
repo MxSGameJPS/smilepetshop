@@ -6,6 +6,40 @@ import { trackEvent } from "../../lib/meta";
 import { getCart } from "../../lib/cart";
 import PaymentModal from "./PaymentModal";
 
+// Função utilitária de validação de CPF
+function validateCPF(cpf) {
+  cpf = (cpf || "").replace(/[^\d]+/g, "");
+  if (cpf == "") return false;
+  // Elimina CPFs invalidos conhecidos
+  if (
+    cpf.length != 11 ||
+    cpf == "00000000000" ||
+    cpf == "11111111111" ||
+    cpf == "22222222222" ||
+    cpf == "33333333333" ||
+    cpf == "44444444444" ||
+    cpf == "55555555555" ||
+    cpf == "66666666666" ||
+    cpf == "77777777777" ||
+    cpf == "88888888888" ||
+    cpf == "99999999999"
+  )
+    return false;
+  // Valida 1o digito
+  let add = 0;
+  for (let i = 0; i < 9; i++) add += parseInt(cpf.charAt(i)) * (10 - i);
+  let rev = 11 - (add % 11);
+  if (rev == 10 || rev == 11) rev = 0;
+  if (rev != parseInt(cpf.charAt(9))) return false;
+  // Valida 2o digito
+  add = 0;
+  for (let i = 0; i < 10; i++) add += parseInt(cpf.charAt(i)) * (11 - i);
+  rev = 11 - (add % 11);
+  if (rev == 10 || rev == 11) rev = 0;
+  if (rev != parseInt(cpf.charAt(10))) return false;
+  return true;
+}
+
 const EMAIL_STORAGE_KEY = "smilepet_checkout_email";
 
 const BRAZIL_STATES = [
@@ -617,6 +651,9 @@ export default function Checkout() {
   const handleCpfChange = (e) => {
     const digits = (e.target.value || "").replace(/\D/g, "");
     setForm((f) => ({ ...f, cpf: digits.slice(0, 11) }));
+    if (formErrors.cpf) {
+      setFormErrors((prev) => ({ ...prev, cpf: false }));
+    }
   };
 
   const handleChange = (e) => {
@@ -710,24 +747,39 @@ export default function Checkout() {
 
   const goToDelivery = () => {
     const cpfDigits = (form.cpf || "").toString().replace(/\D/g, "");
+
+    // Validate CPF using our helper
+    const isCpfValid = validateCPF(cpfDigits);
+
     if (
       !form.firstName ||
       !form.lastName ||
       !form.email ||
       !form.phone ||
-      cpfDigits.length !== 11
+      !isCpfValid
     ) {
       const newErrors = {};
       if (!form.firstName) newErrors.firstName = true;
       if (!form.lastName) newErrors.lastName = true;
       if (!form.email) newErrors.email = true;
       if (!form.phone) newErrors.phone = true;
-      if (cpfDigits.length !== 11) newErrors.cpf = true;
+      if (!isCpfValid) {
+        newErrors.cpf = true;
+        // Show specific CPF error if that's the only/main issue or just general
+        if (cpfDigits.length > 0) {
+          showAlert(
+            "CPF Inválido",
+            "O CPF informado não é válido. Verifique os números."
+          );
+          setFormErrors((prev) => ({ ...prev, ...newErrors }));
+          return;
+        }
+      }
       setFormErrors((prev) => ({ ...prev, ...newErrors }));
 
       showAlert(
         "Dados incompletos",
-        "Preencha Primeiro nome, Sobrenome, E-mail, Telefone e CPF (11 dígitos) antes de continuar."
+        "Preencha todos os campos obrigatórios e um CPF válido para continuar."
       );
       return;
     }
