@@ -45,6 +45,8 @@ import CarrinhoModal from "./components/carrinhoModal/carrinhoModal";
 import BlingCallback from "./components/Bling/callback";
 import AdmPage from "./components/Administracao/admPage";
 import FaixaCorrida from "./components/faixacorrida/faixaCorrida";
+import RecuperarSenha from "./components/Usuario/recuperarSenha/recuperarSenha";
+import RedefinirSenha from "./components/Usuario/redefinirSenha/redefinirSenha";
 
 function Home() {
   return (
@@ -138,6 +140,8 @@ function App() {
             <Route path="/cadastroatacado" element={<CadastroAtacado />} />
             <Route path="/usuario" element={<Usuario />} />
             <Route path="/login" element={<LoginUsuario />} />
+            <Route path="/recuperar-senha" element={<RecuperarSenha />} />
+            <Route path="/redefinir-senha" element={<RedefinirSenha />} />
             <Route path="/cadastro" element={<CadastroUsuario />} />
             <Route path="/perfil" element={<Perfil />} />
             <Route path="/meus-pedidos" element={<MeusPedidos />} />

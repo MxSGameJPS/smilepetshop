@@ -135,6 +135,12 @@ export default function LoginUsuario() {
           </Link>
         </div>
 
+        <div className={styles.forgotPasswordRow}>
+          <Link to="/recuperar-senha" className={styles.forgotPasswordLink}>
+            Esqueci minha senha
+          </Link>
+        </div>
+
         <button className={styles.submitBtn} type="submit" disabled={loading}>
           {loading ? "Entrando..." : "ENTRAR"}
         </button>

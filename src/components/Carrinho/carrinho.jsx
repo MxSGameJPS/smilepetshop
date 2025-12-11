@@ -552,7 +552,7 @@ export default function Carrinho() {
               placeholder="Código do cupom"
               className={styles.couponInput}
               value={coupon}
-              onChange={(e) => setCoupon(e.target.value)}
+              onChange={(e) => setCoupon(e.target.value.toUpperCase())}
             />
             <button type="submit" className={styles.couponBtn}>
               Aplicar cupom

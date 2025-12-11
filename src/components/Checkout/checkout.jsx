@@ -1703,7 +1703,9 @@ export default function Checkout() {
                     <input
                       placeholder="Cupom de desconto"
                       value={couponInput}
-                      onChange={(e) => setCouponInput(e.target.value)}
+                      onChange={(e) =>
+                        setCouponInput(e.target.value.toUpperCase())
+                      }
                       className={styles.couponInput}
                     />
                     <button

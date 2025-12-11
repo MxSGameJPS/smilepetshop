@@ -1,0 +1,104 @@
+.section {
+  padding: 40px 20px;
+  max-width: 600px;
+  margin: 150px auto;
+  text-align: center;
+  color: #073b4c;
+}
+
+.section h1 {
+  font-size: 1.8rem;
+  margin-bottom: 10px;
+  color: #073b4c;
+}
+
+.section p {
+  color: #6c7a89;
+  margin-bottom: 20px;
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  text-align: left;
+}
+
+.label {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #073b4c;
+}
+
+.input {
+  padding: 12px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  font-size: 1rem;
+}
+
+.input:focus {
+  outline: none;
+  border-color: #fc6100;
+  box-shadow: 0 0 0 2px rgba(252, 97, 0, 0.1);
+}
+
+.btn {
+  background: #fc6100;
+  color: white;
+  border: none;
+  padding: 14px;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: bold;
+  cursor: pointer;
+  margin-top: 10px;
+}
+
+.btn:disabled {
+  background: #ccc;
+  cursor: not-allowed;
+}
+
+.successBox,
+.errorBox {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  align-items: center;
+  background: #fff;
+  padding: 30px;
+  border-radius: 10px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.successBox h2 {
+  color: #28a745;
+}
+.errorBox h2 {
+  color: #dc3545;
+}
+
+.error {
+  background: #f8d7da;
+  color: #721c24;
+  padding: 10px;
+  border-radius: 6px;
+  text-align: center;
+}
+
+.link {
+  color: #007bff;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.btnLink {
+  display: inline-block;
+  background: #073b4c;
+  color: white;
+  padding: 10px 20px;
+  border-radius: 6px;
+  text-decoration: none;
+  margin-top: 10px;
+}
