@@ -98,12 +98,48 @@
   /* give a restful elevation so content beneath is visually separated */
   box-shadow: 0 2px 8px rgba(7, 59, 76, 0.06);
 
+  /* Snow Texture Overlay moved outside to .header::before */
   @media (max-width: 760px) {
     display: none;
   }
 }
 
+.header::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  background-image: radial-gradient(
+      4px 4px at 15% 15%,
+      rgba(255, 255, 255, 0.5) 50%,
+      transparent 50%
+    ),
+    radial-gradient(
+      4px 4px at 35% 55%,
+      rgba(255, 255, 255, 0.4) 50%,
+      transparent 50%
+    ),
+    radial-gradient(
+      4px 4px at 75% 25%,
+      rgba(255, 255, 255, 0.5) 50%,
+      transparent 50%
+    ),
+    radial-gradient(
+      4px 4px at 85% 85%,
+      rgba(255, 255, 255, 0.4) 50%,
+      transparent 50%
+    );
+  background-size: 150px 150px;
+  z-index: 0;
+  opacity: 0.6;
+}
+
 .headerContent {
+  position: relative;
+  z-index: 1; /* Garante que o conteúdo fique acima da textura */
   max-width: 1400px;
   display: flex;
   align-items: center;

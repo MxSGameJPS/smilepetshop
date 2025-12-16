@@ -1,0 +1,118 @@
+.christmas-lights-container {
+  width: 100%;
+  overflow: hidden;
+  position: absolute; /* Ajuste conforme onde for inserido, pode ser relative se for parte do fluxo */
+  top: 0; /* Ou -10px para ficar pendurado */
+  left: 0;
+  z-index: 100;
+  pointer-events: none;
+  height: 20px;
+}
+
+.christmas-lights {
+  display: flex;
+  justify-content: space-evenly;
+  padding: 0;
+  margin: 0;
+  list-style: none;
+  width: 100%;
+  white-space: nowrap;
+}
+
+.christmas-lights li {
+  position: relative;
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  margin: 0 10px;
+  background: #f00; /* Cor padrão */
+  animation-duration: 1.5s;
+  animation-iteration-count: infinite;
+  animation-fill-mode: both;
+}
+
+/* Fio das luzes */
+.christmas-lights li::before {
+  content: "";
+  position: absolute;
+  top: -2px;
+  left: -10px; /* Conecta com o anterior */
+  width: 20px;
+  height: 8px;
+  border-bottom: 2px solid #ffffff;
+  border-radius: 50%;
+  z-index: -1;
+}
+
+.christmas-lights li:nth-child(4n + 1) {
+  background: #f44336;
+  animation-name: flash-1;
+  box-shadow: 0px 5px 24px 3px rgba(244, 67, 54, 1);
+}
+
+.christmas-lights li:nth-child(4n + 2) {
+  background: #ffeb3b;
+  animation-name: flash-2;
+  box-shadow: 0px 5px 24px 3px rgba(255, 235, 59, 1);
+}
+
+.christmas-lights li:nth-child(4n + 3) {
+  background: #2196f3;
+  animation-name: flash-3;
+  box-shadow: 0px 5px 24px 3px rgba(33, 150, 243, 1);
+}
+
+.christmas-lights li:nth-child(4n + 4) {
+  background: #4caf50;
+  animation-name: flash-4;
+  box-shadow: 0px 5px 24px 3px rgba(76, 175, 80, 1);
+}
+
+@keyframes flash-1 {
+  0%,
+  100% {
+    opacity: 1;
+    box-shadow: 0px 5px 24px 3px rgba(244, 67, 54, 1);
+  }
+  50% {
+    opacity: 0.4;
+    box-shadow: 0px 2px 10px 1px rgba(244, 67, 54, 0.5);
+  }
+}
+
+@keyframes flash-2 {
+  0%,
+  100% {
+    opacity: 0.4;
+    box-shadow: 0px 2px 10px 1px rgba(255, 235, 59, 0.5);
+  }
+  50% {
+    opacity: 1;
+    box-shadow: 0px 5px 24px 3px rgba(255, 235, 59, 1);
+  }
+}
+
+@keyframes flash-3 {
+  0%,
+  100% {
+    opacity: 1;
+    box-shadow: 0px 5px 24px 3px rgba(33, 150, 243, 1);
+  }
+  50% {
+    opacity: 0.4;
+    box-shadow: 0px 2px 10px 1px rgba(33, 150, 243, 0.5);
+  }
+}
+
+@keyframes flash-4 {
+  0%,
+  100% {
+    opacity: 0.4;
+    box-shadow: 0px 2px 10px 1px rgba(76, 175, 80, 0.5);
+  }
+  50% {
+    opacity: 1;
+    box-shadow: 0px 5px 24px 3px rgba(76, 175, 80, 1);
+  }
+}

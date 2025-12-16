@@ -602,7 +602,7 @@ export default function Produto() {
               role="img"
               aria-label="Promoção SmileFriday"
             >
-              Produto SmileFriday
+              Natal SmilePet
             </div>
           )}
           <h1 className={styles.titulo}>{titulo}</h1>

@@ -6,7 +6,7 @@ import { useNavigate } from "react-router-dom";
 
 const texto = (
   <>
-    <span className={styles.frase}>SMILEFRIDAY</span>
+    <span className={styles.frase}>NATAL NA SMILEPET</span>
     <span className={styles.icone}>
       <PiDog />
     </span>

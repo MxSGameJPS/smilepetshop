@@ -9,7 +9,7 @@
 
   @media (max-width: 760px) {
     width: 160px;
-  } 
+  }
 }
 
 .imageWrap {
@@ -176,7 +176,7 @@
   position: absolute;
   top: 4px;
   left: 8px;
-  background: linear-gradient(90deg, #fc6100 0%, #111 100%);
+  background: linear-gradient(90deg, #d42426 0%, #8b0000 100%);
   color: #ffffff;
   font-size: 0.85rem;
   font-weight: 700;

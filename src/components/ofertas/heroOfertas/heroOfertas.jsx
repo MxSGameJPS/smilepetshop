@@ -9,8 +9,6 @@ export default function HeroOfertas() {
   return (
     <section
       className={styles.hero}
-      role="img"
-      aria-label="Hero ofertas"
       onClick={scrollToProdutos}
       onKeyDown={(e) => {
         if (e.key === "Enter" || e.key === " ") scrollToProdutos();
@@ -18,6 +16,14 @@ export default function HeroOfertas() {
       tabIndex={0}
       style={{ cursor: "pointer" }}
     >
+      <video
+        className={styles.bgVideo}
+        src="/Video/natal.mp4"
+        autoPlay
+        muted
+        loop
+        playsInline
+      />
       <div className={styles.inner}></div>
     </section>
   );

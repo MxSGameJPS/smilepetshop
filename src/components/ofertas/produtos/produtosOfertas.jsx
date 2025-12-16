@@ -59,8 +59,8 @@ export default function ProdutosOfertas() {
   return (
     <div className={style.produtosOfertas}>
       <div className={style.produtosHeader}>
-        <h1>Nossa Primeira Smile <span>Friday</span></h1>
-        <p>Confira nossas ofertas especiais para seu pet!</p>
+        <h1>Natal na Smile Pet </h1>
+        <p>O presente perfeito para seu pet!</p>
       </div>
       <div className={style.produtosGrid}>
       {produtos.length === 0 ? (

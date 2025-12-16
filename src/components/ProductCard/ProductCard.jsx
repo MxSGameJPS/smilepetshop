@@ -30,7 +30,7 @@ export default function ProductCard({
   return (
     <div className={styles.card} onClick={handleOpen} role="button">
       <div className={styles.imageWrap}>
-        {promocao && <span className={styles.smileFridayTag}>SmileFriday</span>}
+        {promocao && <span className={styles.smileFridayTag}>Natal SmilePet</span>}
         <img src={image} alt={title} className={styles.productImage} />
         <button
           className={added ? `${styles.addBtn} ${styles.added}` : styles.addBtn}

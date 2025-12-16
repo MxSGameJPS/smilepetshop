@@ -94,6 +94,7 @@ export default function CarrinhoModal() {
       role="dialog"
       aria-modal="true"
     >
+      <img src="/noel.png" alt="" className={styles.santaClaus} />
       <aside className={styles.panel} onClick={(e) => e.stopPropagation()}>
         <div className={styles.header}>
           <div className={styles.title}>Confira sua compra</div>

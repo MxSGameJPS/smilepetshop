@@ -1,3 +1,4 @@
+import ChristmasLights from "../Christmas/Lights";
 import styles from "./header.module.css";
 import {
   FaSearch,
@@ -71,9 +72,9 @@ export default function Header() {
   const [blinkOfertas, setBlinkOfertas] = useState(false);
   const [categories, setCategories] = useState(null);
   const [products, setProducts] = useState(null);
-  const [brands, setBrands] = useState([]);
-  const [loadingBrands, setLoadingBrands] = useState(false);
-  const [activeSubLabel, setActiveSubLabel] = useState("");
+  // const [brands, setBrands] = useState([]);
+  // const [loadingBrands, setLoadingBrands] = useState(false);
+  // const [activeSubLabel, setActiveSubLabel] = useState("");
   const [showOverlay, setShowOverlay] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [suggestionsOpen, setSuggestionsOpen] = useState(false);
@@ -102,7 +103,7 @@ export default function Header() {
     Areias: ["Higiene e Cuidados para Gatos"],
   };
 
-  const [activeSubSpecies, setActiveSubSpecies] = useState("");
+  // const [activeSubSpecies, setActiveSubSpecies] = useState("");
 
   const normalizeText = (value) =>
     value == null
@@ -113,34 +114,31 @@ export default function Header() {
           .toLowerCase()
           .trim();
 
-  const collectCategoryIds = (product) => {
-    const ids = new Set();
-    const push = (val) => {
-      if (val === null || val === undefined) return;
-      const str = String(val).trim();
-      if (str) ids.add(str);
-    };
-
-    const directCategory = product?.categoria;
-    if (
-      typeof directCategory === "number" ||
-      (typeof directCategory === "string" && directCategory.trim() !== "")
-    ) {
-      push(directCategory);
-    }
-    if (directCategory && typeof directCategory === "object") {
-      push(directCategory?.id);
-      push(directCategory?._id);
-      push(directCategory?.ID);
-      push(directCategory?.codigo);
-    }
-
-    push(product?.categoria_id);
-    push(product?.categoriaId);
-    push(product?.categoriaID);
-
-    return ids;
-  };
+  // const collectCategoryIds = (product) => {
+  //   const ids = new Set();
+  //   const push = (val) => {
+  //     if (val === null || val === undefined) return;
+  //     const str = String(val).trim();
+  //     if (str) ids.add(str);
+  //   };
+  //   const directCategory = product?.categoria;
+  //   if (
+  //     typeof directCategory === "number" ||
+  //     (typeof directCategory === "string" && directCategory.trim() !== "")
+  //   ) {
+  //     push(directCategory);
+  //   }
+  //   if (directCategory && typeof directCategory === "object") {
+  //     push(directCategory?.id);
+  //     push(directCategory?._id);
+  //     push(directCategory?.ID);
+  //     push(directCategory?.codigo);
+  //   }
+  //   push(product?.categoria_id);
+  //   push(product?.categoriaId);
+  //   push(product?.categoriaID);
+  //   return ids;
+  // };
 
   const resolveCategoryMeta = (categoryNames, categoriesList) => {
     const names = new Set();
@@ -196,112 +194,103 @@ export default function Header() {
     return [];
   };
 
-  const findCategoryNameById = (idValue, categoriesList) => {
-    if (idValue === null || idValue === undefined) return "";
-    const idStr = String(idValue).trim();
-    if (!idStr) return "";
-    const match = (categoriesList || []).find((item) => {
-      const candidateIds = [
-        item?.id,
-        item?._id,
-        item?.ID,
-        item?.codigo,
-        item?.categoria_id,
-        item?.categoriaId,
-        item?.categoriaID,
-      ];
-      return candidateIds.some((candidate) => String(candidate) === idStr);
-    });
-    return (
-      match?.nome ||
-      match?.name ||
-      match?.label ||
-      match?.descricao ||
-      match?.description ||
-      ""
-    );
-  };
+  // const findCategoryNameById = (idValue, categoriesList) => {
+  //   if (idValue === null || idValue === undefined) return "";
+  //   const idStr = String(idValue).trim();
+  //   if (!idStr) return "";
+  //   const match = (categoriesList || []).find((item) => {
+  //     const candidateIds = [
+  //       item?.id,
+  //       item?._id,
+  //       item?.ID,
+  //       item?.codigo,
+  //       item?.categoria_id,
+  //       item?.categoriaId,
+  //       item?.categoriaID,
+  //     ];
+  //     return candidateIds.some((candidate) => String(candidate) === idStr);
+  //   });
+  //   return (
+  //     match?.nome ||
+  //     match?.name ||
+  //     match?.label ||
+  //     match?.descricao ||
+  //     match?.description ||
+  //     ""
+  //   );
+  // };
 
-  const collectCategoryNames = (product, categoriesList) => {
-    const names = new Set();
-    const pushName = (val) => {
-      const normalized = normalizeText(val);
-      if (normalized) names.add(normalized);
-    };
+  // const collectCategoryNames = (product, categoriesList) => {
+  //   const names = new Set();
+  //   const pushName = (val) => {
+  //     const normalized = normalizeText(val);
+  //     if (normalized) names.add(normalized);
+  //   };
+  //   const directCategory = product?.categoria;
+  //   if (
+  //     typeof directCategory === "string" ||
+  //     typeof directCategory === "number"
+  //   ) {
+  //     pushName(directCategory);
+  //   } else if (directCategory && typeof directCategory === "object") {
+  //     [
+  //       directCategory.nome,
+  //       directCategory.name,
+  //       directCategory.label,
+  //       directCategory.descricao,
+  //       directCategory.description,
+  //     ].forEach(pushName);
+  //   }
+  //   [
+  //     product?.categoria_nome,
+  //     product?.categoriaName,
+  //     product?.categoria_label,
+  //     product?.categoriaDescricao,
+  //     product?.categoria_description,
+  //   ].forEach(pushName);
+  //   const candidateIds = [
+  //     product?.categoria_id,
+  //     product?.categoriaId,
+  //     product?.categoriaID,
+  //     typeof directCategory === "number" ? directCategory : null,
+  //     typeof directCategory === "string" && /^\d+$/.test(directCategory.trim())
+  //       ? directCategory.trim()
+  //       : null,
+  //   ].filter((v) => v !== null && v !== undefined);
+  //   candidateIds.forEach((idCandidate) => {
+  //     // const nameFromId = findCategoryNameById(idCandidate, categoriesList);
+  //     // pushName(nameFromId);
+  //   });
+  //   return names;
+  // };
 
-    const directCategory = product?.categoria;
-    if (
-      typeof directCategory === "string" ||
-      typeof directCategory === "number"
-    ) {
-      pushName(directCategory);
-    } else if (directCategory && typeof directCategory === "object") {
-      [
-        directCategory.nome,
-        directCategory.name,
-        directCategory.label,
-        directCategory.descricao,
-        directCategory.description,
-      ].forEach(pushName);
-    }
-
-    [
-      product?.categoria_nome,
-      product?.categoriaName,
-      product?.categoria_label,
-      product?.categoriaDescricao,
-      product?.categoria_description,
-    ].forEach(pushName);
-
-    const candidateIds = [
-      product?.categoria_id,
-      product?.categoriaId,
-      product?.categoriaID,
-      typeof directCategory === "number" ? directCategory : null,
-      typeof directCategory === "string" && /^\d+$/.test(directCategory.trim())
-        ? directCategory.trim()
-        : null,
-    ].filter((v) => v !== null && v !== undefined);
-
-    candidateIds.forEach((idCandidate) => {
-      const nameFromId = findCategoryNameById(idCandidate, categoriesList);
-      pushName(nameFromId);
-    });
-
-    return names;
-  };
-
-  const productMatchesCategory = (product, targetNames, categoriesList) => {
-    if (!product || !targetNames) return false;
-    const { names: nameTargets = [], ids: idTargets = [] } = targetNames;
-    const normalizedNameTargets = (targetNames?.normalizedNames || []).filter(
-      Boolean
-    );
-
-    const productNames = collectCategoryNames(product, categoriesList);
-    if (normalizedNameTargets.length) {
-      const hasNameMatch = normalizedNameTargets.some((target) =>
-        productNames.has(target)
-      );
-      if (hasNameMatch) return true;
-    }
-
-    if (idTargets.length) {
-      const productIds = collectCategoryIds(product);
-      const hasIdMatch = idTargets.some((id) => productIds.has(id));
-      if (hasIdMatch) return true;
-    }
-
-    // fallback: compare raw names if available
-    if (nameTargets.length) {
-      const fallbackMatch = nameTargets.some((label) =>
-        productNames.has(normalizeText(label))
-      );
-      if (fallbackMatch) return true;
-    }
-
-    return false;
-  };
+  // const productMatchesCategory = (product, targetNames, categoriesList) => {
+  //   if (!product || !targetNames) return false;
+  //   const { names: nameTargets = [], ids: idTargets = [] } = targetNames;
+  //   const normalizedNameTargets = (targetNames?.normalizedNames || []).filter(
+  //     Boolean
+  //   );
+  //   // const productNames = collectCategoryNames(product, categoriesList);
+  //   // if (normalizedNameTargets.length) {
+  //   //   const hasNameMatch = normalizedNameTargets.some((target) =>
+  //   //     productNames.has(target)
+  //   //   );
+  //   //   if (hasNameMatch) return true;
+  //   // }
+  //   // if (idTargets.length) {
+  //   //   const productIds = collectCategoryIds(product);
+  //   //   const hasIdMatch = idTargets.some((id) => productIds.has(id));
+  //   //   if (hasIdMatch) return true;
+  //   // }
+  //   // fallback: compare raw names if available
+  //   // if (nameTargets.length) {
+  //   //   const fallbackMatch = nameTargets.some((label) =>
+  //   //     productNames.has(normalizeText(label))
+  //   //   );
+  //   //   if (fallbackMatch) return true;
+  //   // }
+  //   return false;
+  // };
 
   async function ensureDataFetched() {
     let categoriesData = categories;
@@ -416,66 +405,66 @@ export default function Header() {
 
   async function handleHoverSubItem(itemLabel, species = "cachorro") {
     if (!showOverlay) setShowOverlay(true);
-    setBrands([]);
-    setActiveSubLabel(itemLabel);
-    setActiveSubSpecies(species);
+    // setBrands([]);
+    // setActiveSubLabel(itemLabel);
+    // setActiveSubSpecies(species);
     const map =
       species === "gato" ? submenuCategoryMapGato : submenuCategoryMapCachorro;
     const targetCategories = map[itemLabel] || [];
     if (!targetCategories || targetCategories.length === 0) return;
-    setLoadingBrands(true);
+    // setLoadingBrands(true);
     try {
-      const { productsData, categoriesData } = await ensureDataFetched();
-      const targetMeta = resolveCategoryMeta(targetCategories, categoriesData);
-      const filtered = productsData.filter((product) =>
-        productMatchesCategory(product, targetMeta, categoriesData)
-      );
-      const unique = Array.from(
-        new Set(
-          filtered
-            .map((p) => (p?.marca ? String(p.marca).trim() : ""))
-            .filter(Boolean)
-        )
-      );
-      setBrands(
-        unique.sort((a, b) =>
-          a.localeCompare(b, "pt-BR", { sensitivity: "base" })
-        )
-      );
+      await ensureDataFetched();
+      // const targetMeta = resolveCategoryMeta(targetCategories, categoriesData);
+      // const filtered = productsData.filter((product) =>
+      //   productMatchesCategory(product, targetMeta, categoriesData)
+      // );
+      // const unique = Array.from(
+      //   new Set(
+      //     filtered
+      //       .map((p) => (p?.marca ? String(p.marca).trim() : ""))
+      //       .filter(Boolean)
+      //   )
+      // );
+      // setBrands(
+      //   unique.sort((a, b) =>
+      //     a.localeCompare(b, "pt-BR", { sensitivity: "base" })
+      //   )
+      // );
     } catch (err) {
       console.warn("Erro filtrando marcas", err);
-      setBrands([]);
+      // setBrands([]);
     } finally {
-      setLoadingBrands(false);
+      // setLoadingBrands(false);
     }
   }
 
-  async function handleBrandClick(brand) {
-    // determine which species map to use
-    const map =
-      activeSubSpecies === "gato"
-        ? submenuCategoryMapGato
-        : submenuCategoryMapCachorro;
-    const targetCategories = map[activeSubLabel] || [];
-    if (!targetCategories || targetCategories.length === 0) return;
-    try {
-      const { categoriesData } = await ensureDataFetched();
-      const targetMeta = resolveCategoryMeta(targetCategories, categoriesData);
-      const params = new URLSearchParams();
-      if (targetMeta.ids.length)
-        params.set("categorias", targetMeta.ids.join(","));
-      else params.set("categorias", targetCategories.join(","));
-      const petLabel = activeSubSpecies === "gato" ? "Gato" : "Cachorro";
-      params.set("pet", petLabel);
-      if (brand) params.set("marca", brand);
-      setOpenCachorro(false);
-      setOpenGato(false);
-      setShowOverlay(false);
-      navigate(`/produtos?${params.toString()}`);
-    } catch (err) {
-      console.warn("Erro ao navegar por marca", err);
-    }
-  }
+  // async function handleBrandClick(brand) {
+  //   // determine which species map to use
+  //   const map =
+  //     activeSubSpecies === "gato"
+  //       ? submenuCategoryMapGato
+  //       : submenuCategoryMapCachorro;
+  //   const targetCategories = map[activeSubLabel] || [];
+  //   if (!targetCategories || targetCategories.length === 0) return;
+  //   try {
+  //     const { categoriesData } = await ensureDataFetched();
+  //     const targetMeta = resolveCategoryMeta(targetCategories, categoriesData);
+  //     const params = new URLSearchParams();
+  //     if (targetMeta.ids.length)
+  //       params.set("categorias", targetMeta.ids.join(","));
+  //     else params.set("categorias", targetCategories.join(","));
+  //     const petLabel = activeSubSpecies === "gato" ? "Gato" : "Cachorro";
+  //     params.set("pet", petLabel);
+  //     if (brand) params.set("marca", brand);
+  //     setOpenCachorro(false);
+  //     setOpenGato(false);
+  //     setShowOverlay(false);
+  //     navigate(`/produtos?${params.toString()}`);
+  //   } catch (err) {
+  //     console.warn("Erro ao navegar por marca", err);
+  //   }
+  // }
 
   async function handleCategoryNavigate(label, species) {
     const map =
@@ -548,6 +537,7 @@ export default function Header() {
       {isMobile ? <HeaderMobile /> : null}
       {!isMobile && (
         <header className={styles.header}>
+          <ChristmasLights />
           {/* Top bar: logo | centered search | right actions */}
           <div className={styles.headerTop}>
             <div className={styles.headerContent}>

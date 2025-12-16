@@ -1,9 +1,7 @@
-/* Hero for ofertas page - uses banner image as background */
+/* Hero for ofertas page - uses video as background */
 .hero {
-  background-image: url("/blackfridy/bannerHero.png");
-  background-size: cover;
-  background-repeat: no-repeat;
-  background-position: center center;
+  position: relative;
+  overflow: hidden;
   min-height: 990px;
   display: flex;
   align-items: center;
@@ -12,8 +10,20 @@
   padding: 0;
 }
 
+.bgVideo {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  z-index: 0;
+}
+
 .inner {
   width: 100%;
+  position: relative;
+  z-index: 1;
 }
 
 @media (max-width: 900px) {

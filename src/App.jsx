@@ -47,6 +47,7 @@ import AdmPage from "./components/Administracao/admPage";
 import FaixaCorrida from "./components/faixacorrida/faixaCorrida";
 import RecuperarSenha from "./components/Usuario/recuperarSenha/recuperarSenha";
 import RedefinirSenha from "./components/Usuario/redefinirSenha/redefinirSenha";
+import Snow from "./components/Christmas/Snow";
 
 function Home() {
   return (
@@ -107,8 +108,6 @@ function FooterConditional() {
 }
 
 function CarrinhoModalConditional() {
-  const location = useLocation();
-  if (location && location.pathname === "/") return null;
   return <CarrinhoModal />;
 }
 
@@ -151,6 +150,7 @@ function App() {
           </Routes>
         </main>
       </div>
+      <Snow />
       <CarrinhoModalConditional />
       <FooterConditional />
     </Router>
