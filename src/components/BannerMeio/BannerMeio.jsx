@@ -6,7 +6,7 @@ export default function BannerMeio() {
     <section className={styles.bannerMeioContainer}>
       <Link to="/produtos?ofertas=true">
       <img
-        src="/banners/banner4.png"
+        src="/banners/banner4.webp"
         alt="Banner promocional"
         className={styles.bannerMeioImg}
       />

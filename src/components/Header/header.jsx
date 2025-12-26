@@ -544,7 +544,7 @@ export default function Header() {
               <div className={styles.logoArea}>
                 <a href="/">
                   <img
-                    src="/logo.gif"
+                    src="/logo.webp"
                     alt="Logo SmilePet"
                     className={styles.logo}
                   />

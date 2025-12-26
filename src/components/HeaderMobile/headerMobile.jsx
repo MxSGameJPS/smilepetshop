@@ -33,7 +33,7 @@ export default function HeaderMobile() {
         </button>
 
         <a href="/" className={styles.logoLink} aria-label="Página inicial">
-          <img src="/logo.gif" alt="Logo" className={styles.logo} />
+          <img src="/logo.webp" alt="Logo" className={styles.logo} />
         </a>
 
         <button

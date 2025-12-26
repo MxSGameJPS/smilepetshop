@@ -275,11 +275,11 @@
 }
 
 .petLinkDog::before {
-  background-image: url("/Cachorro (1).gif");
+  background-image: url("/Cachorro.webp");
 }
 
 .petLinkCat::before {
-  background-image: url("/Gato.gif");
+  background-image: url("/Gato.webp");
 }
 
 .hasSubmenu {

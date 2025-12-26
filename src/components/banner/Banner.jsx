@@ -15,7 +15,7 @@ export default function Banner() {
     window.addEventListener("resize", check);
     return () => window.removeEventListener("resize", check);
   }, []);
-  const slides = ["/banners/banner6.png","/banners/banner3.png", "/banners/banner5.png"];
+  const slides = ["/banners/banner6.webp","/banners/banner3.webp", "/banners/banner5.webp"];
   const DELAY = 5000; // 5 seconds
   const [index, setIndex] = useState(0);
   const [paused, setPaused] = useState(false);
@@ -50,11 +50,11 @@ export default function Banner() {
   }
 
   function handleBannerClick(i) {
-    if (slides[i] === "/banners/banner6.png") {
+    if (slides[i] === "/banners/banner6.webp") {
       window.open("https://lista.mercadolivre.com.br/pagina/smilepet/", "_blank");
     } else if (
-      slides[i] === "/banners/banner5.png" ||
-      slides[i] === "/banners/banner3.png"
+      slides[i] === "/banners/banner5.webp" ||
+      slides[i] === "/banners/banner3.webp"
     ) {
       navigate("/ofertas");
     }
