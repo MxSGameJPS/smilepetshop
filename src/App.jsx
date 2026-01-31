@@ -47,7 +47,7 @@ import AdmPage from "./components/Administracao/admPage";
 import FaixaCorrida from "./components/faixacorrida/faixaCorrida";
 import RecuperarSenha from "./components/Usuario/recuperarSenha/recuperarSenha";
 import RedefinirSenha from "./components/Usuario/redefinirSenha/redefinirSenha";
-import Snow from "./components/Christmas/Snow";
+import Confetti from "./components/Carnival/Confetti";
 
 function Home() {
   return (
@@ -150,7 +150,7 @@ function App() {
           </Routes>
         </main>
       </div>
-      <Snow />
+      <Confetti />
       <CarrinhoModalConditional />
       <FooterConditional />
     </Router>

@@ -115,7 +115,7 @@ export default function Produto() {
     try {
       localStorage.setItem(
         "smilepet_favoritos",
-        JSON.stringify(favoritosArray)
+        JSON.stringify(favoritosArray),
       );
     } catch {
       /* ignore */
@@ -125,14 +125,14 @@ export default function Produto() {
   // atualiza estado do produto atual quando id/produto ou array mudar
   useEffect(() => {
     const sid = String(
-      id || produto?.id || produto?.SKU || produto?.codigo || ""
+      id || produto?.id || produto?.SKU || produto?.codigo || "",
     );
     setFavorito(Boolean(sid && favoritosArray.includes(String(sid))));
   }, [favoritosArray, id, produto]);
 
   const toggleFavorito = () => {
     const sid = String(
-      id || produto?.id || produto?.SKU || produto?.codigo || ""
+      id || produto?.id || produto?.SKU || produto?.codigo || "",
     );
     if (!sid) return setFavorito((s) => !s);
     setFavoritosArray((prev) => {
@@ -178,7 +178,7 @@ export default function Produto() {
         console.debug(
           "variacoes response normalized length",
           arr.length,
-          arr[0]
+          arr[0],
         );
         // normalize to array of objects
         setVariacoesList(arr);
@@ -198,7 +198,7 @@ export default function Produto() {
               produto?.SKU ??
               produto?.codigo ??
               produto?.nome ??
-              ""
+              "",
           );
           if (prodKey) {
             const prodPrice = produto?.preco ?? produto?.precoMin ?? null;
@@ -212,13 +212,13 @@ export default function Produto() {
         // definir variante padrão: preferir o produto pai (mostrar preço do pai por default)
         if (produto && (produto.id ?? produto.SKU ?? produto.codigo)) {
           const prodKey = String(
-            produto.id ?? produto.SKU ?? produto.codigo ?? produto.nome
+            produto.id ?? produto.SKU ?? produto.codigo ?? produto.nome,
           );
           setVariante((prev) => prev ?? prodKey);
         } else if (arr.length > 0) {
           const first = arr[0];
           const val = String(
-            first.id ?? first.codigo ?? first.sku ?? first.nome ?? first
+            first.id ?? first.codigo ?? first.sku ?? first.nome ?? first,
           );
           setVariante((prev) => prev ?? val);
         }
@@ -316,7 +316,7 @@ export default function Produto() {
         else if (Array.isArray(data.data)) arr = data.data;
         else if (Array.isArray(data.produtos)) arr = data.produtos;
         const sid = String(
-          id || produto?.id || produto?.SKU || produto?.codigo || ""
+          id || produto?.id || produto?.SKU || produto?.codigo || "",
         );
         const filtrados = arr.filter((p) => {
           const sidLocal = String(p?.id ?? p?.SKU ?? p?.codigo ?? "");
@@ -327,7 +327,7 @@ export default function Produto() {
               p.produto &&
               Object.prototype.hasOwnProperty.call(
                 p.produto,
-                "produto_pai_id"
+                "produto_pai_id",
               ) &&
               p.produto.produto_pai_id === null);
           return isParent && sidLocal !== sid;
@@ -355,7 +355,7 @@ export default function Produto() {
       // initialize display title/sku from the loaded product
       try {
         setDisplayTitle(
-          produto.nome || produto.title || produto.name || "Produto"
+          produto.nome || produto.title || produto.name || "Produto",
         );
       } catch {
         setDisplayTitle("Produto");
@@ -366,7 +366,7 @@ export default function Produto() {
             produto.SKU ||
             produto.codigo ||
             String(produto.id) ||
-            ""
+            "",
         );
       } catch {
         setDisplaySku("");
@@ -399,7 +399,7 @@ export default function Produto() {
 
     if (found) {
       setDisplayTitle(
-        found.nome || found.title || found.name || produto?.nome || "Produto"
+        found.nome || found.title || found.name || produto?.nome || "Produto",
       );
       setDisplaySku(
         found.sku ||
@@ -408,7 +408,7 @@ export default function Produto() {
           String(found.id) ||
           produto?.sku ||
           produto?.codigo ||
-          ""
+          "",
       );
       return;
     }
@@ -416,18 +416,18 @@ export default function Produto() {
     // fallback: if the selected key matches the parent product, use product fields
     try {
       const prodKey = String(
-        produto?.id ?? produto?.SKU ?? produto?.codigo ?? produto?.nome ?? ""
+        produto?.id ?? produto?.SKU ?? produto?.codigo ?? produto?.nome ?? "",
       );
       if (prodKey === key) {
         setDisplayTitle(
-          produto?.nome || produto?.title || produto?.name || "Produto"
+          produto?.nome || produto?.title || produto?.name || "Produto",
         );
         setDisplaySku(
           produto?.sku ||
             produto?.SKU ||
             produto?.codigo ||
             String(produto?.id) ||
-            ""
+            "",
         );
         return;
       }
@@ -493,14 +493,14 @@ export default function Produto() {
   console.debug(
     "variacoesList (len)",
     variacoesList?.length,
-    variacoesList?.[0]
+    variacoesList?.[0],
   );
   console.debug("produto.variacoes", produto?.variacoes);
   console.debug(
     "variante",
     variante,
     "defaultVariantValue",
-    defaultVariantValue
+    defaultVariantValue,
   );
 
   const handleAddToCart = () => {
@@ -580,7 +580,7 @@ export default function Produto() {
                 className={styles.thumbNav}
                 onClick={() =>
                   setThumbStartIndex(
-                    Math.min(imagens.length - 4, thumbStartIndex + 1)
+                    Math.min(imagens.length - 4, thumbStartIndex + 1),
                   )
                 }
               >
@@ -602,7 +602,7 @@ export default function Produto() {
               role="img"
               aria-label="Promoção SmileFriday"
             >
-              Natal SmilePet
+              Carnaval SmilePet
             </div>
           )}
           <h1 className={styles.titulo}>{titulo}</h1>
@@ -630,11 +630,11 @@ export default function Produto() {
                   (() => {
                     const buttons = [];
                     const baseKeyRaw = produto
-                      ? produto.id ??
+                      ? (produto.id ??
                         produto.SKU ??
                         produto.codigo ??
                         produto.quantidade ??
-                        produto.nome
+                        produto.nome)
                       : null;
                     const baseKey =
                       baseKeyRaw != null && baseKeyRaw !== ""
@@ -644,8 +644,8 @@ export default function Produto() {
                       produto?.quantidade != null && produto.quantidade !== ""
                         ? String(produto.quantidade)
                         : produto?.nome
-                        ? String(produto.nome)
-                        : null;
+                          ? String(produto.nome)
+                          : null;
                     const activeKey =
                       variante ??
                       (baseKey ? baseKey : defaultVariantValue || "");
@@ -663,7 +663,7 @@ export default function Produto() {
                           aria-pressed={isActive}
                         >
                           {baseLabel}
-                        </button>
+                        </button>,
                       );
                     }
 
@@ -671,7 +671,7 @@ export default function Produto() {
                       variacoesList.forEach((v) => {
                         if (!v) return;
                         const key = String(
-                          v.id ?? v.codigo ?? v.sku ?? v.nome ?? v.label ?? v
+                          v.id ?? v.codigo ?? v.sku ?? v.nome ?? v.label ?? v,
                         );
                         if (baseKey && key === baseKey) return;
                         const quantityLabel =
@@ -693,7 +693,7 @@ export default function Produto() {
                             aria-pressed={isActive}
                           >
                             {label}
-                          </button>
+                          </button>,
                         );
                       });
                     } else if (
@@ -716,7 +716,7 @@ export default function Produto() {
                             aria-pressed={isActive}
                           >
                             {label}
-                          </button>
+                          </button>,
                         );
                       });
                     } else if (!buttons.length) {
@@ -726,7 +726,7 @@ export default function Produto() {
                           className={styles.variacaoStatus}
                         >
                           Sem variações disponíveis
-                        </span>
+                        </span>,
                       );
                     }
 
@@ -871,11 +871,11 @@ export default function Produto() {
                     toggleFavoritoById(sid);
                   }}
                   aria-pressed={favoritosArray.includes(
-                    String(p.id || p.SKU || p.codigo)
+                    String(p.id || p.SKU || p.codigo),
                   )}
                 >
                   {favoritosArray.includes(
-                    String(p.id || p.SKU || p.codigo)
+                    String(p.id || p.SKU || p.codigo),
                   ) ? (
                     <AiFillHeart size={16} color="#e11" />
                   ) : (
@@ -897,8 +897,8 @@ export default function Produto() {
                   {p.precoMin
                     ? formatarPreco(p.precoMin)
                     : p.preco
-                    ? formatarPreco(p.preco)
-                    : ""}
+                      ? formatarPreco(p.preco)
+                      : ""}
                   {p.precoMax ? ` – ${formatarPreco(p.precoMax)}` : ""}
                 </div>
               </div>

@@ -30,7 +30,7 @@ export default function ProdutosOfertas() {
           id: p.id || p._id || p.uid,
         }));
         const promocoes = normalized.filter(
-          (p) => p && (p.promocao === true || p.promocao === "true")
+          (p) => p && (p.promocao === true || p.promocao === "true"),
         );
         setProdutos(promocoes);
       })
@@ -59,15 +59,17 @@ export default function ProdutosOfertas() {
   return (
     <div className={style.produtosOfertas}>
       <div className={style.produtosHeader}>
-        <h1>Natal na Smile Pet </h1>
-        <p>O presente perfeito para seu pet!</p>
+        <h1>Carnaval na Smile Pet </h1>
+        <p>A folia perfeita para seu pet!</p>
       </div>
       <div className={style.produtosGrid}>
-      {produtos.length === 0 ? (
-        <div>Nenhuma promoção ativa no momento.</div>
-      ) : (
-        produtos.map((p, idx) => <CardOfertas key={p.id || idx} product={p} />)
-      )}
+        {produtos.length === 0 ? (
+          <div>Nenhuma promoção ativa no momento.</div>
+        ) : (
+          produtos.map((p, idx) => (
+            <CardOfertas key={p.id || idx} product={p} />
+          ))
+        )}
       </div>
     </div>
   );

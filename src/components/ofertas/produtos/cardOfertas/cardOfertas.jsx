@@ -5,7 +5,7 @@ import { PiDog } from "react-icons/pi";
 import { useNavigate } from "react-router-dom";
 
 // Promo termina em 25 de dezembro de 2025 às 23:59 no fuso de Brasília
-const GLOBAL_PROMO_END = new Date("2025-12-25T23:59:59-03:00").getTime();
+const GLOBAL_PROMO_END = new Date("2026-02-28T23:59:59-03:00").getTime();
 
 export default function CardOfertas({ product }) {
   const { id, nome, imagem_url, preco } = product || {};
@@ -20,7 +20,7 @@ export default function CardOfertas({ product }) {
   }, [product]);
 
   const [remaining, setRemaining] = useState(() =>
-    Math.max(0, promoEnd - Date.now())
+    Math.max(0, promoEnd - Date.now()),
   );
 
   useEffect(() => {
@@ -42,7 +42,7 @@ export default function CardOfertas({ product }) {
     const secs = totalSec % 60;
     return `${String(days).padStart(2, "0")}D ${String(hours).padStart(
       2,
-      "0"
+      "0",
     )} : ${String(mins).padStart(2, "0")} : ${String(secs).padStart(2, "0")}`;
   }
 
@@ -72,7 +72,7 @@ export default function CardOfertas({ product }) {
       tabIndex={0}
       aria-label={`Ver detalhes de ${nome}`}
     >
-      <div className={styles.topTag}>NATAL SMILEPET</div>
+      <div className={styles.topTag}>CARNAVAL SMILEPET</div>
 
       <div className={styles.hero}>
         <img

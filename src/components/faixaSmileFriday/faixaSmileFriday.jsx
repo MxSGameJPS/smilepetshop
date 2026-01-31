@@ -78,7 +78,7 @@ function MiniOfferCard({ product, onNavigate }) {
       role="button"
       aria-label={id ? `Ver detalhes de ${nome}` : `Ver ofertas`}
     >
-      <div className={styles.cardHeader}>NATAL NA SMILEPET</div>
+      <div className={styles.cardHeader}>CARNAVAL NA SMILEPET</div>
       <div className={styles.cardHero}>
         <img
           src={imagem_url || FALLBACK_IMAGE}
@@ -140,13 +140,13 @@ export default function FaixaSmileFriday() {
       const list = Array.isArray(data)
         ? data
         : Array.isArray(data?.data)
-        ? data.data
-        : Array.isArray(data?.produtos)
-        ? data.produtos
-        : [];
+          ? data.data
+          : Array.isArray(data?.produtos)
+            ? data.produtos
+            : [];
 
       const promos = list.filter((item) =>
-        Boolean(item?.promocao ?? item?.promo ?? item?.isPromo)
+        Boolean(item?.promocao ?? item?.promo ?? item?.isPromo),
       );
 
       setProducts(promos);
@@ -174,7 +174,7 @@ export default function FaixaSmileFriday() {
     (path) => {
       navigate(path);
     },
-    [navigate]
+    [navigate],
   );
 
   const handleRetry = () => {
@@ -183,7 +183,7 @@ export default function FaixaSmileFriday() {
 
   if (loading) {
     return (
-      <section className={styles.banner} aria-label="Natal na SmilePet">
+      <section className={styles.banner} aria-label="Carnaval na SmilePet">
         <div className={styles.overlayContent}>
           <p className={styles.status}>Carregando ofertas...</p>
         </div>
@@ -193,7 +193,7 @@ export default function FaixaSmileFriday() {
 
   if (error) {
     return (
-      <section className={styles.banner} aria-label="Natal na SmilePet">
+      <section className={styles.banner} aria-label="Carnaval na SmilePet">
         <div className={styles.overlayContent}>
           <p className={styles.status}>{error}</p>
           <button
@@ -210,7 +210,7 @@ export default function FaixaSmileFriday() {
 
   if (!products.length) {
     return (
-      <section className={styles.banner} aria-label="Natal na SmilePet">
+      <section className={styles.banner} aria-label="Carnaval na SmilePet">
         <div className={styles.overlayContent}>
           <p className={styles.status}>
             Ainda não há produtos em promoção. Volte mais tarde!
@@ -221,7 +221,7 @@ export default function FaixaSmileFriday() {
   }
 
   return (
-    <section className={styles.banner} aria-label="Natal na SmilePet">
+    <section className={styles.banner} aria-label="Carnaval na SmilePet">
       <div
         className={styles.content}
         onClick={(e) => {
@@ -232,8 +232,8 @@ export default function FaixaSmileFriday() {
         }}
       >
         <header className={styles.header}>
-          <h2 className={styles.title}>Natal na SmilePet</h2>
-          <p className={styles.subtitle}>O presente perfeito para o seu pet!</p>
+          <h2 className={styles.title}>Carnaval na SmilePet</h2>
+          <p className={styles.subtitle}>A folia perfeita para o seu pet!</p>
         </header>
 
         <div

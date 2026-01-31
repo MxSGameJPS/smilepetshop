@@ -1,4 +1,4 @@
-import ChristmasLights from "../Christmas/Lights";
+import CarnivalDecorations from "../Carnival/CarnivalDecorations";
 import styles from "./header.module.css";
 import {
   FaSearch,
@@ -19,7 +19,7 @@ export default function Header() {
   const [isMobile, setIsMobile] = useState(() =>
     typeof window !== "undefined"
       ? window.matchMedia("(max-width:760px)").matches
-      : false
+      : false,
   );
 
   useEffect(() => {
@@ -153,7 +153,7 @@ export default function Header() {
       const match = (categoriesList || []).find((cat) => {
         const catNames = [cat?.nome, cat?.descricao, cat?.label, cat?.name];
         return catNames.some(
-          (candidate) => normalizeText(candidate) === normalizedEntry
+          (candidate) => normalizeText(candidate) === normalizedEntry,
         );
       });
 
@@ -298,7 +298,7 @@ export default function Header() {
     try {
       if (!categoriesData) {
         const resC = await fetch(
-          "https://apismilepet.vercel.app/api/categorias/produtos"
+          "https://apismilepet.vercel.app/api/categorias/produtos",
         );
         const dataC = await resC.json().catch(() => null);
         categoriesData = resolveCategoryArray(dataC);
@@ -348,7 +348,7 @@ export default function Header() {
     if (!products) return [];
     return products.map((p) => {
       const name = String(
-        p?.nome || p?.title || p?.name || p?.descricao || ""
+        p?.nome || p?.title || p?.name || p?.descricao || "",
       ).trim();
       const rawPrice =
         p?.precoMin ??
@@ -537,7 +537,7 @@ export default function Header() {
       {isMobile ? <HeaderMobile /> : null}
       {!isMobile && (
         <header className={styles.header}>
-          <ChristmasLights />
+          <CarnivalDecorations />
           {/* Top bar: logo | centered search | right actions */}
           <div className={styles.headerTop}>
             <div className={styles.headerContent}>
@@ -759,13 +759,13 @@ export default function Header() {
                                 onClick={() => {
                                   void handleCategoryNavigate(
                                     label,
-                                    "cachorro"
+                                    "cachorro",
                                   );
                                 }}
                               >
                                 {label}
                               </div>
-                            )
+                            ),
                           )}
                         </div>
                         {/* <div className={styles.submenuRight}>
