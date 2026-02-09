@@ -197,7 +197,7 @@ export default function Checkout() {
         savedDraft = raw ? JSON.parse(raw) : null;
         try {
           savedDraftOwner = localStorage.getItem(
-            "smilepet_checkout_billing_owner"
+            "smilepet_checkout_billing_owner",
           );
         } catch {
           savedDraftOwner = null;
@@ -365,7 +365,7 @@ export default function Checkout() {
         .filter(Boolean);
       const num_items = cart.reduce(
         (acc, it) => acc + (Number(it.quantidade ?? it.quantity ?? 1) || 0),
-        0
+        0,
       );
 
       trackEvent("InitiateCheckout", {
@@ -556,7 +556,7 @@ export default function Checkout() {
       Number(it.quantidade ?? it.quantity ?? it.qtd ?? it.qty ?? 1) || 0;
     const price =
       Number(
-        it.precoUnit ?? it.preco ?? it.price ?? it.valor ?? it.unit_price ?? 0
+        it.precoUnit ?? it.preco ?? it.price ?? it.valor ?? it.unit_price ?? 0,
       ) || 0;
     return acc + qty * price;
   }, 0);
@@ -717,7 +717,7 @@ export default function Checkout() {
       if (data.erro) {
         showAlert(
           "CEP não encontrado",
-          "O CEP informado não foi encontrado. Por favor, verifique."
+          "O CEP informado não foi encontrado. Por favor, verifique.",
         );
         setFormErrors((prev) => ({ ...prev, postal: true }));
         // Limpar campos para evitar dados errados de tentativa anterior
@@ -769,7 +769,7 @@ export default function Checkout() {
         if (cpfDigits.length > 0) {
           showAlert(
             "CPF Inválido",
-            "O CPF informado não é válido. Verifique os números."
+            "O CPF informado não é válido. Verifique os números.",
           );
           setFormErrors((prev) => ({ ...prev, ...newErrors }));
           return;
@@ -779,7 +779,7 @@ export default function Checkout() {
 
       showAlert(
         "Dados incompletos",
-        "Preencha todos os campos obrigatórios e um CPF válido para continuar."
+        "Preencha todos os campos obrigatórios e um CPF válido para continuar.",
       );
       return;
     }
@@ -793,7 +793,7 @@ export default function Checkout() {
         if (ownerId)
           localStorage.setItem(
             "smilepet_checkout_billing_owner",
-            String(ownerId)
+            String(ownerId),
           );
       } catch {
         /* ignore */
@@ -832,7 +832,7 @@ export default function Checkout() {
       } else {
         showAlert(
           "Endereço incompleto",
-          "Por favor, preencha todos os campos do endereço (CEP, Rua, Número, Bairro, Cidade e Estado) antes de continuar."
+          "Por favor, preencha todos os campos do endereço (CEP, Rua, Número, Bairro, Cidade e Estado) antes de continuar.",
         );
       }
 
@@ -857,7 +857,7 @@ export default function Checkout() {
       setFormErrors((prev) => ({ ...prev, postal: true }));
       showAlert(
         "CEP necessário",
-        "Por favor, informe o CEP para calcular o frete."
+        "Por favor, informe o CEP para calcular o frete.",
       );
       return;
     }
@@ -885,7 +885,7 @@ export default function Checkout() {
             "Content-Type": "application/json",
           },
           body: JSON.stringify(payload),
-        }
+        },
       );
 
       if (!response.ok) {
@@ -932,7 +932,7 @@ export default function Checkout() {
           localStorage.setItem("smilepet_shipping_label", label);
           localStorage.setItem(
             "smilepet_shipping_service_name",
-            "Frete Grátis"
+            "Frete Grátis",
           );
           localStorage.setItem("smilepet_shipping_service_id", "gratis");
         } catch {
@@ -952,7 +952,7 @@ export default function Checkout() {
       console.error("Erro ao calcular frete:", error);
       showAlert(
         "Erro no frete",
-        "Não foi possível calcular o frete. Tente novamente."
+        "Não foi possível calcular o frete. Tente novamente.",
       );
     } finally {
       setIsCalculatingShipping(false);
@@ -1011,7 +1011,7 @@ export default function Checkout() {
             "https://apismilepet.vercel.app/api/produtos",
             {
               cache: "no-store",
-            }
+            },
           );
           if (res.ok) {
             const data = await res.json().catch(() => null);
@@ -1058,7 +1058,7 @@ export default function Checkout() {
             return (
               localStorage.getItem("smilepet_shipping_service_name") ||
               JSON.parse(
-                localStorage.getItem("smilepet_shipping_option") || "null"
+                localStorage.getItem("smilepet_shipping_option") || "null",
               )?.name ||
               null
             );
@@ -1073,7 +1073,7 @@ export default function Checkout() {
             return (
               localStorage.getItem("smilepet_shipping_service_id") ||
               JSON.parse(
-                localStorage.getItem("smilepet_shipping_option") || "null"
+                localStorage.getItem("smilepet_shipping_option") || "null",
               )?.id ||
               null
             );
@@ -1085,7 +1085,7 @@ export default function Checkout() {
       if (!shippingServiceName) {
         // aviso leve ao usuário — backend exige nome do serviço
         const proceed = window.confirm(
-          "Não foi possível recuperar o serviço de frete selecionado. Deseja continuar e enviar o pedido sem o nome do serviço?"
+          "Não foi possível recuperar o serviço de frete selecionado. Deseja continuar e enviar o pedido sem o nome do serviço?",
         );
         if (!proceed) return;
       }
@@ -1104,6 +1104,7 @@ export default function Checkout() {
           phone: form.phone,
           address1: form.address1,
           numero: form.numero,
+          bairro: form.bairro,
           postal: form.postal,
           city: form.city || null,
           state: form.state || null,
@@ -1121,7 +1122,7 @@ export default function Checkout() {
         const totalValue =
           payload.items.reduce(
             (acc, it) => acc + it.quantidade * it.precoUnit,
-            0
+            0,
           ) +
           payload.shippingCost -
           couponDiscount; // Subtract discount for tracking
@@ -1134,7 +1135,7 @@ export default function Checkout() {
         };
         localStorage.setItem(
           "smilepet_last_order",
-          JSON.stringify(purchaseData)
+          JSON.stringify(purchaseData),
         );
       } catch (e) {
         console.error("Erro ao salvar dados do pedido para tracking:", e);
@@ -1624,7 +1625,7 @@ export default function Checkout() {
                       "Item";
                     const qty =
                       Number(
-                        it.quantity ?? it.quantidade ?? it.qtd ?? it.qty ?? 1
+                        it.quantity ?? it.quantidade ?? it.qtd ?? it.qty ?? 1,
                       ) || 1;
                     // prefer the cart's precoUnit field (canonical in cart.js),
                     // then fall back to other common names
@@ -1635,7 +1636,7 @@ export default function Checkout() {
                           it.price ??
                           it.valor ??
                           it.unit_price ??
-                          0
+                          0,
                       ) || 0;
                     const lineTotal = qty * price;
                     const imageUrl =
@@ -1746,18 +1747,18 @@ export default function Checkout() {
             // persist for thank you page tracking (backend may return purchase info)
             const payload = {
               content_ids: (buildNormalizedItems() || []).map((it) =>
-                String(it.id)
+                String(it.id),
               ),
               value: Number(finalTotal) || 0,
               currency: "BRL",
               num_items: (buildNormalizedItems() || []).reduce(
                 (a, b) => a + (b.quantidade || 0),
-                0
+                0,
               ),
             };
             localStorage.setItem(
               "smilepet_last_order",
-              JSON.stringify(payload)
+              JSON.stringify(payload),
             );
             console.debug("Payment success:", data, payload);
           } catch (e) {

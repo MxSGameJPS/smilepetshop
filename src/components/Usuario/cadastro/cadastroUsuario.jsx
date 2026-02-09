@@ -39,6 +39,7 @@ export default function CadastroUsuario() {
   const [form, setForm] = useState({
     nome: "",
     sobrenome: "",
+    cpf: "",
     rua: "",
     numero: "",
     bairro: "",
@@ -58,6 +59,42 @@ export default function CadastroUsuario() {
 
   const isEmailValid = (v) => /^\S+@\S+\.\S+$/.test(String(v).toLowerCase());
   const isSenhaValid = (v) => typeof v === "string" && v.length >= 8;
+
+  // Função de validação de CPF
+  function validateCPF(cpf) {
+    cpf = (cpf || "").replace(/[^\d]+/g, "");
+    if (cpf === "") return false;
+    if (
+      cpf.length !== 11 ||
+      cpf === "00000000000" ||
+      cpf === "11111111111" ||
+      cpf === "22222222222" ||
+      cpf === "33333333333" ||
+      cpf === "44444444444" ||
+      cpf === "55555555555" ||
+      cpf === "66666666666" ||
+      cpf === "77777777777" ||
+      cpf === "88888888888" ||
+      cpf === "99999999999"
+    )
+      return false;
+    let add = 0;
+    for (let i = 0; i < 9; i++) add += parseInt(cpf.charAt(i)) * (10 - i);
+    let rev = 11 - (add % 11);
+    if (rev === 10 || rev === 11) rev = 0;
+    if (rev !== parseInt(cpf.charAt(9))) return false;
+    add = 0;
+    for (let i = 0; i < 10; i++) add += parseInt(cpf.charAt(i)) * (11 - i);
+    rev = 11 - (add % 11);
+    if (rev === 10 || rev === 11) rev = 0;
+    if (rev !== parseInt(cpf.charAt(10))) return false;
+    return true;
+  }
+
+  function handleCpfChange(e) {
+    const digits = (e.target.value || "").replace(/\D/g, "");
+    setForm((f) => ({ ...f, cpf: digits.slice(0, 11) }));
+  }
 
   function handleChange(e) {
     const { name, value } = e.target;
@@ -123,6 +160,7 @@ export default function CadastroUsuario() {
     const err = {};
     if (!form.nome) err.nome = "Informe o nome";
     if (!form.sobrenome) err.sobrenome = "Informe o sobrenome";
+    if (!validateCPF(form.cpf)) err.cpf = "CPF inválido";
     if (!form.rua) err.rua = "Informe a rua/avenida";
     if (!form.numero) err.numero = "Informe o número";
     if (!form.bairro) err.bairro = "Informe o bairro";
@@ -153,6 +191,7 @@ export default function CadastroUsuario() {
         const payload = {
           first_name: form.nome || form.first_name,
           last_name: form.sobrenome || form.last_name,
+          cpf: form.cpf || null,
           company: null,
           address1: form.rua || null,
           numero: form.numero || null,
@@ -243,6 +282,24 @@ export default function CadastroUsuario() {
             {errors.sobrenome && (
               <div className={styles.error}>{errors.sobrenome}</div>
             )}
+          </div>
+        </div>
+
+        <div className={styles.row}>
+          <div className={styles.col}>
+            <label>CPF *</label>
+            <input
+              name="cpf"
+              value={form.cpf}
+              onChange={handleCpfChange}
+              className={`${styles.input} ${
+                errors.cpf ? styles.inputError : ""
+              }`}
+              inputMode="numeric"
+              maxLength={11}
+              placeholder="Somente números"
+            />
+            {errors.cpf && <div className={styles.error}>{errors.cpf}</div>}
           </div>
         </div>
 
