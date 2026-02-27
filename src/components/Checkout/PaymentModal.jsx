@@ -37,7 +37,7 @@ export default function PaymentModal({
   useEffect(() => {
     try {
       const key = import.meta.env.VITE_MP_PUBLIC_KEY;
-      if (key) initMercadoPago(key, { locale: "pt-BR" }); 
+      if (key) initMercadoPago(key, { locale: "pt-BR" });
     } catch (err) {
       console.debug("MP init failed:", err);
     }
@@ -55,24 +55,42 @@ export default function PaymentModal({
 
   if (!isOpen) return null;
 
+  const combinedUser =
+    user || formData
+      ? {
+          ...(user || {}),
+          ...(formData
+            ? {
+                firstName: formData.firstName || user?.firstName || user?.nome,
+                lastName:
+                  formData.lastName || user?.lastName || user?.sobrenome,
+                email: formData.email || user?.email,
+                cpf: formData.cpf || user?.cpf || user?.cpf_cliente,
+                phone: formData.phone || user?.phone || user?.whatsapp,
+                address1: formData.address1 || user?.address1 || user?.rua,
+                numero: formData.numero || user?.numero,
+                address2:
+                  formData.address2 || user?.address2 || user?.complemento,
+                city: formData.city || user?.city || user?.cidade,
+                state: formData.state || user?.state || user?.estado,
+                postal: formData.postal || user?.postal || user?.cep,
+                bairro: formData.bairro || user?.bairro,
+              }
+            : {}),
+        }
+      : null;
+
   const commonPayload = (extra = {}) => ({
     items,
-    user: user || null,
+    user: combinedUser,
     shippingCost: Number(shippingCost) || 0,
     shippingServiceName: shippingServiceName || null,
     coupon: coupon || null,
     payer: {
-      // prefer values from the live checkout form (formData), fallback to user
-      email:
-        (formData && formData.email) ||
-        (user && (user.email || user.emailAddress)) ||
-        "",
+      email: combinedUser?.email || "",
       identification: {
         type: "CPF",
-        number:
-          (formData && formData.cpf) ||
-          (user && (user.cpf || user.cpf_cliente)) ||
-          "",
+        number: combinedUser?.cpf || "",
       },
     },
     ...extra,
@@ -133,7 +151,7 @@ export default function PaymentModal({
     setError("");
     try {
       // O Brick retorna os dados necessários (token, issuer_id, payment_method_id, installments, etc)
-      const { token, issuer_id, payment_method_id, installments, payer } =
+      const { token, issuer_id, payment_method_id, installments } =
         paymentFormData;
 
       const payload = commonPayload({
@@ -152,7 +170,7 @@ export default function PaymentModal({
       const data = await res.json();
       if (!res.ok)
         throw new Error(
-          data?.message || data?.error || "Erro no pagamento com cartão"
+          data?.message || data?.error || "Erro no pagamento com cartão",
         );
 
       if (data?.status === "approved") {
@@ -330,7 +348,7 @@ export default function PaymentModal({
                 <div className={styles.cardOnly}>
                   <div className={styles.iconLargeCartao}>
                     <BsCreditCard2FrontFill />
-                  <h3>Cartão de Crédito</h3> 
+                    <h3>Cartão de Crédito</h3>
                   </div>
                   <div className={styles.cardAction}>
                     <CardPayment
